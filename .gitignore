@@ -1,0 +1,40 @@
+# Virtual environment (DO NOT track venv)
+venv/
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Environment variables (DO NOT track .env files)
+.env
+*.env
+
+# Database (SQLite - if using it)
+db.sqlite3
+db.sqlite3-journal
+
+# Django secret key file (if stored separately)
+config/settings_secret.py
+
+# Logs
+*.log
+logs/
+debug.log
+
+# Compiled files
+*.pyc
+*.pyo
+*.pyd
+
+# Media and static files (optional)
+media/
+staticfiles/
+node_modules/
+
+# VSCode and JetBrains settings
+.vscode/
+.idea/
+
+# MacOS and system files
+.DS_Store
+Thumbs.db
