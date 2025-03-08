@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}My Cardio{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" type="text/css" href="./static/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="./static/css/output.css" />
+    <!-- Tailwind CSS -->
+  </head>
+  <body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-blue-600 p-4 text-white">
+      <div class="container mx-auto flex justify-between">
+        <a href="/" class="text-lg font-bold">My Cardio</a>
+        <div>
+          <a href="{% url 'login' %}" class="mr-4">Login</a>
+          <a href="{% url 'register' %}">Register</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Content Block -->
+    <div class="container mx-auto p-8">
+      {% block content %}
+      <!-- Page-specific content will go here -->
+      {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+      <p>&copy; 2024 My Django App. All rights reserved.</p>
+    </footer>
+  </body>
+</html>

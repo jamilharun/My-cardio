@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row">
+    
+    <!-- Sidebar -->
+    <aside class="w-full md:w-1/4 bg-blue-600 text-white min-h-screen p-6">
+        <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+        <ul>
+            <li class="mb-4"><a href="{% url 'dashboard' %}" class="hover:text-gray-300">🏠 Home</a></li>
+            <li class="mb-4"><a href="#" class="hover:text-gray-300">📊 Health Reports</a></li>
+            <li class="mb-4"><a href="#" class="hover:text-gray-300">📋 Medical History</a></li>
+            <li class="mb-4"><a href="#" class="hover:text-gray-300">🩺 Doctor Consultations</a></li>
+            <li class="mb-4"><a href="{% url 'logout' %}" class="hover:text-gray-300">🚪 Logout</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="w-full md:w-3/4 p-8">
+        <h1 class="text-3xl font-bold text-gray-700">Welcome, {{ request.user.username }}! 👋</h1>
+        <p class="text-gray-600 mt-2">Here's an overview of your health data.</p>
+
+        <!-- Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <h3 class="text-lg font-bold text-blue-600">🩸 Risk Score</h3>
+                <p class="text-3xl font-bold text-gray-800">85%</p>
+                <p class="text-gray-500">High risk detected</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <h3 class="text-lg font-bold text-blue-600">📅 Last Assessment</h3>
+                <p class="text-3xl font-bold text-gray-800">March 5, 2025</p>
+                <p class="text-gray-500">AI Health Check</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                <h3 class="text-lg font-bold text-blue-600">📋 Total Reports</h3>
+                <p class="text-3xl font-bold text-gray-800">12</p>
+                <p class="text-gray-500">Completed Assessments</p>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="mt-12">
+            <h2 class="text-2xl font-bold text-gray-700">Recent Health Assessments</h2>
+            <table class="w-full mt-4 bg-white shadow-md rounded-lg">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="p-3 text-left">Date</th>
+                        <th class="p-3 text-left">Risk Score</th>
+                        <th class="p-3 text-left">Diagnosis</th>
+                        <th class="p-3 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b">
+                        <td class="p-3">March 5, 2025</td>
+                        <td class="p-3 text-red-500 font-bold">85%</td>
+                        <td class="p-3">High Blood Pressure Risk</td>
+                        <td class="p-3">
+                            <a href="#" class="text-blue-500">View</a>
+                        </td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="p-3">Feb 22, 2025</td>
+                        <td class="p-3 text-yellow-500 font-bold">65%</td>
+                        <td class="p-3">Moderate Risk Detected</td>
+                        <td class="p-3">
+                            <a href="#" class="text-blue-500">View</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="p-3">Jan 10, 2025</td>
+                        <td class="p-3 text-green-500 font-bold">30%</td>
+                        <td class="p-3">Low Risk</td>
+                        <td class="p-3">
+                            <a href="#" class="text-blue-500">View</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</div>
+{% endblock %}
