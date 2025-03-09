@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Health Risk History{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-blue-600 text-center">Health Risk History</h1>
+
+<div class="max-w-4xl mx-auto bg-white p-6 shadow-lg rounded-lg mt-6">
+    {% if risk_history %}
+    <table class="min-w-full bg-white">
+        <thead>
+            <tr>
+                <th class="py-2 px-4 border-b">Date</th>
+                <th class="py-2 px-4 border-b">Age</th>
+                <th class="py-2 px-4 border-b">Gender</th>
+                <th class="py-2 px-4 border-b">Blood Pressure</th>
+                <th class="py-2 px-4 border-b">Cholesterol</th>
+                <th class="py-2 px-4 border-b">Glucose</th>
+                <th class="py-2 px-4 border-b">Risk Level</th>
+                <th class="py-2 px-4 border-b">Probability</th>
+                <th class="py-2 px-4 border-b">Explanation</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in risk_history %}
+            <tr class="hover:bg-gray-100">
+                <td class="py-2 px-4 border-b">{{ result.created_at }}</td>
+                <td class="py-2 px-4 border-b">{{ result.age }}</td>
+                <td class="py-2 px-4 border-b">{{ result.gender }}</td>
+                <td class="py-2 px-4 border-b">{{ result.blood_pressure }}</td>
+                <td class="py-2 px-4 border-b">{{ result.cholesterol_level }}</td>
+                <td class="py-2 px-4 border-b">{{ result.glucose_level }}</td>
+                <td class="py-2 px-4 border-b">{{ result.risk_level }}</td>
+                <td class="py-2 px-4 border-b">{{ result.risk_probability|floatformat:2 }}</td>
+                <td class="py-2 px-4 border-b">{{ result.explanation }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-center text-gray-600">No risk assessment history found.</p>
+    {% endif %}
+</div>
+
+<div class="text-center mt-6">
+    <a href="{% url 'health_risk' %}" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
+        Back to Risk Assessment
+    </a>
+</div>
+{% endblock %}

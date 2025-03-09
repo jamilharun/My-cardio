@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Personalized Health Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 20px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        h3 {
+            font-size: 18px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin: 5px 0;
+        }
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .chart-container {
+            width: 80%;
+            margin: 20px auto;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Personalized Health Report</h1>
+    
+    <!-- User Information -->
+    <div class="section">
+        <h2>User Information</h2>
+        <p><strong>Age:</strong> {{ report.user_info.age }}</p>
+        <p><strong>Gender:</strong> {{ report.user_info.gender }}</p>
+    </div>
+
+    <!-- Assessment Summary -->
+    <div class="section">
+        <h2>Assessment Summary</h2>
+        <p><strong>Blood Pressure:</strong> {{ report.assessment_summary.blood_pressure }}</p>
+        <p><strong>Cholesterol Level:</strong> {{ report.assessment_summary.cholesterol_level }}</p>
+        <p><strong>Glucose Level:</strong> {{ report.assessment_summary.glucose_level }}</p>
+    </div>
+
+    <!-- Risk Level -->
+    <div class="section">
+        <h2>Risk Level</h2>
+        <p><strong>Risk Level:</strong> {{ report.risk_level }}</p>
+        <p><strong>Risk Probability:</strong> {{ report.risk_probability|floatformat:2 }}</p>
+    </div>
+
+    <!-- Explanation -->
+    <div class="section">
+        <h2>Explanation</h2>
+        <p>{{ report.explanation }}</p>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="section">
+        <h2>Recommendations</h2>
+        <ul>
+            {% for recommendation in report.recommendations %}
+            <li>{{ recommendation }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Data Visualization with Chart.js -->
+    <div class="chart-container">
+        <h2>Health Metrics Over Time</h2>
+        <canvas id="healthChart"></canvas>
+    </div>
+
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>Generated on: {{ report.created_at|date:"F j, Y H:i" }}</p>
+        <p>This report is for informational purposes only. Consult a healthcare professional for medical advice.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const ctx = document.getElementById('healthChart').getContext('2d');
+            const healthChart = new Chart(ctx, {
+            type: 'line', // Line chart to show trends over time
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'], // Example labels (replace with actual dates)
+                datasets: [{
+                    label: 'Blood Pressure',
+                    data: [120, 125, 130, 128, 132, 135, 140], // Example data (replace with actual data)
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }, {
+                    label: 'Cholesterol Level',
+                    data: [180, 190, 200, 195, 205, 210, 215], // Example data (replace with actual data)
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }, {
+                    label: 'Glucose Level',
+                    data: [90, 95, 100, 105, 110, 115, 120], // Example data (replace with actual data)
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+
+
