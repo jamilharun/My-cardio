@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from .forms import HealthRiskForm
+from .ai_model import predict_health_risk
 
 # Create your views here.
 def home(request):
@@ -58,3 +60,24 @@ def user_logout(request):
 @login_required
 def dashboard(request):
     return render(request, "dashboard.html")
+
+
+def health_risk_assessment(request):
+    risk_result = None
+
+    if request.method == "POST":
+        form = HealthRiskForm(request.POST)
+        if form.is_valid():
+            # Get user input from the form
+            user_data = form.cleaned_data
+            
+            # Convert gender to numeric format if needed
+            user_data["gender"] = 1 if user_data["gender"].lower() == "male" else 0
+
+            # Predict health risk using AI model
+            risk_result = predict_health_risk(user_data)
+
+    else:
+        form = HealthRiskForm()
+
+    return render(request, "health_risk.html", {"form": form, "risk_result": risk_result})
