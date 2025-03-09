@@ -18,7 +18,10 @@
 <div class="mt-6 text-center text-2xl font-bold {% if risk_result.risk_level == 'High' %}text-red-600{% else %}text-green-600{% endif %}">
     Risk Level: {{ risk_result.risk_level }} <br>
     Probability: {{ risk_result.risk_probability|floatformat:2 }} <br>
-    {{ explanation }}
+
+    <div class="mt-4 text-lg text-gray-700">
+        {{ explanation }}
+    </div>
 </div>
 {% endif %}
 {% endblock %}

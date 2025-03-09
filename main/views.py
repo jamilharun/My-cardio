@@ -4,7 +4,7 @@ from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import HealthRiskForm
-from .ai_model import predict_health_risk
+from .ai_model import predict_health_risk, generate_explanation
 
 # Create your views here.
 def home(request):
@@ -64,6 +64,7 @@ def dashboard(request):
 
 def health_risk_assessment(request):
     risk_result = None
+    explanation = None
 
     if request.method == "POST":
         form = HealthRiskForm(request.POST)
@@ -77,7 +78,19 @@ def health_risk_assessment(request):
             # Predict health risk using AI model
             risk_result = predict_health_risk(user_data)
 
+            # Generate explanation using DeepSeek
+            # if explination is undefined it should output something
+            try:
+                explanation = generate_explanation(
+                    risk_result["risk_level"],
+                    risk_result["risk_probability"],
+                    user_data
+                )
+            except Exception as e:
+                print(f"Error generating explanation: {e}")                
+                explanation = "Unable to generate explanation due to an error."
+
     else:
         form = HealthRiskForm()
 
-    return render(request, "health_risk.html", {"form": form, "risk_result": risk_result})
+    return render(request, "health_risk.html", {"form": form, "risk_result": risk_result, "explanation": explanation})
