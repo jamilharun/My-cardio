@@ -138,4 +138,12 @@ LOGIN_REDIRECT_URL = "/dashboard/"
 LOGIN_URL = "/login/"
 LOGOUT_REDIRECT_URL = "/"
 
-AUTH_USER_MODEL = "main.CustomUser"
+AUTH_USER_MODEL = "main.CustomUser"  # Change 'main' if your app name is different
+
+import os
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+STATIC_URL = "/static/"
+

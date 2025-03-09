@@ -1,36 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}My Cardio{% endblock %}</title>
+    <title>Risk Assessment</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" type="text/css" href="./static/css/main.css" />
-    <link rel="stylesheet" type="text/css" href="./static/css/output.css" />
-    <!-- Tailwind CSS -->
+  
   </head>
   <body class="bg-gray-100">
-    <!-- Navbar -->
-    <nav class="bg-blue-600 p-4 text-white">
-      <div class="container mx-auto flex justify-between">
-        <a href="/" class="text-lg font-bold">My Cardio</a>
-        <div>
-          <a href="{% url 'login' %}" class="mr-4">Login</a>
-          <a href="{% url 'register' %}">Register</a>
-        </div>
+
+    <nav class="p-4 bg-blue-500 text-white flex justify-between">
+      <a href="/" class="text-lg font-bold">Risk Assessment</a>
+      <div>
+          {% if user.is_authenticated %}
+              <a href="{% url 'dashboard' %}" class="mr-4">Dashboard</a>
+              <a href="{% url 'profile' %}">Profile</a>
+              <a href="{% url 'logout' %}" class="bg-red-500 px-4 py-2 rounded">Logout</a>
+          {% else %}
+              <a href="{% url 'login' %}" class="bg-green-500 px-4 py-2 rounded">Login</a>
+          {% endif %}
       </div>
-    </nav>
+  </nav>
+  <div class="container mx-auto mt-10">
+      {% block content %}{% endblock %}
+  </div>
 
-    <!-- Content Block -->
-    <div class="container mx-auto p-8">
-      {% block content %}
-      <!-- Page-specific content will go here -->
-      {% endblock %}
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
-      <p>&copy; 2024 My Django App. All rights reserved.</p>
-    </footer>
   </body>
 </html>

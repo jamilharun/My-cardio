@@ -1,5 +1,6 @@
 from django.db.models.signals import post_save, post_migrate
 from django.dispatch import receiver
+from .models import UserProfile, CustomUser
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from .models import CustomUser, HealthHistory
@@ -45,3 +46,12 @@ def create_default_users(sender, **kwargs):
                 user.save()  # Save the user after setting password
 
                 print(f"✅ Created default {user.role}: {user.username}")
+
+@receiver(post_save, sender=CustomUser)
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=CustomUser)
+def save_profile(sender, instance, **kwargs):
+    instance.profile.save()               
