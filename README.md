@@ -70,7 +70,7 @@ The application will be available at http://127.0.0.1:8000/
 
 ```bash
 # Watch for Tailwind changes during development
-npx tailwindcss -i ./static/css/main.css -o ./static/css/output.css --watch
+npx tailwindcss -i ./my_cardio/static/css/main.css -o ./my_cardio/static/css/output.css --watch
 ```
 
 #### View Project Structure
