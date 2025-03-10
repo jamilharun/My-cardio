@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Health Risk Assessment{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-blue-600 text-center">Health Risk Assessment</h1>
+
+<form method="post" class="max-w-lg mx-auto bg-white p-6 shadow-lg rounded-lg mt-6">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
+        Predict Risk
+    </button>
+</form>
+
+<div class="text-center mt-6">
+    <a href="{% url 'health_risk_history' %}" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
+        View Risk History
+    </a>
+</div>
+
+{% if risk_result %}
+<div class="mt-6 text-center text-2xl font-bold {% if risk_result.risk_level == 'High' %}text-red-600{% else %}text-green-600{% endif %}">
+    Risk Level: {{ risk_result.risk_level }} <br>
+    Probability: {{ risk_result.risk_probability|floatformat:2 }} <br>
+
+    <div class="mt-4 text-lg text-gray-700">
+        {{ explanation }}
+    </div>
+
+    <div>
+        <h3 class="text-xl font-semibold">Recommendations</h3>
+        <ul class="list-disc pl-6">
+            {% for recommendation in report.recommendations %}
+            <li>{{ recommendation }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <a href="{% url 'export_report_pdf' report.id %}" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
+        Download Report as PDF
+    </a>
+    
+</div>
+{% endif %}
+{% endblock %}

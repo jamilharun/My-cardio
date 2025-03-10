@@ -77,45 +77,62 @@ def start_postgres():
     print("✅ PostgreSQL service started!")
 
 def setup_database():
-    """Create the database and user"""
-    print("🔨 Setting up the database...")
+    """Create the database and user with enhanced permissions"""
+    print("🔨 Setting up the database with enhanced admin permissions...")
     
     if is_windows():
-        # Windows commands
-        run_command(f'psql -U postgres -c "CREATE DATABASE {DB_NAME};"')
-        run_command(f'psql -U postgres -c "CREATE USER {DB_USER} WITH PASSWORD \'{DB_PASS}\';"')
-        run_command(f'psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE {DB_NAME} TO {DB_USER};"')
+        # Windows commands - create user first with superuser privileges
+        run_command(f'psql -U postgres -c "CREATE ROLE {DB_USER} WITH LOGIN SUPERUSER CREATEDB CREATEROLE PASSWORD \'{DB_PASS}\';"')
+        # Create database with owner as admin
+        run_command(f'psql -U postgres -c "CREATE DATABASE {DB_NAME} OWNER {DB_USER};"')
+        # Connect to the database and grant schema permissions
+        run_command(f'psql -U postgres -d {DB_NAME} -c "GRANT ALL ON SCHEMA public TO {DB_USER};"')
+        run_command(f'psql -U postgres -d {DB_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {DB_USER};"')
+        run_command(f'psql -U postgres -d {DB_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO {DB_USER};"')
+        run_command(f'psql -U postgres -d {DB_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO {DB_USER};"')
     
     elif is_linux():
-        # Linux commands using heredoc
-        sql_commands = f"""CREATE DATABASE {DB_NAME};
-CREATE USER {DB_USER} WITH PASSWORD '{DB_PASS}';
-ALTER ROLE {DB_USER} SET client_encoding TO 'utf8';
-ALTER ROLE {DB_USER} SET default_transaction_isolation TO 'read committed';
-ALTER ROLE {DB_USER} SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE {DB_NAME} TO {DB_USER};
-ALTER DATABASE {DB_NAME} OWNER TO {DB_USER};
+        # Linux commands using heredoc - create user first with superuser privileges
+        user_sql = f"""
+CREATE ROLE {DB_USER} WITH LOGIN SUPERUSER CREATEDB CREATEROLE PASSWORD '{DB_PASS}';
 """
         # Write SQL to a temporary file
-        with open("temp_db_setup.sql", "w") as f:
-            f.write(sql_commands)
+        with open("temp_user_setup.sql", "w") as f:
+            f.write(user_sql)
         
         # Execute the SQL file as postgres user
+        run_command("sudo -u postgres psql -f temp_user_setup.sql")
+        
+        # Create database with owner as admin
+        db_sql = f"""
+CREATE DATABASE {DB_NAME} OWNER {DB_USER};
+"""
+        with open("temp_db_setup.sql", "w") as f:
+            f.write(db_sql)
+        
         run_command("sudo -u postgres psql -f temp_db_setup.sql")
-
-        with open("temp_schema_perms.sql", "w") as f:
-            f.write(f"GRANT ALL ON SCHEMA public TO {DB_USER};")
         
-        run_command(f"sudo -u postgres psql -d {DB_NAME} -f temp_schema_perms.sql")
+        # Set additional permissions
+        permissions_sql = f"""
+GRANT ALL ON SCHEMA public TO {DB_USER};
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {DB_USER};
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO {DB_USER};
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO {DB_USER};
+"""
+        with open("temp_perm_setup.sql", "w") as f:
+            f.write(permissions_sql)
         
-        # Clean up the temporary file
+        run_command(f"sudo -u postgres psql -d {DB_NAME} -f temp_perm_setup.sql")
+        
+        # Clean up the temporary files
         try:
+            os.remove("temp_user_setup.sql")
             os.remove("temp_db_setup.sql")
-            os.remove("temp_schema_perms.sql")
+            os.remove("temp_perm_setup.sql")
         except:
             pass
     
-    print("✅ Database and user created successfully!")
+    print("✅ Database and superuser created with enhanced permissions!")
 
 def run_migrations():
     """Run Django migrations"""

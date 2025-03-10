@@ -38,3 +38,6 @@ node_modules/
 # MacOS and system files
 .DS_Store
 Thumbs.db
+
+# git should ignore models due to large file size
+cardio_risk_model.pkl
