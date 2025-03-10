@@ -1,5 +1,5 @@
-from django.contrib.auth.models import AbstractUser, Permission
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.conf import settings
 from django.db import models
 # from django.contrib.auth import get_user_model
 
@@ -34,48 +34,60 @@ from django.db import models
 # Create your models here.
 
 # User Roles Choices
-USER_ROLES = (
-    ('patient', 'Patient'),
-    ('doctor', 'Doctor'),
-    ('admin', 'Admin'),
-)
+class CustomUserManager(BaseUserManager):
+    def create_user(self, username, email, password=None, role="Patient"):
+        if not email:
+            raise ValueError("Users must have an email address")
 
-class CustomUser(AbstractUser):
-    """Custom User model extending Django's built-in user"""
+        email = self.normalize_email(email)
+        user = self.model(username=username, email=email, role=role)
+        user.set_password(password)  # ✅ Encrypt password properly
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, email, password=None):
+        user = self.create_user(username, email, password)
+        user.is_admin = True
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    ROLE_CHOICES = [
+        ("Patient", "Patient"),
+        ("Doctor", "Doctor"),
+        ("Admin", "Admin"),
+    ]
+    username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
-    role = models.CharField(max_length=10, choices=USER_ROLES, default='patient')
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
 
-    # Fix related_name conflicts
-    groups = models.ManyToManyField(
-        "auth.Group",
-        related_name="custom_user_set",  # Custom related_name to avoid conflicts
-        blank=True,
-        help_text="The groups this user belongs to."
-    )
+    first_name = models.CharField(max_length=150, default="", blank=True)
+    last_name = models.CharField(max_length=150, default="", blank=True)
 
-    user_permissions = models.ManyToManyField(
-        "auth.Permission",
-        related_name="custom_user_permissions_set",  # Custom related_name to avoid conflicts
-        blank=True,
-        help_text="Specific permissions for this user."
-    )
 
-    # Ensure authentication uses email instead of username
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
 
     def __str__(self):
-        return f"{self.username} ({self.role})"
+        return self.username
 
+def user_profile_path(instance, filename):
+    """Upload profile pictures to a specific user folder"""
+    return f'profile_pics/{instance.user.id}/{filename}'
 
 class UserProfile(models.Model):
-    """Additional health data for users"""
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="profile")
-    age = models.PositiveIntegerField(null=True, blank=True)
-    gender = models.CharField(max_length=10, choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')])
-    weight = models.FloatField(null=True, blank=True)  # in kg
-    height = models.FloatField(null=True, blank=True)  # in cm
-    medical_history = models.TextField(blank=True, help_text="Previous illnesses, medications, etc.")
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
+    profile_picture = models.ImageField(upload_to=user_profile_path, default="profile_pics/default.jpg", blank=True)
+    bio = models.TextField(blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
