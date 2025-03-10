@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.conf import settings
 from django.db import models
+# from django.contrib.auth import get_user_model
 
 # ER Diagram Representation
 # CustomUser
@@ -28,6 +29,7 @@ from django.db import models
 # ├── diagnosis
 # └── recommendations
 
+# User = get_user_model()
 
 # Create your models here.
 
@@ -100,3 +102,19 @@ class HealthHistory(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.assessment_date} - {self.diagnosis}"
+
+class RiskAssessmentResult(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)  # Link to the user (optional)
+    age = models.IntegerField()
+    gender = models.CharField(max_length=10)
+    blood_pressure = models.IntegerField()
+    cholesterol_level = models.IntegerField()
+    glucose_level = models.IntegerField()
+    risk_level = models.CharField(max_length=10)
+    risk_probability = models.FloatField()
+    explanation = models.TextField(blank=True, null=True)
+    recommendations = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Risk Assessment for {self.user} on {self.created_at}"
