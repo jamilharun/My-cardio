@@ -4,7 +4,7 @@ from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import HealthRiskForm
-from .ai_model import predict_health_risk, generate_explanation
+from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report
 from .models import RiskAssessmentResult
 import plotly.graph_objects as go
 import base64
@@ -71,6 +71,7 @@ def health_risk_assessment(request):
     explanation = None
     previous_results = None
     report = None
+    recommendations = None
 
     if request.user.is_authenticated:
         # Fetch previous results for the logged-in user
@@ -99,6 +100,9 @@ def health_risk_assessment(request):
             except Exception as e:
                 print(f"Error generating explanation: {e}")                
                 explanation = "Unable to generate explanation due to an error."
+            
+             # Generate personalized recommendations
+            recommendations = generate_recommendations(user_data, risk_result["risk_level"])
 
             # Generate personalized health report
             report = generate_health_report(user_data, risk_result)
@@ -113,7 +117,8 @@ def health_risk_assessment(request):
                 glucose_level=user_data["glucose_level"],
                 risk_level=risk_result["risk_level"],
                 risk_probability=risk_result["risk_probability"],
-                explanation=explanation
+                explanation=explanation,
+                recommendations=", ".join(recommendations)
             )
 
     else:
@@ -124,7 +129,8 @@ def health_risk_assessment(request):
         "risk_result": risk_result, 
         "explanation": explanation,
         "previous_results": previous_results,
-        "report": report
+        "report": report,
+        "recommendations": recommendations
     })
 
 @login_required
@@ -140,9 +146,27 @@ def health_risk_history(request):
 def export_report_pdf(request, report_id):
     # Fetch the report from the database
     report = RiskAssessmentResult.objects.get(id=report_id)
+
+    # Generate a static chart using Plotly
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=['January', 'February', 'March', 'April', 'May', 'June', 'July'],  # Example data
+        y=[120, 125, 130, 128, 132, 135, 140],  # Example data
+        name='Blood Pressure'
+    ))
+    fig.update_layout(title="Health Metrics Over Time", xaxis_title="Date", yaxis_title="Value")
+    
+    # Save the chart as a static image
+    buf = BytesIO()
+    fig.write_image(buf, format="png")
+    chart_image = base64.b64encode(buf.getvalue()).decode("utf-8")
+    
     
     # Render the report as HTML
-    html_string = render_to_string("report_pdf_template.html", {"report": report})
+    html_string = render_to_string("report_pdf_template.html", {
+        "report": report, 
+        "chart_image": chart_image
+    })
     
     # Convert HTML to PDF
     pdf = HTML(string=html_string).write_pdf()

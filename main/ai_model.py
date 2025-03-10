@@ -5,6 +5,7 @@ import os
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 import openai
+from .health_api_service import get_nutrition_data
 
 # Check if model already exists
 model_path = "main/models/cardio_risk_model.pkl"
@@ -311,27 +312,62 @@ def generate_health_report(user_data, risk_result):
     }
     return report
 
-def generate_recommendations(user_data, risk_result):
+def generate_recommendations(user_data, risk_level):
     """
     Generate personalized health recommendations based on risk level and user data.
+    
+    Parameters:
+    - user_data: Dictionary containing user health metrics (e.g., age, BP, cholesterol, glucose).
+    - risk_level: String indicating the risk level ("High", "Medium", "Low").
+    
+    Returns:
+    - List of recommendations.
     """
     recommendations = []
-    
-    if risk_result["risk_level"] == "High":
+
+    # Convert numeric fields to integers or floats
+    try:
+        cholesterol_level = int(user_data.get("cholesterol_level", 0))
+        blood_pressure = int(user_data.get("BP", 0))
+        glucose_level = int(user_data.get("glucose_level", 0))
+    except (ValueError, TypeError):
+        # Handle cases where conversion fails (e.g., invalid input)
+        cholesterol_level = 0
+        blood_pressure = 0
+        glucose_level = 0
+
+    # General recommendations based on risk level
+    if risk_level == "High":
         recommendations.append("Consult a healthcare professional immediately.")
-        recommendations.append("Consider lifestyle changes such as a healthier diet and regular exercise.")
-    elif risk_result["risk_level"] == "Medium":
+        recommendations.append("Adopt a low-sodium, low-fat diet.")
+        recommendations.append("Engage in regular physical activity (e.g., 30 minutes of exercise daily).")
+        recommendations.append("Monitor blood pressure and cholesterol levels regularly.")
+    elif risk_level == "Medium":
         recommendations.append("Monitor your health regularly and consider preventive measures.")
         recommendations.append("Reduce intake of high-cholesterol and high-sugar foods.")
+        recommendations.append("Increase physical activity (e.g., walking 20-30 minutes daily).")
+        recommendations.append("Consider stress management techniques (e.g., meditation, yoga).")
     else:
         recommendations.append("Maintain a healthy lifestyle to keep your risk low.")
-    
-    # Add specific recommendations based on user data
-    if user_data["BP"] > 140:
+        recommendations.append("Eat a balanced diet rich in fruits, vegetables, and whole grains.")
+        recommendations.append("Exercise regularly (e.g., 150 minutes of moderate activity per week).")
+        recommendations.append("Avoid smoking and limit alcohol consumption.")
+
+    # Specific recommendations based on user data
+    if blood_pressure > 140:
         recommendations.append("Your blood pressure is high. Consider reducing salt intake and exercising regularly.")
-    if user_data["cholesterol_level"] > 200:
+    if cholesterol_level > 200:
         recommendations.append("Your cholesterol level is high. Consider a diet low in saturated fats.")
-    if user_data["glucose_level"] > 126:
+    if glucose_level > 126:
         recommendations.append("Your glucose level is high. Monitor your sugar intake and consider consulting a doctor.")
-    
+
+    # Add nutrition recommendations using Nutritionix API
+    if risk_level in ["High", "Medium"]:
+        food_query = "low-sodium low-fat foods"
+        nutrition_data = get_nutrition_data(food_query)
+        if nutrition_data:
+            recommendations.append("Here are some low-sodium, low-fat food options:")
+            for food in nutrition_data.get("foods", [])[:3]:  # Show top 3 results
+                recommendations.append(f"- {food['food_name']} ({food['nf_calories']} calories)")
+
     return recommendations
