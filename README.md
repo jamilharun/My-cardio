@@ -84,7 +84,7 @@ tree -I "venv|__pycache__|*.pyc|*.pyo|*.pyd|node_modules|.git"
 
 ```bash
 # After making model changes:
-python manage.py makemigrationsW
+python manage.py makemigrations
 python manage.py migrate
 ```
 
