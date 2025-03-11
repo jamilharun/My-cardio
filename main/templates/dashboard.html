@@ -6,14 +6,17 @@
 <div class="flex flex-col md:flex-row">
     
     <!-- Sidebar -->
-    <aside class="w-full md:w-1/4 bg-blue-600 text-white min-h-screen p-6">
+    <aside class="w-full md:w-1/4 bg-gradient-to-b from-blue-700 to-blue-500 text-white min-h-screen p-6">
         <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
-        <ul>
-            <li class="mb-4"><a href="#" id="home-btn" class="hover:text-gray-300">🏠 Home</a></li>
-            <li class="mb-4"><a href="#" id="reports-btn" class="hover:text-gray-300">📊 Health Reports</a></li>
-            <li class="mb-4"><a href="#" id="history-btn" class="hover:text-gray-300">📋 Medical History</a></li>
-            <li class="mb-4"><a href="#" id="consultations-btn" class="hover:text-gray-300">🩺 Doctor Consultations</a></li>
-            <li class="mb-4"><a href="{% url 'logout' %}" class="hover:text-gray-300">🚪 Logout</a></li>
+        <ul class="space-y-4">
+            <li><a href="#" id="home-btn" class="block py-2 px-4 rounded hover:bg-blue-800">🏠 Home</a></li>
+            <li><a href="#" id="reports-btn" class="block py-2 px-4 rounded hover:bg-blue-800">📊 Health Reports</a></li>
+            <li><a href="#" id="history-btn" class="block py-2 px-4 rounded hover:bg-blue-800">📋 Medical History</a></li>
+            <li><a href="#" id="consultations-btn" class="block py-2 px-4 rounded hover:bg-blue-800">🩺 Doctor Consultations</a></li>
+            <li><a href="{% url 'health_risk' %}" class="block py-2 px-4 bg-yellow-400 text-black font-bold rounded-lg shadow-lg hover:bg-yellow-500">🩺 Take Health Assessment</a></li>
+            <li><a href="#" id="health-risk-history-btn" class="block py-2 px-4 rounded hover:bg-blue-800">📜 Health Risk History</a></li>
+            <li><a href="{% url 'logout' %}" class="block py-2 px-4 rounded hover:bg-red-600">🚪 Logout</a></li>
+            
         </ul>
     </aside>
     
@@ -23,6 +26,31 @@
         <div id="dynamic-content">
             <h1 class="text-3xl font-bold text-gray-700">Welcome, {{ request.user.username }}! 👋</h1>
             <p class="text-gray-600 mt-2">Here's an overview of your health data.</p>
+
+            <!-- Call to Action Banner -->
+        <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6 rounded-lg shadow-md mt-6 text-center animate-fade-in">
+            <h2 class="text-2xl font-bold">🩺 Take Your Health Risk Assessment</h2>
+            <p class="mt-2">Stay ahead of potential health issues by completing your assessment today.</p>
+            <a href="{% url 'health_risk' %}" class="mt-4 inline-block bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-yellow-500">
+                🚀 Start Assessment
+            </a>
+        </div>
+
+        <!-- Health Assessment Modal -->
+<div id="healthModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center w-96">
+        <h2 class="text-2xl font-bold text-gray-700">🩺 Health Check Reminder</h2>
+        <p class="text-gray-600 mt-2">Have you checked your health risks today?</p>
+        <div class="mt-4">
+            <a href="{% url 'health_risk' %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-700">
+                ✅ Take Assessment
+            </a>
+            <button onclick="closeModal()" class="ml-2 bg-gray-300 text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-400">
+                ❌ Not Now
+            </button>
+        </div>
+    </div>
+</div>
 
             <!-- Stats Section -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
@@ -110,11 +138,72 @@
                     <p class="text-gray-800 font-bold">Past: February 10, 2025</p>
                     <p class="text-gray-600">Dr. Mark Lewis - General Checkup</p>
                 </div>
+
+                
             `;
         });
     });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(() => {
+            document.getElementById("healthModal").classList.remove("hidden");
+        }, 5000); // Show the modal after 5 seconds
+    });
+
+    function closeModal() {
+        document.getElementById("healthModal").classList.add("hidden");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const dynamicContent = document.getElementById("dynamic-content");
+
+        document.getElementById("home-btn").addEventListener("click", function () {
+            dynamicContent.innerHTML = `
+                <h1 class="text-3xl font-bold text-gray-700">Welcome, {{ request.user.username }}! 👋</h1>
+                <p class="text-gray-600 mt-2">Here's an overview of your health data.</p>
+
+                <!-- Call to Action Section -->
+                <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6 rounded-lg shadow-md mt-6 text-center animate-fade-in">
+                    <h2 class="text-2xl font-bold">🩺 Take Your Health Risk Assessment</h2>
+                    <p class="mt-2">Stay ahead of potential health issues by completing your assessment today.</p>
+                    <a href="{% url 'health_risk' %}" class="mt-4 inline-block bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-yellow-500 hover-scale">
+                        🚀 Start Assessment
+                    </a>
+                </div>
+
+                <!-- Health Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition">
+                        <h3 class="text-lg font-bold text-blue-600">🩸 Risk Score</h3>
+                        <p class="text-3xl font-bold text-gray-800">85%</p>
+                        <p class="text-gray-500">High risk detected</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition">
+                        <h3 class="text-lg font-bold text-blue-600">📅 Last Assessment</h3>
+                        <p class="text-3xl font-bold text-gray-800">March 5, 2025</p>
+                        <p class="text-gray-500">AI Health Check</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition">
+                        <h3 class="text-lg font-bold text-blue-600">📋 Total Reports</h3>
+                        <p class="text-3xl font-bold text-gray-800">12</p>
+                        <p class="text-gray-500">Completed Assessments</p>
+                    </div>
+                </div>
+            `;
+        });
+
+    });
+
+    document.getElementById("health-risk-history-btn").addEventListener("click", function () {
+    fetch("{% url 'health_risk_history' %}") // Fetch data from Django view
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("dynamic-content").innerHTML = html; // Load content dynamically
+        })
+        .catch(error => console.error("Error loading history:", error));
+    });
 </script>
-        
+
 
 <!-- </div> -->
 {% endblock %}
