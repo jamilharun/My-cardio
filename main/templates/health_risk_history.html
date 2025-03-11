@@ -1,7 +1,3 @@
-{% extends 'base.html' %}
-
-{% block title %}Health Risk History{% endblock %}
-
 {% block content %}
 <h1 class="text-3xl font-bold text-blue-600 text-center">Health Risk History</h1>
 
@@ -52,7 +48,7 @@
         Download Report as PDF
     </a>
     {% else %}
-    <p class="text-gray-500 mt-4">PDF report is not available.</p>
+    <p class="text-gray-600 mt-2">Here are your past health risk assessments.</p>
     {% endif %}
 </div>
 {% endblock %}
