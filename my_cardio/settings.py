@@ -19,9 +19,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # To serve CSS and JavaScript,
 import os
+from dotenv import load_dotenv
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'my_cardio/static')]
+
+# This is needed for `collectstatic` in production
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles") 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/

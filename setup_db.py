@@ -3,6 +3,7 @@ import os
 import platform
 import subprocess
 import sys
+from dotenv import load_dotenv
 
 # Database credentials
 DB_NAME = "mycardiodb"

@@ -4,8 +4,11 @@ import joblib
 import os
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-import openai
-from .health_api_service import get_nutrition_data
+from openai import OpenAI
+from .api_service import get_nutrition_data, get_exercise_data
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Check if model already exists
 model_path = "main/models/cardio_risk_model.pkl"
@@ -231,8 +234,10 @@ if __name__ == "__main__":
     print(f"Risk assessment: {result['risk_level']} (Probability: {result['risk_probability']:.2f})")
 
 
-DEEPSEEK_API_URL = "https://api.deepseek.com/v1" 
-DEEPSEEK_API_KEY = "sk-a3827ec6f6584fc48b150e85b6de0e47"
+DEEPSEEK_API_URL = os.getenv("DEEPSEEK_API_URL")
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 def assess_risk(request):
     if request.method == "POST":
@@ -270,19 +275,43 @@ def generate_explanation(risk_level, risk_probability, user_data):
     """
 
     # Call OpenAI API
-    response = openai.ChatCompletion.create(
-        model="gpt-4",  # Use GPT-4 or GPT-3.5
-        messages=[
-            {"role": "system", "content": "You are a helpful health assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=300  # Limit the response length
+
+    client = OpenAI(
+        api_key=OPENAI_API_KEY,  # This is the default and can be omitted
     )
 
-    # Extract the explanation
-    explanation = response["choices"][0]["message"]["content"]
-    return explanation
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": "You are a helpful health assistant."},
+                {
+                    "role": "user", 
+                    "content": [
+                        {"type": "text", "text": prompt},
+                    ]
+                }
+            ],
+            max_tokens=300 
+        )
 
+        # Extract the explanation
+        explanation = response["choices"][0]["message"]["content"]
+        return explanation
+    except Exception as e:
+        # Handle API errors (e.g., quota exceeded, network issues)
+        # print(f"Error generating explanation: {e}")
+
+        # Fallback explanation
+        fallback_explanation = (
+            f"Your risk level is {risk_level} with a probability of {risk_probability:.2f}. "
+            "This indicates a potential cardiovascular risk. To reduce your risk, consider adopting a healthy lifestyle, "
+            "including a balanced diet, regular exercise, and regular health checkups. "
+            "For personalized advice, consult a healthcare professional."
+        )
+        return fallback_explanation
 
 def generate_health_report(user_data, risk_result):
     """
@@ -369,5 +398,11 @@ def generate_recommendations(user_data, risk_level):
             recommendations.append("Here are some low-sodium, low-fat food options:")
             for food in nutrition_data.get("foods", [])[:3]:  # Show top 3 results
                 recommendations.append(f"- {food['food_name']} ({food['nf_calories']} calories)")
+                
+        exercises = get_exercise_data(body_part="cardio", equipment="body weight", limit=3)
+        if exercises:
+            recommendations.append("Here are some recommended exercises:")
+            for exercise in exercises:
+                recommendations.append(f"- {exercise['name']} (Targets: {exercise['bodyPart']}, Equipment: {exercise['equipment']})")
 
     return recommendations
