@@ -36,7 +36,7 @@ This checklist outlines the key tasks required to develop the **Web-Based Health
 ## [ ] **4️⃣ Preventive Health Recommendations**
 
 - ✅ Develop a **recommendation engine** based on risk levels
-- [ ] Integrate **external health APIs** for better recommendations
+- ✅ Integrate **external health APIs** for better recommendations
 - [ ] Provide **personalized advice** (e.g., diet, exercise plans)
 
 ---

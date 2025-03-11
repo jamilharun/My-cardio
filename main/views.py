@@ -9,6 +9,13 @@ from .models import RiskAssessmentResult
 import plotly.graph_objects as go
 import base64
 from io import BytesIO
+from .utils import sanitize_text
+
+# debugging tool
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Create your views here.
 def home(request):
@@ -72,6 +79,7 @@ def health_risk_assessment(request):
     previous_results = None
     report = None
     recommendations = None
+    # personalized_advice = None
 
     if request.user.is_authenticated:
         # Fetch previous results for the logged-in user
@@ -107,19 +115,28 @@ def health_risk_assessment(request):
             # Generate personalized health report
             report = generate_health_report(user_data, risk_result)
 
-            # Save the results to the database
-            RiskAssessmentResult.objects.create(
-                user=request.user if request.user.is_authenticated else None,  # Link to the logged-in user (optional)
-                age=user_data["age"],
-                gender="Male" if user_data["gender"] == 1 else "Female",
-                blood_pressure=user_data["BP"],
-                cholesterol_level=user_data["cholesterol_level"],
-                glucose_level=user_data["glucose_level"],
-                risk_level=risk_result["risk_level"],
-                risk_probability=risk_result["risk_probability"],
-                explanation=explanation,
-                recommendations=", ".join(recommendations)
-            )
+            # 
+            explanation = generate_explanation(risk_result["risk_level"], risk_result["risk_probability"], user_data)
+            sanitized_explanation = sanitize_text(explanation)
+
+            try:
+                # Save the results to the database
+                RiskAssessmentResult.objects.create(
+                    user=request.user if request.user.is_authenticated else None,  # Link to the logged-in user (optional)
+                    age=user_data["age"],
+                    gender="Male" if user_data["gender"] == 1 else "Female",
+                    blood_pressure=user_data["BP"],
+                    cholesterol_level=user_data["cholesterol_level"],
+                    glucose_level=user_data["glucose_level"],
+                    risk_level=risk_result["risk_level"],
+                    risk_probability=risk_result["risk_probability"],
+                    explanation=explanation,
+                    recommendations=", ".join(recommendations)
+                )
+            except UnicodeEncodeError as e:
+                logger.error(f"UnicodeEncodeError: {e}")
+                logger.error(f"Problematic data: {explanation}")
+                raise
 
     else:
         form = HealthRiskForm()
@@ -130,7 +147,7 @@ def health_risk_assessment(request):
         "explanation": explanation,
         "previous_results": previous_results,
         "report": report,
-        "recommendations": recommendations
+        "recommendations": recommendations,
     })
 
 @login_required
