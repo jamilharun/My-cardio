@@ -1,3 +1,88 @@
-<div>
-    home
-</div>
+{% extends 'base.html' %}
+
+{% block title %}My Cardio - Risk Assessment{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="relative bg-blue-600 text-white text-center py-20 px-6">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-5xl font-bold leading-tight">Take Control of Your Heart Health</h1>
+        <p class="mt-4 text-lg opacity-90">Assess your cardiovascular risks with our AI-powered platform.</p>
+
+        {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="mt-6 inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition">
+                Go to Dashboard
+            </a>
+            <a href="{% url 'logout' %}" class="mt-6 inline-block bg-red-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-red-600 transition ml-2">
+                Logout
+            </a>
+        {% else %}
+            <a href="{% url 'register' %}" class="mt-6 inline-block bg-green-500 text-white px-6 bg py-3 rounded-lg shadow-md hover:bg-green-600 transition">
+                Get Started
+            </a>
+            <a href="{% url 'login' %}" class="mt-6 inline-block bg-gray-700 text-white px-6 py-3 rounded-lg shadow-md hover:bg-gray-800 transition ml-2">
+                Login
+            </a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-20 bg-gray-100 text-center">
+    <div class="max-w-5xl mx-auto">
+        <h2 class="text-4xl font-bold text-gray-800">Why Choose My Cardio?</h2>
+        <p class="text-lg text-gray-600 mt-4">Our platform offers personalized risk assessment based on medical data.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+            <div class="p-6 bg-white shadow-lg rounded-lg">
+                <img src="https://img.icons8.com/ios/100/heartbeat.png" class="mx-auto" alt="Heart Icon">
+                <h3 class="text-xl font-semibold mt-4">AI-Powered Analysis</h3>
+                <p class="mt-2 text-gray-600">Get instant insights using advanced machine learning models.</p>
+            </div>
+
+            <div class="p-6 bg-white shadow-lg rounded-lg">
+                <img src="https://img.icons8.com/ios/100/stethoscope.png" class="mx-auto" alt="Doctor Icon">
+                <h3 class="text-xl font-semibold mt-4">Doctor-Reviewed Reports</h3>
+                <p class="mt-2 text-gray-600">Every assessment is validated by medical professionals.</p>
+            </div>
+
+            <div class="p-6 bg-white shadow-lg rounded-lg">
+                <img src="https://img.icons8.com/ios/100/security-checked.png" class="mx-auto" alt="Security Icon">
+                <h3 class="text-xl font-semibold mt-4">Secure & Confidential</h3>
+                <p class="mt-2 text-gray-600">Your health data is encrypted and fully secure.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-20 bg-white text-center">
+    <div class="max-w-4xl mx-auto">
+        <h2 class="text-4xl font-bold text-gray-800">What Our Users Say</h2>
+        <p class="text-lg text-gray-600 mt-4">Join thousands who have improved their heart health with My Cardio.</p>
+
+        <div class="mt-12">
+            <div class="p-6 bg-gray-100 rounded-lg shadow-lg">
+                <p class="italic text-gray-700">"My Cardio gave me insights I never expected. It helped me detect early signs of risk!"</p>
+                <p class="mt-4 font-bold text-gray-800">— John D.</p>
+            </div>
+
+            <div class="p-6 bg-gray-100 rounded-lg shadow-lg mt-6">
+                <p class="italic text-gray-700">"This tool is a must-have for anyone serious about their health!"</p>
+                <p class="mt-4 font-bold text-gray-800">— Sarah M.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-20 bg-blue-600 text-center text-white">
+    <h2 class="text-4xl font-bold">Start Your Risk Assessment Today</h2>
+    <p class="text-lg opacity-90 mt-4">It only takes 2 minutes to check your heart health.</p>
+
+    <a href="{% url 'register' %}" class="mt-6 inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition">
+        Get Started
+    </a>
+</section>
+

@@ -1,6 +1,11 @@
 from django import forms
+from .models import UserProfile
 
-from django import forms
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ["profile_picture", "bio", "phone_number", "address"]
+
 
 class HealthRiskForm(forms.Form):
     age = forms.IntegerField(label="Age", min_value=1)
