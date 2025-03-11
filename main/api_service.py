@@ -7,7 +7,7 @@ load_dotenv()
 
 NUTRITIONIX_API_KEY = os.getenv("NUTRITIONIX_API_KEY")
 NUTRITIONIX_APP_ID = os.getenv("NUTRITIONIX_APP_ID")
-NUTRITIONIX_API_URL = os.getenv("NUTRITIONIX_API_URL")
+NUTRITIONIX_API_URL = "https://trackapi.nutritionix.com/v2/natural/nutrients"
 
 def get_nutrition_data(food_query):
     """
@@ -24,12 +24,13 @@ def get_nutrition_data(food_query):
         "x-app-key": NUTRITIONIX_API_KEY,
         "Content-Type": "application/json"
     }
+
     data = {
         "query": food_query
     }
     
     try:
-        response = requests.post(NUTRITIONIX_API_URL, headers=headers, json=data)
+        response = requests.post(NUTRITIONIX_API_URL,  headers=headers, json=data)
         response.raise_for_status()  # Raise an error for bad status codes
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -39,6 +40,7 @@ def get_nutrition_data(food_query):
 
 # ExerciseDB API credentials
 EXERCISEDB_API_KEY = os.getenv("EXERCISEDB_API_KEY")
+EXERCISEDB_API_HOST = "exercisedb.p.rapidapi.com"
 EXERCISEDB_API_URL = os.getenv("EXERCISEDB_API_URL")
 
 def get_exercise_data(body_part=None, equipment=None, limit=5):
@@ -55,7 +57,7 @@ def get_exercise_data(body_part=None, equipment=None, limit=5):
     """
     headers = {
         "X-RapidAPI-Key": EXERCISEDB_API_KEY,
-        "X-RapidAPI-Host": EXERCISEDB_API_URL
+        "X-RapidAPI-Host": EXERCISEDB_API_HOST
     }
     params = {}
     
