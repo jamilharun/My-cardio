@@ -1,0 +1,38 @@
+{% extends 'admin_dashboard.html' %}
+{% block admin_content %}
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">🚨 System Alerts</h1>
+
+<table class="min-w-full bg-white shadow-md rounded-lg mt-4">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border">Type</th>
+            <th class="py-2 px-4 border">Title</th>
+            <th class="py-2 px-4 border">Message</th>
+            <th class="py-2 px-4 border">Date</th>
+            <th class="py-2 px-4 border">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for alert in alerts %}
+        <tr class="text-center {% if not alert.is_read %}bg-red-100{% endif %}">
+            <td class="py-2 px-4 border">{{ alert.alert_type }}</td>
+            <td class="py-2 px-4 border font-bold">{{ alert.title }}</td>
+            <td class="py-2 px-4 border">{{ alert.message }}</td>
+            <td class="py-2 px-4 border">{{ alert.created_at }}</td>
+            <td class="py-2 px-4 border">
+                {% if not alert.is_read %}
+                <a href="{% url 'mark_alert_as_read' alert.id %}" class="text-green-500 hover:underline">✔ Mark as Read</a> |
+                {% endif %}
+                <a href="{% url 'delete_alert' alert.id %}" class="text-red-500 hover:underline">🗑 Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="py-2 px-4 border text-center text-gray-500">No alerts found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

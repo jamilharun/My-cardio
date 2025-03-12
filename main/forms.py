@@ -1,5 +1,5 @@
 from django import forms
-from .models import UserProfile
+from .models import (UserProfile, CustomUser, DoctorPatientAssignment)
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
@@ -20,3 +20,31 @@ class HealthRiskForm(forms.Form):
     restingrelectro = forms.ChoiceField(choices=[(0, "Normal"), (1, "ST-T wave abnormality"), (2, "Left ventricular hypertrophy")], label="Resting ECG results")
     maxheartrate = forms.IntegerField(label="Maximum Heart Rate Achieved")
     exerciseangia = forms.ChoiceField(choices=[(0, "No"), (1, "Yes")], label="Exercise-induced Angina?")
+
+class UserForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=False)  # ✅ Hide password input
+
+    class Meta:
+        model = CustomUser
+        fields = ["username", "email", "role", "password"]
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if self.cleaned_data["password"]:  # ✅ Only update password if provided
+            user.set_password(self.cleaned_data["password"])
+        if commit:
+            user.save()
+        return user
+
+class AssignPatientForm(forms.ModelForm):
+    doctor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(role="doctor"), label="Select Doctor")
+    patient = forms.ModelChoiceField(queryset=CustomUser.objects.filter(role="patient"), label="Select Patient")
+
+    class Meta:
+        model = DoctorPatientAssignment
+        fields = ["doctor", "patient"]
+
+class RoleUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ["role"]

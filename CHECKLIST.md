@@ -66,21 +66,21 @@ This checklist outlines the key tasks required to develop the **Web-Based Health
 
 ### **🔹 Dashboard Features**
 
-- [ ] **User Management** → Add, edit, or delete users
-- [ ] **Doctor & Patient Management** → Assign patients to doctors
-- [ ] **System Analytics** → View total users, assessments, and trends
-- [ ] **View All Risk Assessments** → Monitor AI model predictions
-- [ ] **Security & Permissions Control** → Set roles (Admin, Doctor, Patient)
-- [ ] **Generate System Reports** → Export statistics (CSV, PDF)
+- ✅ **User Management** → Add, edit, or delete users
+- ✅ **Doctor & Patient Management** → Assign patients to doctors //maybe add automatic assignement
+- ✅ **System Analytics** → View total users, assessments, and trends
+- ✅ **View All Risk Assessments** → Monitor AI model predictions
+- ✅ **Security & Permissions Control** → Set roles (Admin, Doctor, Patient)
+- ✅ **Generate System Reports** → Export statistics (CSV, PDF)
 - [ ] **Configure AI Model Settings** → Adjust model parameters (Optional)
 
 ### **🔹 Admin Dashboard UI Components**
 
-- [ ] 📊 **User Statistics Panel** → Show number of patients, doctors, and assessments
-- [ ] 📍 **Risk Trends Over Time** → View **graphical reports** (e.g., Chart.js, Plotly)
-- [ ] 🔍 **Search & Filter** → Search users by **name, email, or role**
-- [ ] 📑 **Export Data** → Allow downloading of user reports
-- [ ] 🔔 **System Alerts** → Notify admins of **critical system updates**
+- ✅ 📊 **User Statistics Panel** → Show number of patients, doctors, and assessments
+- ✅ 📍 **Risk Trends Over Time** → View **graphical reports** (e.g., Chart.js, Plotly)
+- ✅ 🔍 **Search & Filter** → Search users by **name, email, or role**
+- ✅ 📑 **Export Data** → Allow downloading of user reports
+- ✅ 🔔 **System Alerts** → Notify admins of **critical system updates**
 
 ---
 

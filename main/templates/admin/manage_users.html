@@ -1,0 +1,57 @@
+{% extends 'admin_dashboard.html' %}
+{% block admin_content %}
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">👤 Manage Users</h1>
+
+<!-- 🔍 Search & Filter Bar -->
+<div class="flex justify-between items-center mt-4">
+    <form method="GET" class="flex space-x-4">
+        <!-- 🔍 Search Input -->
+        <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name or email"
+               class="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        
+        <!-- 🔽 Role Filter -->
+        <select name="role" class="border p-2 rounded-lg">
+            <option value="">All Roles</option>
+            <option value="patient" {% if role_filter == "Patient" %}selected{% endif %}>Patients</option>
+            <option value="doctor" {% if role_filter == "Doctor" %}selected{% endif %}>Doctors</option>
+            <option value="admin" {% if role_filter == "Admin" %}selected{% endif %}>Admins</option>
+        </select>
+        
+        <!-- 🔍 Search Button -->
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">🔍 Search</button>
+
+        <a href="{% url 'add_user' %}" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Add New User</a>
+    </form>
+</div>
+
+<!-- 📋 Users Table -->
+<table class="min-w-full bg-white shadow-md rounded-lg mt-4">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border">Username</th>
+            <th class="py-2 px-4 border">Email</th>
+            <th class="py-2 px-4 border">Role</th>
+            <th class="py-2 px-4 border">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr class="text-center">
+            <td class="py-2 px-4 border">{{ user.username }}</td>
+            <td class="py-2 px-4 border">{{ user.email }}</td>
+            <td class="py-2 px-4 border">{{ user.role }}</td>
+            <td class="py-2 px-4 border">
+                <a href="{% url 'edit_user' user.id %}" class="text-blue-500 hover:underline">Edit</a> |
+                <a href="{% url 'delete_user' user.id %}" class="text-red-500 hover:underline">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="py-2 px-4 border text-center text-gray-500">No users found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

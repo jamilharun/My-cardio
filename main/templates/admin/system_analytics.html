@@ -1,0 +1,63 @@
+{% extends 'admin_dashboard.html' %}
+{% block admin_content %}
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">📊 System Analytics</h1>
+
+<!-- 🏷️ Key System Stats -->
+<div class="grid grid-cols-3 gap-6 mt-6">
+    <div class="bg-white p-6 shadow rounded-lg">
+        <h3 class="text-xl font-semibold">Total Users</h3>
+        <p class="text-2xl text-gray-700">{{ total_users }}</p>
+    </div>
+    <div class="bg-white p-6 shadow rounded-lg">
+        <h3 class="text-xl font-semibold">Total Patients</h3>
+        <p class="text-2xl text-gray-700">{{ total_patients }}</p>
+    </div>
+    <div class="bg-white p-6 shadow rounded-lg">
+        <h3 class="text-xl font-semibold">Total Doctors</h3>
+        <p class="text-2xl text-gray-700">{{ total_doctors }}</p>
+    </div>
+    <div class="bg-white p-6 shadow rounded-lg">
+        <h3 class="text-xl font-semibold">Total Risk Assessments</h3>
+        <p class="text-2xl text-gray-700">{{ total_assessments }}</p>
+    </div>
+    <div class="bg-white p-6 shadow rounded-lg">
+        <h3 class="text-xl font-semibold text-red-600">High-Risk Cases</h3>
+        <p class="text-2xl text-red-600">{{ high_risk_cases }}</p>
+    </div>
+    <div class="bg-white p-6 shadow rounded-lg">
+        <h3 class="text-xl font-semibold text-green-600">Low-Risk Cases</h3>
+        <p class="text-2xl text-green-600">{{ low_risk_cases }}</p>
+    </div>
+</div>
+
+<!-- 📈 Risk Trends Chart -->
+<h2 class="text-2xl font-bold text-blue-900 mt-6 text-center">📈 Risk Trends Over Time</h2>
+<div class="bg-white p-6 shadow-lg rounded-lg">
+    <canvas id="riskTrendChart"></canvas>
+</div>
+
+<!-- 📊 Chart.js Integration -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById("riskTrendChart").getContext("2d");
+    var riskData = JSON.parse('{{ risk_data_json|escapejs }}');
+
+    var chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: Object.keys(riskData),
+            datasets: [{
+                label: "Risk Levels",
+                data: Object.values(riskData),
+                backgroundColor: ["#ff0000", "#ffcc00", "#00cc66"]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+</script>
+
+{% endblock %}

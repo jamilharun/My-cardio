@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    <!-- ✅ Sidebar Navigation -->
+    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+        <h1 class="text-xl font-bold text-center py-4 border-b border-gray-600">Doctor Dashboard</h1>
+        <nav class="flex-1">
+            {% with request.resolver_match.url_name as url_name %}
+            <ul class="space-y-2 p-4">
+                <li><a href="{% url 'doctor_dashboard' %}" class="block py-2 px-4 rounded {% if url_name == 'doctor_dashboard' %}bg-blue-700{% endif %}">Overview</a></li>
+                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Patient List</a></li>
+                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Search Patients</a></li>
+                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Real-Time Risk Alerts</a></li>
+                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Recommendations</a></li>
+                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Appointments</a></li>
+                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Download Reports</a></li>
+            </ul>
+            {% endwith %}
+        </nav>
+    </aside>
+
+    <!-- ✅ Main Content -->
+    <main class="flex-1 p-6">
+        <h2 class="text-2xl font-bold text-blue-900">Doctor Dashboard Overview</h2>
+
+        <!-- 📊 Risk Analysis Section -->
+        <div class="grid grid-cols-3 gap-6 mt-6">
+            <div class="bg-white p-6 shadow rounded-lg">
+                <h3 class="text-xl font-semibold">Total Patients</h3>
+                <p class="text-2xl text-gray-700">{{ total_patients }}</p>
+            </div>
+            <div class="bg-white p-6 shadow rounded-lg">
+                <h3 class="text-xl font-semibold text-red-600">High-Risk Patients</h3>
+                <p class="text-2xl text-red-600">{{ high_risk_patients }}</p>
+            </div>
+            <div class="bg-white p-6 shadow rounded-lg">
+                <h3 class="text-xl font-semibold text-green-600">Low-Risk Patients</h3>
+                <p class="text-2xl text-green-600">{{ low_risk_patients }}</p>
+            </div>
+        </div>
+
+        <!-- 🔔 Notifications Panel -->
+        <h2 class="text-2xl font-bold text-blue-900 mt-6">High-Risk Alerts</h2>
+        <div class="bg-white p-4 shadow-md rounded-lg">
+            <ul class="list-disc pl-6">
+                {% for alert in risk_alerts %}
+                <li class="mt-2 text-red-600 font-semibold">{{ alert }}</li>
+                {% empty %}
+                <li class="text-gray-600">No alerts at the moment.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </main>
+</div>
+{% endblock %}

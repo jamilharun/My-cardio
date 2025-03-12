@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Edit User{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto mt-8">
+    <!-- 🔙 Back Button -->
+    <a href="{% url 'manage_users' %}" class="inline-block mb-4 text-blue-500 hover:underline flex items-center">
+        🔙 Back to Manage Users
+    </a>
+
+    <!-- 📝 Edit User Title -->
+    <h1 class="text-3xl font-bold text-blue-600 text-center">Edit User</h1>
+
+    <!-- 📝 User Edit Form -->
+    <div class="bg-white p-6 shadow-lg rounded-lg mt-6">
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-semibold">Username</label>
+                {{ form.username }}
+            </div>
+            
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-semibold">Email</label>
+                {{ form.email }}
+            </div>
+
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-semibold">Role</label>
+                {{ form.role }}
+            </div>
+
+            <div class="flex flex-col">
+                <label class="text-gray-700 font-semibold">Password (Leave blank to keep current)</label>
+                {{ form.password }}
+            </div>
+
+            <!-- ✅ Save Button -->
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
+                💾 Save Changes
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

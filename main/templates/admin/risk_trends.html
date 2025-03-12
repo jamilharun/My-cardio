@@ -1,0 +1,57 @@
+{% extends 'admin_dashboard.html' %}
+{% block admin_content %}
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">📈 Risk Trends Over Time</h1>
+
+<!-- 📊 Risk Trends Chart -->
+<div class="bg-white p-6 shadow-lg rounded-lg">
+    <canvas id="riskTrendChart"></canvas>
+</div>
+
+<!-- 📊 Chart.js Integration -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById("riskTrendChart").getContext("2d");
+    var riskData = JSON.parse('{{ risk_data_json|escapejs }}');
+
+    var labels = Object.keys(riskData);
+    var highRisk = labels.map(month => riskData[month]["High"] || 0);
+    var mediumRisk = labels.map(month => riskData[month]["Medium"] || 0);
+    var lowRisk = labels.map(month => riskData[month]["Low"] || 0);
+
+    var chart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "High Risk",
+                    data: highRisk,
+                    borderColor: "#ff0000",
+                    backgroundColor: "rgba(255,0,0,0.2)",
+                    fill: true
+                },
+                {
+                    label: "Medium Risk",
+                    data: mediumRisk,
+                    borderColor: "#ffcc00",
+                    backgroundColor: "rgba(255,204,0,0.2)",
+                    fill: true
+                },
+                {
+                    label: "Low Risk",
+                    data: lowRisk,
+                    borderColor: "#00cc66",
+                    backgroundColor: "rgba(0,204,102,0.2)",
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+</script>
+
+{% endblock %}
