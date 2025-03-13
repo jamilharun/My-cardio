@@ -1,11 +1,12 @@
 from django.db.models.signals import post_save, post_migrate
 from django.dispatch import receiver
-from .models import UserProfile, CustomUser
+from .models import UserProfile, CustomUser, HealthHistory, RiskAssessment, SystemAlert
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from .models import CustomUser, HealthHistory
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
+CustomUser = get_user_model()
 
 @receiver(post_save, sender=CustomUser)
 def assign_permissions(sender, instance, created, **kwargs):
@@ -21,7 +22,7 @@ def assign_permissions(sender, instance, created, **kwargs):
             instance.is_superuser = True  # Admins get full control
             instance.save()
 
-CustomUser = get_user_model()
+
 
 @receiver(post_migrate)
 def create_default_users(sender, **kwargs):
@@ -54,4 +55,26 @@ def create_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=CustomUser)
 def save_profile(sender, instance, **kwargs):
-    instance.profile.save()               
+    """Ensure profile is saved when the user is updated"""
+    if hasattr(instance, "profile"):  # ✅ Prevents errors if profile doesn't exist
+        instance.profile.save()            
+
+@receiver(post_save, sender=CustomUser)
+def user_created_alert(sender, instance, created, **kwargs):
+    """Create an alert when a new user registers"""
+    if created:
+        SystemAlert.objects.create(
+            title="New User Registered",
+            message=f"A new {instance.role} ({instance.username}) has registered.",
+            alert_type="User"
+        )
+
+@receiver(post_save, sender=RiskAssessment)
+def high_risk_alert(sender, instance, created, **kwargs):
+    """Create an alert when a high-risk assessment is made"""
+    if created and instance.risk_level == "High":
+        SystemAlert.objects.create(
+            title="High-Risk Patient Alert",
+            message=f"Patient {instance.user.username} has been classified as HIGH RISK.",
+            alert_type="Risk"
+        )

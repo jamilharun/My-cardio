@@ -1,0 +1,30 @@
+{% extends 'admin_dashboard.html' %}
+{% block admin_content %}
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">📊 Generate System Reports</h1>
+
+<div class="mt-6">
+    <h2 class="text-xl font-semibold text-gray-700">Export User Statistics</h2>
+    <div class="flex space-x-4 mt-2">
+        <a href="{% url 'export_users_csv' %}" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+            📥 Download CSV
+        </a>
+        <a href="{% url 'export_users_pdf' %}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            📥 Download PDF
+        </a>
+    </div>
+</div>
+
+<div class="mt-6">
+    <h2 class="text-xl font-semibold text-gray-700">Export Risk Assessments</h2>
+    <div class="flex space-x-4 mt-2">
+        <a href="{% url 'export_risk_assessments_csv' %}" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+            📥 Download CSV
+        </a>
+        <a href="{% url 'export_risk_assessments_pdf' %}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            📥 Download PDF
+        </a>
+    </div>
+</div>
+
+{% endblock %}

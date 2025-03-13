@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.conf import settings
+from django.utils.timezone import now
 from django.db import models
 # from django.contrib.auth import get_user_model
 
@@ -70,6 +71,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
+    date_joined = models.DateTimeField(auto_now_add=True)  
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
@@ -118,3 +121,45 @@ class RiskAssessmentResult(models.Model):
 
     def __str__(self):
         return f"Risk Assessment for {self.user} on {self.created_at}"
+
+
+class DoctorPatientAssignment(models.Model):
+    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="assigned_patients")
+    patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="assigned_doctor")
+    assigned_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.patient.username} → {self.doctor.username}"
+
+class RiskAssessment(models.Model):
+    RISK_LEVEL_CHOICES = [
+        ("Low", "Low"),
+        ("Medium", "Medium"),
+        ("High", "High"),
+    ]
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="risk_assessments")
+    risk_level = models.CharField(max_length=10, choices=RISK_LEVEL_CHOICES)
+    risk_probability = models.FloatField()  # AI model confidence score
+    assessment_date = models.DateTimeField(auto_now_add=True)  # Timestamp
+    notes = models.TextField(blank=True, null=True)  # Optional notes from doctors
+
+    def __str__(self):
+        return f"{self.user.username} - {self.risk_level} Risk ({self.risk_probability:.2f})"
+
+class SystemAlert(models.Model):
+    ALERT_TYPES = [
+        ("Security", "Security"),
+        ("Update", "Update"),
+        ("User", "User"),
+        ("Risk", "Risk"),
+    ]
+
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    alert_type = models.CharField(max_length=20, choices=ALERT_TYPES)
+    created_at = models.DateTimeField(default=now)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.alert_type}: {self.title} ({'Read' if self.is_read else 'Unread'})"

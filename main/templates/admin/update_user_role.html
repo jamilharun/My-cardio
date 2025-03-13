@@ -1,0 +1,23 @@
+{% extends 'admin_dashboard.html' %}
+{% block admin_content %}
+
+<div class="max-w-2xl mx-auto mt-8">
+    <a href="{% url 'manage_roles' %}" class="inline-block mb-4 text-blue-500 hover:underline flex items-center">
+        🔙 Back to Security & Permissions
+    </a>
+
+    <h1 class="text-3xl font-bold text-blue-600 text-center">Edit User Role</h1>
+
+    <div class="bg-white p-6 shadow-lg rounded-lg mt-6">
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {{ form.as_p }}
+            
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
+                💾 Save Role
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

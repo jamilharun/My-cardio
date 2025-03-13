@@ -1,0 +1,33 @@
+{% extends 'admin_dashboard.html' %}
+{% block admin_content %}
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">🔒 Security & Permissions</h1>
+
+<table class="min-w-full bg-white shadow-md rounded-lg mt-4">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border">Username</th>
+            <th class="py-2 px-4 border">Email</th>
+            <th class="py-2 px-4 border">Role</th>
+            <th class="py-2 px-4 border">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr class="text-center">
+            <td class="py-2 px-4 border">{{ user.username }}</td>
+            <td class="py-2 px-4 border">{{ user.email }}</td>
+            <td class="py-2 px-4 border">{{ user.role }}</td>
+            <td class="py-2 px-4 border">
+                <a href="{% url 'update_user_role' user.id %}" class="text-blue-500 hover:underline">Change Role</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="py-2 px-4 border text-center text-gray-500">No users found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

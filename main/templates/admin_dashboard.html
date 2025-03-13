@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    <!-- ✅ Sidebar Navigation -->
+    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+        <h1 class="text-xl font-bold text-center py-4 border-b border-gray-600">Admin Dashboard</h1>
+        <nav class="flex-1">
+            {% with request.resolver_match.url_name as url_name %}
+            <ul class="space-y-2 p-4">
+                <li><a href="{% url 'admin_dashboard' %}" class="block py-2 px-4 rounded {% if url_name == 'admin_dashboard' %}bg-blue-700{% endif %}">Dashboard Overview</a></li>
+                <li><a href="{% url 'manage_users' %}" class="px-4 py-2 rounded-lg {% if url_name == 'manage_users' %}bg-blue-700{% endif %}">Manage Users</a></li>
+                <li><a href="{% url 'manage_assignments' %}" class="block py-2 px-4 rounded {% if url_name == 'manage_assignments' %}bg-blue-700{% endif %}">Doctor & Patient Management</a></li>
+                <li><a href="{% url 'system_analytics' %}" class="block py-2 px-4 rounded {% if url_name == 'system_analytics' %}bg-blue-700{% endif %}">System Analytics</a></li>
+                <li><a href="{% url 'view_assessments' %}" class="block py-2 px-4 rounded {% if url_name == 'view_assessments' %}bg-blue-700{% endif %}">View Risk Assessments</a></li>
+                <li><a href="{% url 'manage_roles' %}" class="block py-2 px-4 rounded {% if url_name == 'manage_roles' %}bg-blue-700{% endif %}">Security & Permissions</a></li>
+                <li><a href="{% url 'generate_reports' %}" class="block py-2 px-4 rounded {% if url_name == 'generate_reports' %}bg-blue-700{% endif %}">Generate Reports</a></li>
+                <!-- <li><a href="#" class="block py-2 px-4 rounded {% if url_name == 'manage_users' %}bg-blue-700{% endif %}">AI Model Settings</a></li> -->
+                <li><a href="{% url 'system_alerts' %}" class="block py-2 px-4 rounded {% if url_name == 'system_alerts' %}bg-blue-700{% endif %}">System Alerts</a></li>
+                
+            </ul>
+            {% endwith %}
+        </nav>
+    </aside>
+
+    <!-- ✅ Main Content -->
+    <main class="flex-1 p-6">
+        {% block admin_content %}
+        <h2 class="text-2xl font-bold text-blue-900">Admin Dashboard Overview</h2>
+
+        <!-- 📊 General Overview Cards -->
+        <div class="grid grid-cols-3 gap-6 mt-6">
+            <div class="bg-white p-6 shadow rounded-lg">
+                <h3 class="text-xl font-semibold">Total Users</h3>
+                <p class="text-2xl text-gray-700">{{ total_users }}</p>
+            </div>
+            <div class="bg-white p-6 shadow rounded-lg">
+                <h3 class="text-xl font-semibold">Total Patients</h3>
+                <p class="text-2xl text-gray-700">{{ total_patients }}</p>
+            </div>
+            <div class="bg-white p-6 shadow rounded-lg">
+                <h3 class="text-xl font-semibold">Total Doctors</h3>
+                <p class="text-2xl text-gray-700">{{ total_doctors }}</p>
+            </div>
+            <div class="bg-white p-6 shadow rounded-lg">
+                <h3 class="text-xl font-semibold">Total Risk Assessments</h3>
+                <p class="text-2xl text-gray-700">{{ total_assessments }}</p>
+            </div>
+            <div class="bg-white p-6 shadow rounded-lg">
+                <h3 class="text-xl font-semibold text-red-600">High-Risk Cases</h3>
+                <p class="text-2xl text-red-600">{{ high_risk_cases }}</p>
+            </div>
+            <div class="bg-white p-6 shadow rounded-lg">
+                <h3 class="text-xl font-semibold text-green-600">Low-Risk Cases</h3>
+                <p class="text-2xl text-green-600">{{ low_risk_cases }}</p>
+            </div>
+        </div>
+
+        <!-- 🔍 Recent Risk Assessments -->
+        <h2 class="text-2xl font-bold text-blue-900 mt-6">Recent Risk Assessments</h2>
+        <table class="min-w-full bg-white shadow-md rounded-lg mt-4">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 border">User</th>
+                    <th class="py-2 px-4 border">Risk Level</th>
+                    <th class="py-2 px-4 border">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assessment in latest_assessments %}
+                <tr class="text-center">
+                    <td class="py-2 px-4 border">{{ assessment.user.username }}</td>
+                    <td class="py-2 px-4 border {% if assessment.risk_level == 'High' %}text-red-600{% else %}text-green-600{% endif %}">
+                        {{ assessment.risk_level }}
+                    </td>
+                    <td class="py-2 px-4 border">{{ assessment.created_at }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="py-2 px-4 border text-center text-gray-500">No recent assessments.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endblock %}
+    </main>
+</div>
+{% endblock %}
