@@ -10,7 +10,7 @@ from .forms import (HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientFo
                     ConsultationForm)
 from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report
 from .models import (RiskAssessmentResult, CustomUser, UserProfile, DoctorPatientAssignment, SystemAlert, Recommendation, Appointment,
-                    RiskAlert, HealthReport)
+                    RiskAlert, HealthReport, HealthReport)
 import plotly.graph_objects as go
 import base64
 from io import BytesIO
@@ -980,13 +980,25 @@ def patient_dashboard(request):
     # Fetch past risk assessments
     risk_assessments = RiskAssessmentResult.objects.filter(user=request.user).order_by("-created_at")
 
+    # Extract health data for visualization
+    labels = [ra.created_at.strftime("%Y-%m-%d") for ra in risk_assessments]
+    blood_pressure = [ra.blood_pressure for ra in risk_assessments]
+    cholesterol = [ra.cholesterol_level for ra in risk_assessments]
+    glucose = [ra.glucose_level for ra in risk_assessments]
+    bmi = [ra.bmi for ra in risk_assessments]
+
     # Fetch recommendations from doctors
     recommendations = Recommendation.objects.filter(patient=request.user).order_by("-created_at")
 
     return render(request, "patient_dashboard.html", {
         "appointments": appointments,
         "risk_assessments": risk_assessments,
-        "recommendations": recommendations
+        "recommendations": recommendations,
+        "labels": json.dumps(labels),
+        "blood_pressure": json.dumps(blood_pressure),
+        "cholesterol": json.dumps(cholesterol),
+        "glucose": json.dumps(glucose),
+        "bmi": json.dumps(bmi),
     })
 
 
@@ -1020,3 +1032,43 @@ def doctor_consultation(request, appointment_id):
         "form": form,
         "appointment": appointment
     })
+
+
+@login_required
+def patient_health_statistics(request):
+    """Patient - View Health Statistics on a Separate Page"""
+    
+    if request.user.role != "patient":
+        return render(request, "error.html", {"message": "Access Denied: Only patients can access this page."})
+
+    # Fetch latest health statistics
+    risk_assessments = RiskAssessmentResult.objects.filter(user=request.user).order_by("-created_at")
+
+    # Extract health data for visualization
+    labels = [ra.created_at.strftime("%Y-%m-%d") for ra in risk_assessments]
+    blood_pressure = [ra.blood_pressure for ra in risk_assessments]
+    cholesterol = [ra.cholesterol_level for ra in risk_assessments]
+    glucose = [ra.glucose_level for ra in risk_assessments]
+    bmi = [ra.bmi for ra in risk_assessments]
+
+    return render(request, "patient/patient_health_statistics.html", {
+        "labels": json.dumps(labels),
+        "blood_pressure": json.dumps(blood_pressure),
+        "cholesterol": json.dumps(cholesterol),
+        "glucose": json.dumps(glucose),
+        "bmi": json.dumps(bmi),
+    })
+
+@login_required
+def health_report_list(request):
+    """List all health reports for a patient."""
+    
+    reports = HealthReport.objects.filter(user=request.user).order_by("-created_at")
+    return render(request, "patient/health_report_list.html", {"reports": reports})
+
+@login_required
+def health_report_detail(request, report_id):
+    """View details of a specific health report."""
+    
+    report = get_object_or_404(HealthReport, id=report_id, user=request.user)
+    return render(request, "patient/health_report_detail.html", {"report": report})
