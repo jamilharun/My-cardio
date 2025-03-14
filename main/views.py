@@ -5,9 +5,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
-from .forms import HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientForm, RoleUpdateForm
+from .forms import (HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientForm, RoleUpdateForm, AppointmentForm, UserUpdateForm,
+                    ConsultationForm)
 from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report
-from .models import RiskAssessmentResult, CustomUser, UserProfile, DoctorPatientAssignment, SystemAlert
+from .models import (RiskAssessmentResult, CustomUser, UserProfile, DoctorPatientAssignment, SystemAlert, Recommendation, Appointment,
+                    RiskAlert, HealthReport)
 import plotly.graph_objects as go
 import base64
 from io import BytesIO
@@ -54,7 +56,7 @@ def register_user(request):
         elif role == "Admin":
             return redirect("admin_dashboard")
         else:
-            return redirect("dashboard")  # Default fallback patient
+            return redirect("patient_dashboard")  # Default fallback patient
 
     return render(request, "register.html")
 
@@ -79,7 +81,7 @@ def user_login(request):
             elif role == "admin":
                 return redirect("admin_dashboard")
             else:
-                return redirect("dashboard")  # Default fallback patient
+                return redirect("patient_dashboard")  # Default fallback patient
 
         else:
             messages.error(request, "Invalid email or password.")
@@ -90,29 +92,29 @@ def user_logout(request):
     logout(request)
     return redirect("login")
 
-@login_required
-def dashboard(request):
-    return render(request, "dashboard.html")
 
 @login_required
 def profile_view(request):
-    try:
-        profile = request.user.profile  # ✅ Try fetching the profile
-    except UserProfile.DoesNotExist:
-        profile = UserProfile.objects.create(user=request.user)  # ✅ Create profile if missing
-        messages.warning(request, "Profile was missing, so we created one for you!")
-
+    """Display and edit user profile"""
     if request.method == "POST":
-        form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Your profile has been updated!")
-            return redirect("profile")
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            return redirect("profile")  # Redirect to profile page after saving
+
     else:
-        form = ProfileUpdateForm(instance=profile)
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=request.user.profile)
 
-    return render(request, "profile.html", {"profile": profile, "form": form})
+    context = {
+        "user_form": user_form,
+        "profile_form": profile_form,
+    }
+    return render(request, "users/profile.html", context)
 
+@login_required
 def health_risk_assessment(request):
     risk_result = None
     explanation = None
@@ -339,6 +341,8 @@ def doctor_required(user):
 @user_passes_test(doctor_required)
 def doctor_dashboard(request):
     """Doctor Dashboard Overview"""
+    appointments = Appointment.objects.filter(doctor=request.user).order_by("-appointment_date")
+
     total_patients = CustomUser.objects.filter(role="patient").count()
     high_risk_patients = RiskAssessmentResult.objects.filter(risk_level="High").count()
     low_risk_patients = RiskAssessmentResult.objects.filter(risk_level="Low").count()
@@ -350,6 +354,8 @@ def doctor_dashboard(request):
         "high_risk_patients": high_risk_patients,
         "low_risk_patients": low_risk_patients,
         "risk_alerts": risk_alerts,
+        "appointments": appointments
+
     })
 
 @login_required
@@ -613,3 +619,365 @@ def delete_alert(request, alert_id):
     alert.delete()
     messages.success(request, "Alert deleted successfully.")
     return redirect("system_alerts")
+
+
+@login_required
+def patient_list(request):
+    """Doctor - View & Search Assigned Patients"""
+    
+    if request.user.role != "doctor":
+        return render(request, "error.html", {"message": "Access Denied: Only doctors can view assigned patients."})
+
+    # Fetch all patients assigned to the logged-in doctor
+    assignments = DoctorPatientAssignment.objects.filter(doctor=request.user)
+    patients = [assignment.patient for assignment in assignments]
+
+    # Get search parameters from request
+    search_query = request.GET.get("search", "").strip()
+    age_filter = request.GET.get("age", "").strip()
+    risk_level_filter = request.GET.get("risk_level", "")
+
+    # Apply search filter (by name)
+    if search_query:
+        patients = [p for p in patients if search_query.lower() in p.username.lower()]
+
+    # Apply age filter (exact match)
+    if age_filter:
+        patients = [p for p in patients if str(p.age) == age_filter]
+
+    # Apply risk level filter (only patients with risk assessments)
+    if risk_level_filter:
+        filtered_patients = []
+        for patient in patients:
+            latest_assessment = patient.risk_assessments.order_by("-created_at").first()
+            if latest_assessment and latest_assessment.risk_level == risk_level_filter:
+                filtered_patients.append(patient)
+        patients = filtered_patients
+
+    return render(request, "doctor/patient_list.html", {
+        "patients": patients,
+        "search_query": search_query,
+        "age_filter": age_filter,
+        "risk_level_filter": risk_level_filter
+    })
+
+@login_required
+def patient_detail(request, patient_id):
+    """Doctor - View Individual Patient Record"""
+    
+    if request.user.role != "doctor":
+        return render(request, "error.html", {"message": "Access Denied: Only doctors can view patient records."})
+
+    # Fetch patient details & ensure they are assigned to this doctor
+    patient = get_object_or_404(CustomUser, id=patient_id, role="patient")
+    assignment = DoctorPatientAssignment.objects.filter(doctor=request.user, patient=patient).exists()
+
+    if not assignment:
+        return render(request, "error.html", {"message": "You are not assigned to this patient."})
+
+    # Fetch patient's health history & past risk assessments
+    risk_assessments = RiskAssessment.objects.filter(user=patient).order_by("-created_at")
+
+    return render(request, "doctor/patient_detail.html", {
+        "patient": patient,
+        "risk_assessments": risk_assessments,
+    })
+
+@login_required
+def export_patient_csv(request, patient_id):
+    """Doctor - Export Patient Report as CSV"""
+    patient = get_object_or_404(CustomUser, id=patient_id, role="patient")
+
+    # Ensure the doctor is assigned to this patient
+    if not DoctorPatientAssignment.objects.filter(doctor=request.user, patient=patient).exists():
+        return render(request, "error.html", {"message": "Access Denied: You are not assigned to this patient."})
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{patient.username}_report.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Patient Name", "Email", "Age", "Gender"])
+    writer.writerow([patient.username, patient.email, patient.age, patient.gender])
+
+    writer.writerow([])  # Empty row
+    writer.writerow(["Date", "Risk Level", "Explanation"])
+
+    risk_assessments = RiskAssessment.objects.filter(user=patient).order_by("-created_at")
+    for assessment in risk_assessments:
+        writer.writerow([assessment.created_at.strftime("%Y-%m-%d"), assessment.risk_level, assessment.explanation])
+
+    return response
+
+@login_required
+def export_patient_pdf(request, patient_id):
+    """Doctor - Export Patient Report as PDF"""
+    patient = get_object_or_404(CustomUser, id=patient_id, role="patient")
+
+    # Ensure the doctor is assigned to this patient
+    if not DoctorPatientAssignment.objects.filter(doctor=request.user, patient=patient).exists():
+        return render(request, "error.html", {"message": "Access Denied: You are not assigned to this patient."})
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{patient.username}_report.pdf"'
+
+    pdf = canvas.Canvas(response, pagesize=letter)
+    pdf.setFont("Helvetica", 12)
+
+    pdf.drawString(100, 750, f"Patient Report: {patient.username}")
+    pdf.drawString(100, 730, f"Email: {patient.email}")
+    pdf.drawString(100, 710, f"Age: {patient.age}")
+    pdf.drawString(100, 690, f"Gender: {patient.gender}")
+
+    y = 670  # Position for risk assessments
+    pdf.drawString(100, y, "Risk Assessments:")
+    y -= 20
+
+    risk_assessments = RiskAssessment.objects.filter(user=patient).order_by("-created_at")
+    for assessment in risk_assessments:
+        pdf.drawString(100, y, f"{assessment.created_at.strftime('%Y-%m-%d')} - {assessment.risk_level}: {assessment.explanation}")
+        y -= 20
+        if y < 100:  # Move to next page if needed
+            pdf.showPage()
+            pdf.setFont("Helvetica", 12)
+            y = 750
+
+    pdf.showPage()
+    pdf.save()
+    return response
+
+
+@login_required
+def patient_detail(request, patient_id):
+    """Doctor - View Individual Patient Record & Provide Recommendations"""
+    
+    if request.user.role != "doctor":
+        return render(request, "error.html", {"message": "Access Denied: Only doctors can view patient records."})
+
+    # Fetch patient details & ensure they are assigned to this doctor
+    patient = get_object_or_404(CustomUser, id=patient_id, role="Patient")
+    assignment = DoctorPatientAssignment.objects.filter(doctor=request.user, patient=patient).exists()
+
+    if not assignment:
+        return render(request, "error.html", {"message": "You are not assigned to this patient."})
+
+    # Fetch patient's health history & past risk assessments
+    risk_assessments = RiskAssessmentResult.objects.filter(user=patient).order_by("-created_at")
+    recommendations = Recommendation.objects.filter(patient=patient, doctor=request.user).order_by("-created_at")
+
+    # Handle recommendation submission
+    if request.method == "POST":
+        form = RecommendationForm(request.POST)
+        if form.is_valid():
+            recommendation = form.save(commit=False)
+            recommendation.doctor = request.user
+            recommendation.patient = patient
+            latest_assessment = risk_assessments.first()  # Link to most recent assessment
+            recommendation.risk_assessment = latest_assessment
+            recommendation.save()
+            messages.success(request, "Recommendation added successfully!")
+            return redirect("patient_detail", patient_id=patient.id)
+    else:
+        form = RecommendationForm()
+
+    return render(request, "doctor/patient_detail.html", {
+        "patient": patient,
+        "risk_assessments": risk_assessments,
+        "recommendations": recommendations,
+        "form": form,
+    })
+
+
+@login_required
+def book_appointment(request, doctor_id):
+    """Patient - Book an Appointment with a Doctor"""
+    
+    doctor = get_object_or_404(CustomUser, id=doctor_id, role="doctor")
+
+    # Ensure the patient is assigned to this doctor
+    if not DoctorPatientAssignment.objects.filter(doctor=doctor, patient=request.user).exists():
+        return render(request, "error.html", {"message": "Access Denied: You are not assigned to this doctor."})
+
+    if request.method == "POST":
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            appointment = form.save(commit=False)
+            appointment.doctor = doctor
+            appointment.patient = request.user
+            appointment.status = "Pending"  # Default status
+            appointment.save()
+            messages.success(request, "Appointment request sent successfully!")
+            return redirect("patient_dashboard")
+
+    else:
+        form = AppointmentForm()
+
+    return render(request, "patient/book_appointment.html", {
+        "form": form,
+        "doctor": doctor
+    })
+
+@login_required
+def doctor_appointments(request):
+    """Doctor - View and Manage Appointments"""
+    
+    if request.user.role != "doctor":
+        return render(request, "error.html", {"message": "Access Denied: Only doctors can manage appointments."})
+
+    appointments = Appointment.objects.filter(doctor=request.user).order_by("-date", "-time")
+
+    return render(request, "doctor/appointments.html", {"appointments": appointments})
+
+@login_required
+def update_appointment_status(request, appointment_id, status):
+    """Doctor - Approve, Cancel, or Reschedule an Appointment"""
+    
+    appointment = get_object_or_404(Appointment, id=appointment_id, doctor=request.user)
+    appointment.status = status
+    appointment.save()
+    
+    messages.success(request, f"Appointment {status.lower()} successfully!")
+    return redirect("doctor_appointments")
+
+
+@login_required
+def risk_alerts(request):
+    """Doctor - View Real-Time Risk Alerts"""
+    
+    if request.user.role != "doctor":
+        return render(request, "error.html", {"message": "Access Denied: Only doctors can view risk alerts."})
+
+    alerts = RiskAlert.objects.filter(doctor=request.user, is_read=False).order_by("-created_at")
+
+    return render(request, "doctor/risk_alerts.html", {"alerts": alerts})
+
+@login_required
+def mark_alert_as_read(request, alert_id):
+    """Doctor - Mark an Alert as Read"""
+    
+    alert = RiskAlert.objects.get(id=alert_id, doctor=request.user)
+    alert.is_read = True
+    alert.save()
+
+    return redirect("risk_alerts")
+
+
+
+@login_required
+def patient_risk_chart(request, patient_id):
+    """Doctor - View Patient Risk Trend as a Chart"""
+    
+    if request.user.role != "doctor":
+        return render(request, "error.html", {"message": "Access Denied: Only doctors can view risk charts."})
+
+    # Fetch patient details & risk assessments
+    patient = get_object_or_404(CustomUser, id=patient_id, role="Patient")
+    risk_assessments = RiskAssessment.objects.filter(user=patient).order_by("created_at")
+
+    # Prepare data for Chart.js
+    labels = [ra.created_at.strftime("%Y-%m-%d") for ra in risk_assessments]
+    risk_levels = [ra.risk_level for ra in risk_assessments]
+
+    # Convert risk levels to numerical values for graphing
+    risk_mapping = {"Low": 1, "Medium": 2, "High": 3}
+    risk_values = [risk_mapping.get(level, 0) for level in risk_levels]
+
+    return render(request, "doctor/patient_risk_chart.html", {
+        "patient": patient,
+        "labels": json.dumps(labels),  # Convert to JSON for Chart.js
+        "risk_values": json.dumps(risk_values),
+    })
+
+
+@login_required
+def assessment_detail(request, assessment_id):
+    """View details of a specific risk assessment"""
+    
+    assessment = get_object_or_404(RiskAssessmentResult, id=assessment_id)
+
+    # Ensure only the patient or assigned doctor can view this
+    if request.user != assessment.user and request.user.role != "doctor":
+        return render(request, "error.html", {"message": "Access Denied: You are not authorized to view this assessment."})
+
+    return render(request, "health/assessment_detail.html", {"assessment": assessment})
+
+
+@login_required
+def notifications_panel(request):
+    """Doctor - View Notifications for High-Risk Patients"""
+    
+    if request.user.role != "doctor":
+        return render(request, "error.html", {"message": "Access Denied: Only doctors can view notifications."})
+
+    # Fetch only unread notifications
+    notifications = RiskAlert.objects.filter(doctor=request.user, is_read=False).order_by("-created_at")
+
+    return render(request, "doctor/notifications.html", {"notifications": notifications})
+
+@login_required
+def mark_notification_as_read(request, alert_id):
+    """Doctor - Mark a Notification as Read"""
+    
+    notification = RiskAlert.objects.get(id=alert_id, doctor=request.user)
+    notification.is_read = True
+    notification.save()
+
+    return redirect("notifications_panel")
+
+
+
+
+# patient
+
+@login_required
+def patient_dashboard(request):
+    """Patient - View Dashboard"""
+    
+    if request.user.role != "patient":
+        return render(request, "error.html", {"message": "Access Denied: Only patients can access this page."})
+
+    # Fetch upcoming appointments
+    appointments = Appointment.objects.filter(patient=request.user, status="Confirmed").order_by("date", "time")
+
+    # Fetch past risk assessments
+    risk_assessments = RiskAssessmentResult.objects.filter(user=request.user).order_by("-created_at")
+
+    # Fetch recommendations from doctors
+    recommendations = Recommendation.objects.filter(patient=request.user).order_by("-created_at")
+
+    return render(request, "patient_dashboard.html", {
+        "appointments": appointments,
+        "risk_assessments": risk_assessments,
+        "recommendations": recommendations
+    })
+
+
+@login_required
+def health_reports_view(request):
+    latest_report = HealthReport.objects.filter(user=request.user).order_by("-assessment_date").first()
+    
+    context = {
+        "latest_report": latest_report
+    }
+    return render(request, "patient/health_reports.html", context)
+
+
+@login_required
+def doctor_consultation(request, appointment_id):
+    """Doctor - Add Consultation Notes & Update Appointment Status"""
+    
+    appointment = get_object_or_404(Appointment, id=appointment_id, doctor=request.user)
+
+    if request.method == "POST":
+        form = ConsultationForm(request.POST, instance=appointment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Consultation notes saved successfully!")
+            return redirect("doctor_dashboard")  # Redirect to doctor's dashboard
+
+    else:
+        form = ConsultationForm(instance=appointment)
+
+    return render(request, "doctor/consultation.html", {
+        "form": form,
+        "appointment": appointment
+    })

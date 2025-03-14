@@ -1,0 +1,55 @@
+{% extends 'doctor_dashboard.html' %}
+{% block doctor_content %}
+
+<a href="{% url 'patient_detail' patient.id %}" class="text-blue-500 hover:underline flex items-center mb-4">
+    🔙 Back to Patient Record
+</a>
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">📈 Patient Risk Trends</h1>
+
+<!-- 📊 Risk Trend Chart -->
+<div class="bg-white p-6 shadow-lg rounded-lg mt-6">
+    <canvas id="riskTrendChart"></canvas>
+</div>
+
+<!-- 📊 Chart.js Integration -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById("riskTrendChart").getContext("2d");
+    var labels = JSON.parse('{{ labels|escapejs }}');
+    var riskValues = JSON.parse('{{ risk_values|escapejs }}');
+
+    var chart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Risk Level",
+                data: riskValues,
+                borderColor: ["#ff0000"],
+                backgroundColor: "rgba(255,0,0,0.2)",
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: 3,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            return ["", "Low", "Medium", "High"][value] || "";
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

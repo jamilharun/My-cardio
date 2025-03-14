@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.conf import settings
 from django.utils.timezone import now
 from django.db import models
+from django.templatetags.static import static
 # from django.contrib.auth import get_user_model
 
 # ER Diagram Representation
@@ -86,14 +87,33 @@ def user_profile_path(instance, filename):
     return f'profile_pics/{instance.user.id}/{filename}'
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
+    GENDER_CHOICES = [
+        ("Male", "Male"),
+        ("Female", "Female"),
+        ("Other", "Other"),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name="profile"
+    )
     profile_picture = models.ImageField(upload_to=user_profile_path, default="profile_pics/default.jpg", blank=True)
     bio = models.TextField(blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True)
+    emergency_contact = models.CharField(max_length=15, blank=True, null=True)
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
+
+    # def get_profile_picture_url(self):
+    #     """Return profile picture URL or default static image."""
+    #     if self.profile_picture:
+    #         return self.profile_picture.url
+    #     return static("assets/default.jpg")
 
 class HealthHistory(models.Model):
     """Stores user’s past health assessments"""
@@ -163,3 +183,90 @@ class SystemAlert(models.Model):
 
     def __str__(self):
         return f"{self.alert_type}: {self.title} ({'Read' if self.is_read else 'Unread'})"
+
+
+# for doctors
+
+class DoctorPatientAssignment(models.Model):
+    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="assigned_patients")
+    patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="assigned_doctor")
+    assigned_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.patient.username} → {self.doctor.username}"
+
+
+class Recommendation(models.Model):
+    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="doctor_recommendations")
+    patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="patient_recommendations")
+    risk_assessment = models.ForeignKey(RiskAssessment, on_delete=models.CASCADE, null=True, blank=True)
+    recommendation_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Recommendation by {self.doctor.username} for {self.patient.username}"
+
+class Appointment(models.Model):
+    STATUS_CHOICES = [
+        ("Pending", "Pending"),
+        ("Confirmed", "Confirmed"),
+        ("Cancelled", "Cancelled"),
+    ]
+
+    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="doctor_appointments")
+    patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="patient_appointments")
+    date = models.DateField()
+    time = models.TimeField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="Pending")
+    created_at = models.DateTimeField(default=now)
+    consultation_notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Appointment on {self.date} at {self.time} - {self.status}"
+
+
+class RiskAlert(models.Model):
+    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="risk_alerts")
+    patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="patient_alerts")
+    risk_assessment = models.ForeignKey(RiskAssessment, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=now)
+    is_read = models.BooleanField(default=False)  # Mark as read when viewed
+
+    def __str__(self):
+        return f"⚠ High Risk Alert - {self.patient.username} ({self.risk_assessment.risk_level})"
+
+class HealthReport(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="health_reports")
+    blood_pressure = models.CharField(max_length=20, help_text="e.g., 130/90")
+    sugar_level = models.CharField(max_length=20, help_text="e.g., 110 mg/dL")
+    heart_rate = models.IntegerField(help_text="e.g., 75 bpm")
+    assessment_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Health Report for {self.user.username} on {self.assessment_date.strftime('%Y-%m-%d')}"
+    
+    def get_bp_status(self):
+        """Returns status for blood pressure"""
+        systolic, diastolic = map(int, self.blood_pressure.split('/'))
+        if systolic >= 130 or diastolic >= 80:
+            return "High"
+        elif systolic < 120 and diastolic < 80:
+            return "Normal"
+        return "Elevated"
+    
+    def get_sugar_status(self):
+        """Returns status for sugar level"""
+        level = int(self.sugar_level.split()[0])    
+        if level < 70:
+            return "Low"
+        elif 70 <= level <= 140:
+            return "Normal"
+        return "High"
+    
+    def get_hr_status(self):
+        """Returns status for heart rate"""
+        if self.heart_rate < 60:
+            return "Low"
+        elif 60 <= self.heart_rate <= 100:
+            return "Normal"
+        return "High"

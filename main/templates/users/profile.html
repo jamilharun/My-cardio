@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div class="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
+    <h2 class="text-2xl font-semibold text-gray-700 text-center">My Profile</h2>
+    
+    <div class="flex flex-col items-center">
+        {% load static %}
+        <img 
+            class="w-32 h-32 rounded-full mt-4" 
+            src="{% if user.profile.profile_picture %}{{ user.profile.profile_picture.url }}{% else %}{% static 'assets/default.jpg' %}{% endif %}"
+            alt="Profile Picture">
+        <p class="text-gray-600 mt-2">@{{ user.username }}</p>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="mt-6">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="text-gray-700 font-semibold">First Name</label>
+                {{ user_form.first_name }}
+            </div>
+            <div>
+                <label class="text-gray-700 font-semibold">Last Name</label>
+                {{ user_form.last_name }}
+            </div>
+            <div>
+                <label class="text-gray-700 font-semibold">Email</label>
+                {{ user_form.email }}
+            </div>
+            <div>
+                <label class="text-gray-700 font-semibold">Date of Birth</label>
+                {{ profile_form.date_of_birth }}
+            </div>
+            <div>
+                <label class="text-gray-700 font-semibold">Gender</label>
+                {{ profile_form.gender }}
+            </div>
+            <div>
+                <label class="text-gray-700 font-semibold">Phone Number</label>
+                {{ profile_form.phone_number }}
+            </div>
+            <div>
+                <label class="text-gray-700 font-semibold">Emergency Contact</label>
+                {{ profile_form.emergency_contact }}
+            </div>
+            <div>
+                <label class="text-gray-700 font-semibold">Address</label>
+                {{ profile_form.address }}
+            </div>
+            <div class="col-span-2">
+                <label class="text-gray-700 font-semibold">Bio</label>
+                {{ profile_form.bio }}
+            </div>
+            <div class="col-span-2">
+                <label class="text-gray-700 font-semibold">Profile Picture</label>
+                {{ profile_form.profile_picture }}
+            </div>
+        </div>
+
+        <button type="submit" class="w-full mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Save Changes
+        </button>
+    </form>
+</div>
+{% endblock %}

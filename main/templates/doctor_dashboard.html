@@ -10,22 +10,52 @@
             {% with request.resolver_match.url_name as url_name %}
             <ul class="space-y-2 p-4">
                 <li><a href="{% url 'doctor_dashboard' %}" class="block py-2 px-4 rounded {% if url_name == 'doctor_dashboard' %}bg-blue-700{% endif %}">Overview</a></li>
-                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Patient List</a></li>
-                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Search Patients</a></li>
-                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Real-Time Risk Alerts</a></li>
-                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Recommendations</a></li>
-                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Appointments</a></li>
-                <li><a href="#" class="block py-2 px-4 rounded hover:bg-blue-700">Download Reports</a></li>
+                <li><a href="{% url 'patient_list' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_list' %}bg-blue-700{% endif %}">Patient List</a></li>
+                <li><a href="{% url 'doctor_appointments' %}" class="block py-2 px-4 rounded {% if url_name == 'doctor_appointments' %}bg-blue-700{% endif %}">Appointments</a></li>
+                <li><a href="{% url 'risk_alerts' %}" class="block py-2 px-4 rounded {% if url_name == 'risk_alerts' %}bg-blue-700{% endif %}">Risk Alerts</a></li>
             </ul>
             {% endwith %}
         </nav>
+        {% if notifications %}
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-4">
+            <p class="font-bold">⚠ High-Risk Patient Notifications:</p>
+            <ul>
+                {% for notification in notifications %}
+                <li class="mt-2">
+                    <a href="{% url 'patient_detail' notification.patient.id %}" class="text-blue-500 hover:underline">
+                        {{ notification.patient.username }} - {{ notification.risk_assessment.risk_level }} Risk ({{ notification.risk_assessment.created_at|date:"Y-m-d" }})
+                    </a>
+                    <a href="{% url 'mark_notification_as_read' notification.id %}" class="text-green-500 hover:underline ml-2">✔ Mark as Read</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
     </aside>
+
+    {% if alerts %}
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-4">
+        <p class="font-bold">⚠ High-Risk Patients Alert:</p>
+        <ul>
+            {% for alert in alerts %}
+            <li class="mt-2">
+                <a href="{% url 'patient_detail' alert.patient.id %}" class="text-blue-500 hover:underline">
+                    {{ alert.patient.username }} - {{ alert.risk_assessment.risk_level }} Risk ({{ alert.risk_assessment.created_at|date:"Y-m-d" }})
+                </a>
+                <a href="{% url 'mark_alert_as_read' alert.id %}" class="text-green-500 hover:underline ml-2">✔ Mark as Read</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 
     <!-- ✅ Main Content -->
     <main class="flex-1 p-6">
-        <h2 class="text-2xl font-bold text-blue-900">Doctor Dashboard Overview</h2>
-
+        
         <!-- 📊 Risk Analysis Section -->
+        {% block doctor_content %}
+        <h2 class="text-2xl font-bold text-blue-900">Doctor Dashboard Overview</h2>
         <div class="grid grid-cols-3 gap-6 mt-6">
             <div class="bg-white p-6 shadow rounded-lg">
                 <h3 class="text-xl font-semibold">Total Patients</h3>
@@ -52,6 +82,25 @@
                 {% endfor %}
             </ul>
         </div>
+
+        <p class="text-gray-600 mt-2">Manage your patient appointments.</p>
+    
+        <ul class="mt-4">
+            {% for appointment in appointments %}
+            <li class="p-4 bg-white shadow rounded mb-2">
+                📅 <strong>{{ appointment.appointment_date }}</strong> - 
+                🏥 <strong>{{ appointment.patient.username }}</strong> - 
+                Status: <span class="font-bold {% if appointment.status == 'Pending' %}text-yellow-500{% elif appointment.status == 'Confirmed' %}text-green-500{% elif appointment.status == 'Cancelled' %}text-red-500{% elif appointment.status == 'Completed' %}text-gray-500{% endif %}">{{ appointment.status }}</span>
+                <a href="{% url 'doctor_consultation' appointment.id %}" class="ml-4 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    📝 Add Notes
+                </a>
+            </li>
+            {% empty %}
+            <p class="text-gray-500 mt-4">No appointments yet.</p>
+            {% endfor %}
+        </ul>
+        
+        {% endblock %}
     </main>
 </div>
 {% endblock %}

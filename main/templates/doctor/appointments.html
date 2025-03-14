@@ -1,0 +1,36 @@
+{% extends 'doctor_dashboard.html' %}
+{% block doctor_content %}
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">📅 My Appointments</h1>
+
+<table class="min-w-full bg-white shadow-md rounded-lg mt-4">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border">Patient</th>
+            <th class="py-2 px-4 border">Date</th>
+            <th class="py-2 px-4 border">Time</th>
+            <th class="py-2 px-4 border">Status</th>
+            <th class="py-2 px-4 border">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for appointment in appointments %}
+        <tr class="text-center">
+            <td class="py-2 px-4 border">{{ appointment.patient.username }}</td>
+            <td class="py-2 px-4 border">{{ appointment.date }}</td>
+            <td class="py-2 px-4 border">{{ appointment.time }}</td>
+            <td class="py-2 px-4 border">{{ appointment.status }}</td>
+            <td class="py-2 px-4 border">
+                <a href="{% url 'update_appointment_status' appointment.id 'Confirmed' %}" class="text-green-500 hover:underline">✔ Approve</a> |
+                <a href="{% url 'update_appointment_status' appointment.id 'Cancelled' %}" class="text-red-500 hover:underline">🗑 Cancel</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="py-2 px-4 border text-center text-gray-500">No appointments yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

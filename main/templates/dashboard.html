@@ -37,20 +37,20 @@
         </div>
 
         <!-- Health Assessment Modal -->
-<div id="healthModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-    <div class="bg-white p-6 rounded-lg shadow-lg text-center w-96">
-        <h2 class="text-2xl font-bold text-gray-700">🩺 Health Check Reminder</h2>
-        <p class="text-gray-600 mt-2">Have you checked your health risks today?</p>
-        <div class="mt-4">
-            <a href="{% url 'health_risk' %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-700">
-                ✅ Take Assessment
-            </a>
-            <button onclick="closeModal()" class="ml-2 bg-gray-300 text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-400">
-                ❌ Not Now
-            </button>
+        <div id="healthModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+            <div class="bg-white p-6 rounded-lg shadow-lg text-center w-96">
+                <h2 class="text-2xl font-bold text-gray-700">🩺 Health Check Reminder</h2>
+                <p class="text-gray-600 mt-2">Have you checked your health risks today?</p>
+                <div class="mt-4">
+                    <a href="{% url 'health_risk' %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-700">
+                        ✅ Take Assessment
+                    </a>
+                    <button onclick="closeModal()" class="ml-2 bg-gray-300 text-black px-6 py-2 rounded-lg shadow-md hover:bg-gray-400">
+                        ❌ Not Now
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
             <!-- Stats Section -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
