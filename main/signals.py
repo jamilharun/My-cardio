@@ -78,3 +78,16 @@ def high_risk_alert(sender, instance, created, **kwargs):
             message=f"Patient {instance.user.username} has been classified as HIGH RISK.",
             alert_type="Risk"
         )
+
+@receiver(post_save, sender=RiskAssessment)
+def create_risk_alert(sender, instance, created, **kwargs):
+    """Automatically create an alert when a high-risk patient is identified"""
+    if created and instance.risk_level == "High":
+        # Find the assigned doctor
+        assignment = DoctorPatientAssignment.objects.filter(patient=instance.user).first()
+        if assignment:
+            RiskAlert.objects.create(
+                doctor=assignment.doctor,
+                patient=instance.user,
+                risk_assessment=instance
+            )

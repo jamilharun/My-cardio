@@ -11,12 +11,24 @@
         <p class="mt-4 text-lg opacity-90">Assess your cardiovascular risks with our AI-powered platform.</p>
 
         {% if user.is_authenticated %}
-            <a href="{% url 'dashboard' %}" class="mt-6 inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition">
-                Go to Dashboard
-            </a>
+            {% if user.role == "patient" %}
+                <a href="{% url 'patient_dashboard' %}" class="mt-6 inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition">
+                    Patient Dashboard
+                </a>
+            {% elif user.role == "admin" %}
+                <a href="{% url 'admin_dashboard' %}" class="mt-6 inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition">
+                    Admin Dashboard
+                </a>
+            {% elif user.role == "doctor" %}
+                <a href="{% url 'doctor_dashboard' %}" class="mt-6 inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition">
+                    Doctor Dashboard
+                </a>
+            {% endif %}
+
             <a href="{% url 'logout' %}" class="mt-6 inline-block bg-red-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-red-600 transition ml-2">
                 Logout
             </a>
+            
         {% else %}
             <a href="{% url 'register' %}" class="mt-6 inline-block bg-green-500 text-white px-6 bg py-3 rounded-lg shadow-md hover:bg-green-600 transition">
                 Get Started

@@ -1,0 +1,19 @@
+{% extends 'patient_dashboard.html' %}
+
+{% block patient_content %}
+<div class="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
+    <h2 class="text-2xl font-bold text-gray-700">📊 Health Reports</h2>
+    <p class="text-gray-600 mt-2">Your latest health assessments.</p>
+
+    {% if latest_report %}
+    <ul class="mt-4">
+        <li class="p-4 bg-white shadow rounded mb-2">🩸 Blood Pressure: {{ latest_report.blood_pressure }} ({{ latest_report.get_bp_status }})</li>
+        <li class="p-4 bg-white shadow rounded mb-2">💉 Sugar Level: {{ latest_report.sugar_level }} ({{ latest_report.get_sugar_status }})</li>
+        <li class="p-4 bg-white shadow rounded mb-2">❤️ Heart Rate: {{ latest_report.heart_rate }} bpm ({{ latest_report.get_hr_status }})</li>
+        <li class="p-4 bg-gray-100 shadow rounded mt-4">📅 Report Date: {{ latest_report.assessment_date|date:"F j, Y" }}</li>
+    </ul>
+    {% else %}
+    <p class="text-gray-500 mt-4">No health reports available.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -16,12 +16,17 @@
       <div>
 
         {% if user.is_authenticated %}
-            {% if user.role == "Admin" %}
+            {% if user.role == "patient" %}
+                <a href="{% url 'patient_dashboard' %}" class="text-blue-600 hover:underline">Patient Dashboard</a>
+            {% elif user.role == "admin" %}
                 <a href="{% url 'admin_dashboard' %}" class="text-blue-300 hover:underline mr-4">Admin Dashboard</a>
+            {% elif user.role == "doctor" %}
+                <a href="{% url 'doctor_dashboard' %}" class="text-blue-300 hover:underline mr-4">Doctor Dashboard</a>
             {% endif %}
             
-            <a href="{% url 'dashboard' %}" class="mr-4">Dashboard</a>
-            <a href="{% url 'profile' %}" class="mr-4">Profile</a>
+            <a href="{% url 'profile' %}" class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+              Profile
+            </a>
             <a href="{% url 'logout' %}" class="bg-red-500 px-4 py-2 rounded">Logout</a>
         {% else %}
             <a href="{% url 'login' %}" class="bg-green-500 px-4 py-2 rounded">Login</a>

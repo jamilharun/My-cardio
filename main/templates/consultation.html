@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
+    <h2 class="text-2xl font-bold text-gray-700">🩺 Doctor Consultation</h2>
+    <p class="text-gray-600 mt-2">Consultation for <strong>{{ appointment.patient.username }}</strong></p>
+    
+    <form method="POST" class="mt-4">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label class="block text-gray-700 font-semibold">Appointment Status:</label>
+            {{ form.status }}
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 font-semibold">Consultation Notes:</label>
+            {{ form.consultation_notes }}
+        </div>
+        <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Save Consultation
+        </button>
+    </form>
+</div>
+
+{% endblock %}
