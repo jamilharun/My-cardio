@@ -19,6 +19,8 @@ class ProfileUpdateForm(forms.ModelForm):
 class HealthRiskForm(forms.Form):
     age = forms.IntegerField(label="Age", min_value=1)
     gender = forms.ChoiceField(choices=[("Male", "Male"), ("Female", "Female")], label="Gender")
+    height = forms.FloatField(help_text="Enter height in cm") 
+    weight = forms.FloatField(help_text="Enter weight in kg") 
     BP = forms.IntegerField(label="Blood Pressure (Systolic)")
     cholesterol_level = forms.ChoiceField(choices=[(0, "Normal"), (1, "Above Normal"), (2, "Well Above Normal")], label="Cholesterol Level")
     glucose_level = forms.ChoiceField(choices=[(0, "Normal"), (1, "Above Normal"), (2, "Well Above Normal")], label="Glucose Level")
