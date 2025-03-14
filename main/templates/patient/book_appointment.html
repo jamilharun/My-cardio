@@ -1,0 +1,19 @@
+{% extends 'patient_dashboard.html' %}
+
+{% block patient_content %}
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">📅 Book Appointment</h1>
+
+<div class="bg-white p-6 shadow-lg rounded-lg mt-6">
+    <h2 class="text-xl font-semibold">Doctor: {{ doctor.username }}</h2>
+    
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            ➕ Request Appointment
+        </button>
+    </form>
+</div>
+
+{% endblock %}

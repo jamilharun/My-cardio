@@ -2,11 +2,14 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import (
-    home, user_login, user_logout, register_user, dashboard, health_risk_assessment, health_risk_history,
+    home, user_login, user_logout, register_user, health_risk_assessment, health_risk_history,
     export_report_pdf, profile_view, admin_dashboard, doctor_dashboard, manage_users, add_user, edit_user, delete_user,
     manage_assignments, assign_patient, unassign_patient, system_analytics, view_risk_assessments, manage_roles,
     update_user_role, generate_reports, export_users_csv, export_risk_assessments_csv, export_users_pdf, export_risk_assessments_pdf,
-    risk_trends, system_alerts, mark_alert_as_read, delete_alert
+    risk_trends, system_alerts, mark_alert_as_read, delete_alert, patient_list, patient_detail, export_patient_csv, export_patient_pdf,
+    book_appointment,doctor_appointments, update_appointment_status, risk_alerts, mark_alert_as_read, patient_risk_chart, 
+    assessment_detail, notifications_panel , mark_notification_as_read, patient_dashboard, health_reports_view, doctor_consultation,
+    patient_health_statistics, health_report_list, health_report_detail
 )
 
 
@@ -15,12 +18,13 @@ urlpatterns = [
     path("login/", user_login, name="login"),
     path("logout/", user_logout, name="logout"),
     path("register/", register_user, name="register"),
-    path("dashboard/", dashboard, name="dashboard"),
     path("profile/", profile_view, name="profile"),
     path("health-risk/", health_risk_assessment, name="health_risk"),
     path("health-risk-history/", health_risk_history, name="health_risk_history"),
+    path("health-reports/", health_reports_view, name="health_reports"),
     path("export-report-pdf/<int:report_id>/", export_report_pdf, name="export_report_pdf"),
-
+    path("assessment/<int:assessment_id>/", assessment_detail, name="assessment_detail"),
+    path("consultation/<int:appointment_id>/", doctor_consultation, name="doctor_consultation"),
     path("doctor-dashboard/", doctor_dashboard, name="doctor_dashboard"),
     
     # dashboard roles admin
@@ -46,6 +50,26 @@ urlpatterns = [
     path("admin-dashboard/mark-alert-as-read/<int:alert_id>/", mark_alert_as_read, name="mark_alert_as_read"),
     path("admin-dashboard/delete-alert/<int:alert_id>/", delete_alert, name="delete_alert"),
 
+    # doctors
+    path("doctor-dashboard/patients/", patient_list, name="patient_list"),
+    path("doctor-dashboard/patient/<int:patient_id>/", patient_detail, name="patient_detail"),
+    path("doctor-dashboard/patient/<int:patient_id>/export-csv/", export_patient_csv, name="export_patient_csv"),
+    path("doctor-dashboard/patient/<int:patient_id>/export-pdf/", export_patient_pdf, name="export_patient_pdf"),
+    path("doctor-dashboard/patient/<int:patient_id>/risk-chart/", patient_risk_chart, name="patient_risk_chart"),
+    path("doctor-dashboard/appointments/", doctor_appointments, name="doctor_appointments"),
+    path("doctor-dashboard/update-appointment/<int:appointment_id>/<str:status>/", update_appointment_status, name="update_appointment_status"),
+    path("doctor-dashboard/risk-alerts/", risk_alerts, name="risk_alerts"),
+    path("doctor-dashboard/mark-alert-as-read/<int:alert_id>/", mark_alert_as_read, name="mark_alert_as_read"),
+    path("doctor-dashboard/notifications/", notifications_panel, name="notifications_panel"),
+    path("doctor-dashboard/mark-notification/<int:alert_id>/", mark_notification_as_read, name="mark_notification_as_read"),
+    
+
+    # patient
+    path("patient-dashboard/", patient_dashboard, name="patient_dashboard"),
+    path("patient/book-appointment/<int:doctor_id>/", book_appointment, name="book_appointment"),
+    path("patient/patient-health-statistics/", patient_health_statistics, name="patient_health_statistics"),
+    path("patient/patient-health-reports/", health_report_list, name="health_report_list"),
+    path("patient/patient-health-report/<int:report_id>/", health_report_detail, name="health_report_detail"),
 ]
 
 

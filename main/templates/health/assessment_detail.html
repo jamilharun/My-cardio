@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Health Report{% endblock %}
+
+{% block content %}
+<a href="{% url 'patient_detail' assessment.user.id %}" class="text-blue-500 hover:underline flex items-center mb-4">
+    🔙 Back to Patient Record
+</a>
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">📋 Health Report</h1>
+
+<div class="bg-white p-6 shadow-lg rounded-lg mt-6">
+    <h2 class="text-xl font-semibold">Patient: {{ assessment.user.username }}</h2>
+    <p class="text-gray-700 mt-2"><strong>Date:</strong> {{ assessment.created_at|date:"Y-m-d" }}</p>
+    <p class="text-gray-700"><strong>Risk Level:</strong> 
+        <span class="text-{% if assessment.risk_level == 'High' %}red{% elif assessment.risk_level == 'Medium' %}yellow{% else %}green{% endif %}-600">
+            {{ assessment.risk_level }}
+        </span>
+    </p>
+</div>
+
+<!-- 📊 Health Metrics -->
+<h2 class="text-xl font-semibold text-gray-700 mt-6">📊 Health Metrics</h2>
+
+<table class="min-w-full bg-white shadow-md rounded-lg mt-4">
+    <tr><td class="py-2 px-4 border font-semibold">Age</td><td class="py-2 px-4 border">{{ assessment.age }}</td></tr>
+    <tr><td class="py-2 px-4 border font-semibold">Blood Pressure</td><td class="py-2 px-4 border">{{ assessment.blood_pressure }}</td></tr>
+    <tr><td class="py-2 px-4 border font-semibold">Cholesterol Level</td><td class="py-2 px-4 border">{{ assessment.cholesterol_level }}</td></tr>
+    <tr><td class="py-2 px-4 border font-semibold">Glucose Level</td><td class="py-2 px-4 border">{{ assessment.glucose_level }}</td></tr>
+</table>
+
+<!-- 📌 AI Explanation -->
+<h2 class="text-xl font-semibold text-gray-700 mt-6">🤖 AI Explanation</h2>
+<p class="bg-gray-100 p-4 rounded-lg shadow-sm mt-2">{{ assessment.explanation|default:"No explanation available." }}</p>
+
+{% endblock %}

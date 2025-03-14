@@ -1,0 +1,77 @@
+{% extends 'doctor_dashboard.html' %}
+{% block doctor_content %}
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">👨‍⚕️ My Patients</h1>
+
+<!-- 🔍 Search & Filter Bar -->
+<div class="flex justify-between items-center mt-4">
+    <form method="GET" class="flex space-x-4">
+        <!-- 🔍 Search by Name -->
+        <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name"
+               class="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        
+        <!-- 🔢 Filter by Age -->
+        <input type="number" name="age" value="{{ age_filter }}" placeholder="Filter by Age"
+               class="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        
+        <!-- 🔽 Filter by Risk Level -->
+        <select name="risk_level" class="border p-2 rounded-lg">
+            <option value="">All Risk Levels</option>
+            <option value="Low" {% if risk_level_filter == "Low" %}selected{% endif %}>Low</option>
+            <option value="Medium" {% if risk_level_filter == "Medium" %}selected{% endif %}>Medium</option>
+            <option value="High" {% if risk_level_filter == "High" %}selected{% endif %}>High</option>
+        </select>
+        
+        <!-- 🔍 Search Button -->
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">🔍 Search</button>
+    </form>
+</div>
+
+<!-- 📋 Patients Table -->
+<table class="min-w-full bg-white shadow-md rounded-lg mt-4">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border">Name</th>
+            <th class="py-2 px-4 border">Age</th>
+            <th class="py-2 px-4 border">Email</th>
+            <th class="py-2 px-4 border">Recent Risk Assessment</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for patient in patients %}
+        <tr class="text-center">
+            <td class="py-2 px-4 border">{{ patient.username }}</td>
+            <td class="py-2 px-4 border">{{ patient.age }}</td>
+            <td class="py-2 px-4 border">{{ patient.email }}</td>
+            <td class="py-2 px-4 border">
+                {% with assessment=patient.risk_assessments.last %}
+                    {% if assessment %}
+                        {% if assessment.risk_level == 'High' %}
+                            <span class="text-red-600">
+                        {% elif assessment.risk_level == 'Medium' %}
+                            <span class="text-yellow-600">
+                        {% else %}
+                            <span class="text-green-600">
+                        {% endif %}
+                            {{ assessment.risk_level }} ({{ assessment.created_at|date:"Y-m-d" }})
+                        </span>
+                    {% else %}
+                        <span class="text-gray-500">No Assessments</span>
+                    {% endif %}
+                {% endwith %}
+            </td>
+            <td class="py-2 px-4 border">
+                <a href="{% url 'patient_detail' patient.id %}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    📄 View Record
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="py-2 px-4 border text-center text-gray-500">No patients found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

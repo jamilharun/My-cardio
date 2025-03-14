@@ -41,26 +41,26 @@ This checklist outlines the key tasks required to develop the **Web-Based Health
 
 ---
 
-## [ ] **5️⃣ Doctor & Admin Dashboard**
+## ✅ **5️⃣ Doctor & Admin Dashboard**
 
 ### **🔹 Dashboard Features**
 
-### [ ] Create a **Doctor Dashboard** for viewing patient records
+### ✅ Create a **Doctor Dashboard** for viewing patient records
 
-- [ ] **Patient List View** → See all assigned patients
-- [ ] **Search Patients** → Search by name, age, or risk level
-- [ ] **View Individual Patient Records** → See health history & risk assessments
-- [ ] **Download Patient Reports** → Export data in **PDF or CSV**
-- [ ] **Provide Recommendations** → Add doctor’s notes for each patient
-- [ ] **Appointment Scheduling** (Optional) → Set up patient consultations
-- [ ] **Real-Time Risk Alerts** → Highlight high-risk patients
+- ✅ **Patient List View** → See all assigned patients
+- ✅ **Search Patients** → Search by name, age, or risk level
+- ✅ **View Individual Patient Records** → See health history & risk assessments
+- ✅ **Download Patient Reports** → Export data in **PDF or CSV**
+- ✅ **Provide Recommendations** → Add doctor’s notes for each patient
+- ✅ **Appointment Scheduling** (Optional) → Set up patient consultations
+- ✅ **Real-Time Risk Alerts** → Highlight high-risk patients
 
 ### **🔹 Doctor Dashboard UI Components**
 
-- [ ] 📊 **Risk Analysis Charts** → Show patient risk trends
-- [ ] 📍 **Filter by Risk Level** → **(High, Medium, Low)**
-- [ ] 📑 **Health Report Section** → See details of each assessment
-- [ ] 🔔 **Notifications Panel** → Alert for high-risk patients
+- ✅ 📊 **Risk Analysis Charts** → Show patient risk trends
+- ✅ 📍 **Filter by Risk Level** → **(High, Medium, Low)**
+- ✅ 📑 **Health Report Section** → See details of each assessment
+- ✅ 🔔 **Notifications Panel** → Alert for high-risk patients
 
 ### [ ] Develop an **Admin Dashboard** for user management
 

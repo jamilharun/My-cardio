@@ -1,0 +1,87 @@
+{% extends 'doctor_dashboard.html' %}
+{% block doctor_content %}
+
+<a href="{% url 'patient_list' %}" class="text-blue-500 hover:underline flex items-center mb-4">
+    🔙 Back to Patient List
+</a>
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">🩺 Patient Record</h1>
+
+<div class="bg-white p-6 shadow-lg rounded-lg mt-6">
+    <h2 class="text-2xl font-semibold">{{ patient.username }}</h2>
+    <p class="text-gray-700 mt-2"><strong>Email:</strong> {{ patient.email }}</p>
+    <p class="text-gray-700"><strong>Age:</strong> {{ patient.age }}</p>
+    <p class="text-gray-700"><strong>Gender:</strong> {{ patient.gender }}</p>
+</div>
+
+<!-- 📥 Export Buttons -->
+<div class="flex space-x-4 mt-6">
+    <a href="{% url 'export_patient_csv' patient.id %}" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+        📥 Download CSV
+    </a>
+    <a href="{% url 'export_patient_pdf' patient.id %}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+        📥 Download PDF
+    </a>
+</div>
+
+<!-- 📋 Risk Assessment History -->
+<h2 class="text-xl font-semibold text-gray-700 mt-6">📊 Risk Assessment History</h2>
+
+<table class="min-w-full bg-white shadow-md rounded-lg mt-4">
+    <thead>
+        <tr>
+            <th class="py-2 px-4 border">Date</th>
+            <th class="py-2 px-4 border">Risk Level</th>
+            <th class="py-2 px-4 border">Explanation</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for assessment in risk_assessments %}
+        <tr class="text-center">
+            <td class="py-2 px-4 border">{{ assessment.created_at|date:"Y-m-d" }}</td>
+            <td class="py-2 px-4 border {% if assessment.risk_level == 'High' %}text-red-600{% elif assessment.risk_level == 'Medium' %}text-yellow-600{% else %}text-green-600{% endif %}">
+                {{ assessment.risk_level }}
+            </td>
+            <td class="py-2 px-4 border">
+                <a href="{% url 'assessment_detail' assessment.id %}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    📄 View Report
+                </a>
+            </td>
+            <td class="py-2 px-4 border">{{ assessment.explanation|default:"No explanation available" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class="py-2 px-4 border text-center text-gray-500">No assessments found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="flex space-x-4 mt-6">
+    <a href="{% url 'patient_risk_chart' patient.id %}" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600">
+        📊 View Risk Trends
+    </a>
+</div>
+
+<!-- 📄 Doctor's Recommendations -->
+<h2 class="text-xl font-semibold text-gray-700 mt-6">📝 Doctor's Recommendations</h2>
+
+<form method="post" class="bg-white p-6 shadow-lg rounded-lg mt-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+        ➕ Add Recommendation
+    </button>
+</form>
+
+<ul class="mt-4">
+    {% for rec in recommendations %}
+    <li class="bg-gray-100 p-3 rounded-lg shadow-sm mt-2">
+        <strong>{{ rec.created_at|date:"Y-m-d" }}:</strong> {{ rec.recommendation_text }}
+    </li>
+    {% empty %}
+    <li class="text-gray-500">No recommendations yet.</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

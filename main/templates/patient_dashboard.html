@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row  ">
+    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+        <!-- Profile Section -->
+        <div class="flex flex-col items-center py-4 border-b border-gray-600">
+            {% load static %}
+            <a href="{% url 'profile' %}">
+                <img class="w-20 h-20 rounded-full border-4 border-white shadow-md"
+                    src="{% if user.profile.profile_picture %}{{ user.profile.profile_picture.url }}{% else %}{% static 'assets/default.jpg' %}{% endif %}"
+                    alt="Profile Picture">
+            </a>
+            <p class="mt-2 text-lg font-semibold">{{ user.username }}</p>
+            <a href="{% url 'profile' %}" class="text-sm underline hover:text-gray-300">View Profile</a>
+        </div>
+        <h1 class="text-xl font-bold text-center py-4 border-b border-gray-600">Dashboard</h1>
+        {% with request.resolver_match.url_name as url_name %}
+        <ul class="space-y-4">
+            <li><a href="{% url 'patient_dashboard' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_dashboard' %}bg-blue-700{% endif %}">🏠 Overview</a></li>
+            <li><a href="{% url 'health_risk' %}" class="block py-2 px-4 bg-yellow-400 text-black font-bold rounded-lg shadow-lg hover:bg-yellow-500">🩺 Take Risk Assessment</a></li>
+            <li><a href="{% url 'health_report_list' %}" class="block py-2 px-4 rounded {% if url_name == 'health_report_list' %}bg-blue-700{% endif %}">📊 Health Reports</a></li>
+            <li><a href="{% url 'health_risk_history' %}" class="block py-2 px-4 rounded {% if url_name == 'health_risk_history' %}bg-blue-700{% endif %}">📋 Health Risk History</a></li>
+            <li><a href="{% url 'patient_health_statistics' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_health_statistics' %}bg-blue-700{% endif %}">📊 Health Statistics</a></li>
+        </ul>
+        {% endwith %}
+    </aside>
+
+    <main class="flex-1">
+        {% block patient_content %}
+        <h1 class="text-3xl font-bold text-blue-600 text-center">🏥 Patient Dashboard</h1>
+
+        <!-- 🔹 Upcoming Appointments -->
+        <h2 class="text-xl font-semibold text-gray-700 mt-6">📅 Upcoming Appointments</h2>
+        <table class="min-w-full bg-white shadow-md rounded-lg mt-4">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 border">Doctor</th>
+                    <th class="py-2 px-4 border">Date</th>
+                    <th class="py-2 px-4 border">Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr class="text-center">
+                    <td class="py-2 px-4 border">{{ appointment.doctor.username }}</td>
+                    <td class="py-2 px-4 border">{{ appointment.date }}</td>
+                    <td class="py-2 px-4 border">{{ appointment.time }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="py-2 px-4 border text-center text-gray-500">No upcoming appointments.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- 🔹 Risk Assessments -->
+        <h2 class="text-xl font-semibold text-gray-700 mt-6">📊 Health Risk Assessments</h2>
+        
+        <table class="min-w-full bg-white shadow-md rounded-lg mt-4">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 border">Date</th>
+                    <th class="py-2 px-4 border">Risk Level</th>
+                    <th class="py-2 px-4 border">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assessment in risk_assessments %}
+                <tr class="text-center">
+                    <td class="py-2 px-4 border">{{ assessment.created_at|date:"Y-m-d" }}</td>
+                    <td class="py-2 px-4 border {% if assessment.risk_level == 'High' %}text-red-600{% elif assessment.risk_level == 'Medium' %}text-yellow-600{% else %}text-green-600{% endif %}">
+                        {{ assessment.risk_level }}
+                    </td>
+                    <td class="py-2 px-4 border">
+                        <a href="{% url 'assessment_detail' assessment.id %}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                            📄 View Report
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="py-2 px-4 border text-center text-gray-500">No assessments found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <!-- 🔹 Doctor Recommendations -->
+        <h2 class="text-xl font-semibold text-gray-700 mt-6">📝 Doctor's Recommendations</h2>
+        
+        <ul class="mt-4">
+            {% for rec in recommendations %}
+            <li class="bg-gray-100 p-3 rounded-lg shadow-sm mt-2">
+                <strong>{{ rec.created_at|date:"Y-m-d" }}:</strong> {{ rec.recommendation_text }}
+            </li>
+            {% empty %}
+            <li class="text-gray-500">No recommendations yet.</li>
+            {% endfor %}
+        </ul>
+        {% endblock %}
+    </main>
+</div>
+
+
+
+{% endblock %}

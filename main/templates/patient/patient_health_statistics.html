@@ -1,0 +1,66 @@
+{% extends 'patient_dashboard.html' %}
+{% block title %}Health Statistics{% endblock %}
+
+{% block patient_content %}
+<a href="{% url 'patient_dashboard' %}" class="text-blue-500 hover:underline flex items-center mb-4">
+    🔙 Back to Dashboard
+</a>
+
+<h1 class="text-3xl font-bold text-blue-600 text-center">📈 Health Statistics</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+        <canvas id="bloodPressureChart"></canvas>
+    </div>
+    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+        <canvas id="cholesterolChart"></canvas>
+    </div>
+    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+        <canvas id="glucoseChart"></canvas>
+    </div>
+    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+        <canvas id="bmiChart"></canvas>
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var labels = JSON.parse('{{ labels|escapejs }}');
+    var bloodPressureData = JSON.parse('{{ blood_pressure|escapejs }}');
+    var cholesterolData = JSON.parse('{{ cholesterol|escapejs }}');
+    var glucoseData = JSON.parse('{{ glucose|escapejs }}');
+    var bmiData = JSON.parse('{{ bmi|escapejs }}');
+
+    function createChart(canvasId, label, data, borderColor) {
+        var ctx = document.getElementById(canvasId).getContext("2d");
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    borderColor: borderColor,
+                    backgroundColor: "rgba(0,0,0,0.1)",
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: false }
+                }
+            }
+        });
+    }
+
+    createChart("bloodPressureChart", "Blood Pressure", bloodPressureData, "#ff0000");
+    createChart("cholesterolChart", "Cholesterol Level", cholesterolData, "#ffa500");
+    createChart("glucoseChart", "Glucose Level", glucoseData, "#008000");
+    createChart("bmiChart", "BMI", bmiData, "#0000ff");
+</script>
+
+{% endblock %}
