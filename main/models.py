@@ -133,6 +133,7 @@ class RiskAssessmentResult(models.Model):
     blood_pressure = models.IntegerField()
     cholesterol_level = models.IntegerField()
     glucose_level = models.IntegerField()
+    bmi = models.FloatField(null=True, blank=True)
     risk_level = models.CharField(max_length=10)
     risk_probability = models.FloatField()
     explanation = models.TextField(blank=True, null=True)
@@ -236,37 +237,16 @@ class RiskAlert(models.Model):
         return f"⚠ High Risk Alert - {self.patient.username} ({self.risk_assessment.risk_level})"
 
 class HealthReport(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="health_reports")
-    blood_pressure = models.CharField(max_length=20, help_text="e.g., 130/90")
-    sugar_level = models.CharField(max_length=20, help_text="e.g., 110 mg/dL")
-    heart_rate = models.IntegerField(help_text="e.g., 75 bpm")
-    assessment_date = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="health_reports")
+    created_at = models.DateTimeField(default=now)
+    risk_level = models.CharField(max_length=10, choices=[("Low", "Low"), ("Medium", "Medium"), ("High", "High")])
+    risk_probability = models.FloatField(default=0)
+    blood_pressure = models.IntegerField(default=0)
+    cholesterol_level = models.FloatField(default=180)
+    glucose_level = models.FloatField(default=0)
+    bmi = models.FloatField(default=25)
+    recommendations = models.TextField(default='')
+    explanation = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"Health Report for {self.user.username} on {self.assessment_date.strftime('%Y-%m-%d')}"
-    
-    def get_bp_status(self):
-        """Returns status for blood pressure"""
-        systolic, diastolic = map(int, self.blood_pressure.split('/'))
-        if systolic >= 130 or diastolic >= 80:
-            return "High"
-        elif systolic < 120 and diastolic < 80:
-            return "Normal"
-        return "Elevated"
-    
-    def get_sugar_status(self):
-        """Returns status for sugar level"""
-        level = int(self.sugar_level.split()[0])    
-        if level < 70:
-            return "Low"
-        elif 70 <= level <= 140:
-            return "Normal"
-        return "High"
-    
-    def get_hr_status(self):
-        """Returns status for heart rate"""
-        if self.heart_rate < 60:
-            return "Low"
-        elif 60 <= self.heart_rate <= 100:
-            return "Normal"
-        return "High"
+        return f"Health Report for {self.user.username} on {self.created_at.strftime('%Y-%m-%d')}"
