@@ -3,7 +3,11 @@
 
 {% block content %}
 <div class="flex flex-col md:flex-row  ">
+<<<<<<< HEAD
     <aside class="w-64 bg-blue-900 text-white flex flex-col rounded h-screen">
+=======
+    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+>>>>>>> ddfc7b5 (feat: doctor and patient dashboard done)
         <!-- Profile Section -->
         <div class="flex flex-col items-center py-4 border-b border-gray-600">
             {% load static %}
@@ -16,6 +20,7 @@
             <a href="{% url 'profile' %}" class="text-sm underline hover:text-gray-300">View Profile</a>
         </div>
         <h1 class="text-xl font-bold text-center py-4 border-b border-gray-600">Dashboard</h1>
+<<<<<<< HEAD
 
         <!-- 🔔 Notifications Section -->
         <div class="p-4 bg-gray-100 border-b border-gray-300">
@@ -33,12 +38,19 @@
         </div>
 
 
+=======
+>>>>>>> ddfc7b5 (feat: doctor and patient dashboard done)
         {% with request.resolver_match.url_name as url_name %}
         <ul class="space-y-4">
             <li><a href="{% url 'patient_dashboard' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_dashboard' %}bg-blue-700{% endif %}">🏠 Overview</a></li>
             <li><a href="{% url 'health_risk' %}" class="block py-2 px-4 bg-yellow-400 text-black font-bold rounded-lg shadow-lg hover:bg-yellow-500">🩺 Take Risk Assessment</a></li>
+<<<<<<< HEAD
             <li><a href="{% url 'health_risk_history' %}" class="block py-2 px-4 rounded {% if url_name == 'health_risk_history' %}bg-blue-700{% endif %}">📋 Health Risk History</a></li>
             <li><a href="{% url 'patient_health_statistics' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_health_statistics' %}bg-blue-700{% endif %}">📊 Health Statistics</a></li>
+=======
+            <li><a href="{% url 'health_reports' %}" class="block py-2 px-4 rounded {% if url_name == 'health_reports' %}bg-blue-700{% endif %}">📊 Health Reports</a></li>
+            <li><a href="{% url 'health_risk_history' %}" class="block py-2 px-4 rounded {% if url_name == 'health_risk_history' %}bg-blue-700{% endif %}">📋 Health Risk History</a></li>
+>>>>>>> ddfc7b5 (feat: doctor and patient dashboard done)
         </ul>
         {% endwith %}
     </aside>
@@ -118,6 +130,9 @@
     </main>
 </div>
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> ddfc7b5 (feat: doctor and patient dashboard done)
 {% endblock %}

@@ -5,11 +5,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
+
 from .forms import (HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientForm, RoleUpdateForm, AppointmentForm, UserUpdateForm,
                     ConsultationForm)
 from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report
 from .models import (RiskAssessmentResult, CustomUser, UserProfile, DoctorPatientAssignment, SystemAlert, Recommendation, Appointment,
-                    RiskAlert, DataAccessLog, EncryptedFieldMixin, Notification)
+                    RiskAlert, HealthReport)
 import plotly.graph_objects as go
 import base64
 from io import BytesIO
@@ -61,6 +62,7 @@ def register_user(request):
             return redirect("admin_dashboard")
         else:
             return redirect("patient_dashboard")  # Default fallback patient
+            return redirect("patient_dashboard")  # Default fallback patient
 
     return render(request, "register.html")
 
@@ -86,6 +88,7 @@ def user_login(request):
                 return redirect("admin_dashboard")
             else:
                 return redirect("patient_dashboard")  # Default fallback patient
+                return redirect("patient_dashboard")  # Default fallback patient
 
         else:
             messages.error(request, "Invalid email or password.")
@@ -100,7 +103,15 @@ def user_logout(request):
 @login_required
 def profile_view(request):
     """Display and edit user profile"""
+    """Display and edit user profile"""
     if request.method == "POST":
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            return redirect("profile")  # Redirect to profile page after saving
+
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
         if user_form.is_valid() and profile_form.is_valid():
@@ -111,13 +122,21 @@ def profile_view(request):
     else:
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=request.user.profile)
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=request.user.profile)
 
     context = {
         "user_form": user_form,
         "profile_form": profile_form,
     }
     return render(request, "users/profile.html", context)
+    context = {
+        "user_form": user_form,
+        "profile_form": profile_form,
+    }
+    return render(request, "users/profile.html", context)
 
+@login_required
 @login_required
 def health_risk_assessment(request):
     risk_result = None
@@ -359,7 +378,7 @@ def doctor_required(user):
 @user_passes_test(doctor_required)
 def doctor_dashboard(request):
     """Doctor Dashboard Overview"""
-    appointments = Appointment.objects.filter(doctor=request.user).order_by("-date")
+    appointments = Appointment.objects.filter(doctor=request.user).order_by("-appointment_date")
 
     total_patients = CustomUser.objects.filter(role="patient").count()
     high_risk_patients = RiskAssessmentResult.objects.filter(risk_level="High").count()
@@ -372,6 +391,8 @@ def doctor_dashboard(request):
         "high_risk_patients": high_risk_patients,
         "low_risk_patients": low_risk_patients,
         "risk_alerts": risk_alerts,
+        "appointments": appointments
+
         "appointments": appointments
 
     })
@@ -956,34 +977,28 @@ def patient_dashboard(request):
     # Fetch upcoming appointments
     appointments = Appointment.objects.filter(patient=request.user, status="Confirmed").order_by("date", "time")
 
-    # Fetch unread notifications
-    notifications = Notification.objects.filter(user=request.user, is_read=False).order_by("-created_at")
-
     # Fetch past risk assessments
     risk_assessments = RiskAssessmentResult.objects.filter(user=request.user).order_by("-created_at")
-
-    # Extract health data for visualization
-    labels = [ra.created_at.strftime("%Y-%m-%d") for ra in risk_assessments]
-    blood_pressure = [ra.blood_pressure for ra in risk_assessments]
-    cholesterol = [ra.cholesterol_level for ra in risk_assessments]
-    glucose = [ra.glucose_level for ra in risk_assessments]
-    bmi = [ra.bmi for ra in risk_assessments]
 
     # Fetch recommendations from doctors
     recommendations = Recommendation.objects.filter(patient=request.user).order_by("-created_at")
 
     return render(request, "patient_dashboard.html", {
         "appointments": appointments,
-        "notifications": notifications,
         "risk_assessments": risk_assessments,
-        "recommendations": recommendations,
-        "labels": json.dumps(labels),
-        "blood_pressure": json.dumps(blood_pressure),
-        "cholesterol": json.dumps(cholesterol),
-        "glucose": json.dumps(glucose),
-        "bmi": json.dumps(bmi),
-        "user_role": request.user.role,
+        "recommendations": recommendations
     })
+
+
+@login_required
+def health_reports_view(request):
+    latest_report = HealthReport.objects.filter(user=request.user).order_by("-assessment_date").first()
+    
+    context = {
+        "latest_report": latest_report
+    }
+    return render(request, "patient/health_reports.html", context)
+
 
 @login_required
 def doctor_consultation(request, appointment_id):
@@ -1005,40 +1020,3 @@ def doctor_consultation(request, appointment_id):
         "form": form,
         "appointment": appointment
     })
-
-
-@login_required
-def patient_health_statistics(request):
-    """Patient - View Health Statistics on a Separate Page"""
-    
-    if request.user.role != "patient":
-        return render(request, "error.html", {"message": "Access Denied: Only patients can access this page."})
-
-    # Fetch latest health statistics
-    risk_assessments = RiskAssessmentResult.objects.filter(user=request.user).order_by("-created_at")
-
-    # Extract health data for visualization
-    labels = [ra.created_at.strftime("%Y-%m-%d") for ra in risk_assessments]
-    blood_pressure = [ra.blood_pressure for ra in risk_assessments]
-    cholesterol = [ra.cholesterol_level for ra in risk_assessments]
-    glucose = [ra.glucose_level for ra in risk_assessments]
-    bmi = [ra.bmi for ra in risk_assessments]
-
-    return render(request, "patient/patient_health_statistics.html", {
-        "labels": json.dumps(labels),
-        "blood_pressure": json.dumps(blood_pressure),
-        "cholesterol": json.dumps(cholesterol),
-        "glucose": json.dumps(glucose),
-        "bmi": json.dumps(bmi),
-    })
-
-
-
-def log_data_access(user, data_type, object_id, action="Viewed"):
-    DataAccessLog.objects.create(user=user, data_type=data_type, object_id=object_id, action=action)
-
-
-def notifications_view(request):
-    """Show user notifications"""
-    notifications = Notification.objects.filter(user=request.user, is_read=False)
-    return render(request, "notifications.html", {"notifications": notifications})
