@@ -359,7 +359,7 @@ def doctor_required(user):
 @user_passes_test(doctor_required)
 def doctor_dashboard(request):
     """Doctor Dashboard Overview"""
-    appointments = Appointment.objects.filter(doctor=request.user).order_by("-appointment_date")
+    appointments = Appointment.objects.filter(doctor=request.user).order_by("-date")
 
     total_patients = CustomUser.objects.filter(role="patient").count()
     high_risk_patients = RiskAssessmentResult.objects.filter(risk_level="High").count()
@@ -982,6 +982,7 @@ def patient_dashboard(request):
         "cholesterol": json.dumps(cholesterol),
         "glucose": json.dumps(glucose),
         "bmi": json.dumps(bmi),
+        "user_role": request.user.role,
     })
 
 @login_required

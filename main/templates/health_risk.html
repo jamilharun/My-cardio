@@ -3,45 +3,46 @@
 {% block title %}Health Risk Assessment{% endblock %}
 
 {% block patient_content %}
-<h1 class="text-3xl font-bold text-blue-600 text-center">Health Risk Assessment</h1>
+<h1 <h1 class="text-3xl font-bold text-blue-600 text-center mb-6">Health Risk Assessment</h1>
 
-<form method="post" class="max-w-lg mx-auto bg-white p-6 shadow-lg rounded-lg mt-6">
+<for<form method="post" class="max-w-3xl mx-auto bg-white p-6 shadow-lg rounded-lg">
     {% csrf_token %}
     
-    <div class="grid grid-flow-col grid-rows-4 gap-4">
-        <!-- Age Field -->
-        <div>
-            <label for="{{ form.age.id_for_label }}" class="block text-gray-700 font-semibold lg:text-base text-xl">Age</label>
+    <!-- Grid Layout for Form Fields -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Age -->
+        <div class="relative">
+            <label for="{{ form.age.id_for_label }}" class="block text-gray-700 font-semibold">Age</label>
             <input type="number" name="{{ form.age.name }}" id="{{ form.age.id_for_label }}" 
-                   class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:text-base text-xl">
-            {% if form.age.errors %}
-                <p class="text-red-500 text-sm">{{ form.age.errors.0 }}</p>
-            {% endif %}
+                   class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" 
+                   placeholder="Enter your age">
         </div>
 
-        <!-- Gender Field -->
+        <!-- Gender -->
         <div>
-            <label for="{{ form.gender.id_for_label }}" class="block text-gray-700 font-semibold lg:text-base text-xl">Gender</label>
-            <select name="{{ form.gender.name }}" id="{{ form.gender.id_for_label }}"
-                    class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 lg:text-base text-xl">
+            <label for="{{ form.gender.id_for_label }}" class="block text-gray-700 font-semibold">Gender</label>
+            <select name="{{ form.gender.name }}" id="{{ form.gender.id_for_label }}" 
+                    class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-blue-500">
                 {% for choice in form.gender.field.choices %}
                     <option value="{{ choice.0 }}">{{ choice.1 }}</option>
                 {% endfor %}
             </select>
         </div>
 
-        <!-- Blood Pressure Field -->
+        <!-- Blood Pressure -->
         <div>
-            <label for="{{ form.BP.id_for_label }}" class="block text-gray-700 font-semibold lg:text-base text-xl">Blood Pressure (Systolic)</label>
+            <label for="{{ form.BP.id_for_label }}" class="block text-gray-700 font-semibold">Blood Pressure</label>
             <input type="number" name="{{ form.BP.name }}" id="{{ form.BP.id_for_label }}" 
-                   class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:text-base text-xl">
+                   class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" 
+                   placeholder="e.g., 120">
         </div>
 
         <!-- Cholesterol Level -->
         <div>
-            <label for="{{ form.cholesterol_level.id_for_label }}" class="block text-gray-700 font-semibold lg:text-base text-xl">Cholesterol Level</label>
-            <select name="{{ form.cholesterol_level.name }}" id="{{ form.cholesterol_level.id_for_label }}"
-                    class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 lg:text-base text-xl">
+            <label for="{{ form.cholesterol_level.id_for_label }}" class="block text-gray-700 font-semibold">Cholesterol Level</label>
+            <select name="{{ form.cholesterol_level.name }}" id="{{ form.cholesterol_level.id_for_label }}" 
+                    class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-blue-500">
                 {% for choice in form.cholesterol_level.field.choices %}
                     <option value="{{ choice.0 }}">{{ choice.1 }}</option>
                 {% endfor %}
@@ -50,30 +51,30 @@
 
         <!-- Glucose Level -->
         <div>
-            <label for="{{ form.glucose_level.id_for_label }}" class="block text-gray-700 font-semibold lg:text-base text-xl">Glucose Level</label>
-            <select name="{{ form.glucose_level.name }}" id="{{ form.glucose_level.id_for_label }}"
-                    class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 lg:text-base text-xl">
+            <label for="{{ form.glucose_level.id_for_label }}" class="block text-gray-700 font-semibold">Glucose Level</label>
+            <select name="{{ form.glucose_level.name }}" id="{{ form.glucose_level.id_for_label }}" 
+                    class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-blue-500">
                 {% for choice in form.glucose_level.field.choices %}
                     <option value="{{ choice.0 }}">{{ choice.1 }}</option>
                 {% endfor %}
             </select>
         </div>
 
-        <!-- Other Fields (Smoking, Alcohol, Exercise, Chest Pain, ECG, etc.) -->
+        <!-- Loop Through Other Fields -->
         {% for field in form %}
             {% if field.name not in "age gender BP cholesterol_level glucose_level" %}
                 <div>
-                    <label for="{{ field.id_for_label }}" class="block text-gray-700 font-semibold lg:text-base text-xl">{{ field.label }}</label>
+                    <label for="{{ field.id_for_label }}" class="block text-gray-700 font-semibold">{{ field.label }}</label>
                     {% if field.field.widget.input_type == "select" %}
                         <select name="{{ field.name }}" id="{{ field.id_for_label }}"
-                                class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 lg:text-base text-xl">
+                                class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-blue-500">
                             {% for choice in field.field.choices %}
                                 <option value="{{ choice.0 }}">{{ choice.1 }}</option>
                             {% endfor %}
                         </select>
                     {% else %}
                         <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"
-                               class="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:text-base text-xl">
+                               class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
                     {% endif %}
                 </div>
             {% endif %}
@@ -81,11 +82,10 @@
     </div>
 
     <!-- Submit Button -->
-    <button type="submit" id="submit-btn" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center space-x-2 lg:text-base text-2xl">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-5 h-5" viewBox="0 0 24 24">
-            <path d="M5 12l5 5L19 7"></path>
-        </svg>
+    <button type="submit" class="mt-6 w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center">
         <span id="btn-text">Predict Risk</span>
+    </button>
+</form>
 
         <!-- Hidden Loading Spinner -->
         <svg id="loading-spinner" class="hidden animate-spin w-5 h-5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
