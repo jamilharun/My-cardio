@@ -3,19 +3,63 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="flex flex-col md:flex-row">
+<div class="flex flex-col md:flex-row my-24">
     
     <!-- Sidebar -->
     <aside class="w-full md:w-1/4 bg-gradient-to-b from-blue-700 to-blue-500 text-white min-h-screen p-6">
         <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
-        <ul class="space-y-4">
-            <li><a href="#" id="home-btn" class="block py-2 px-4 rounded hover:bg-blue-800">🏠 Home</a></li>
-            <li><a href="#" id="reports-btn" class="block py-2 px-4 rounded hover:bg-blue-800">📊 Health Reports</a></li>
-            <li><a href="#" id="history-btn" class="block py-2 px-4 rounded hover:bg-blue-800">📋 Medical History</a></li>
-            <li><a href="#" id="consultations-btn" class="block py-2 px-4 rounded hover:bg-blue-800">🩺 Doctor Consultations</a></li>
-            <li><a href="{% url 'health_risk' %}" class="block py-2 px-4 bg-yellow-400 text-black font-bold rounded-lg shadow-lg hover:bg-yellow-500">🩺 Take Health Assessment</a></li>
-            <li><a href="#" id="health-risk-history-btn" class="block py-2 px-4 rounded hover:bg-blue-800">📜 Health Risk History</a></li>
-            <li><a href="{% url 'logout' %}" class="block py-2 px-4 rounded hover:bg-red-600">🚪 Logout</a></li>
+        <ul class="space-y-4">  
+            <li>
+                <a href="#" id="home-btn" 
+                    class="block py-2 px-4 rounded hover:bg-blue-800 lg:text-base text-2xl">
+                    🏠 Home
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'profile' %}" 
+                   id="profile-btn" 
+                    class="block py-2 px-4 rounded hover:bg-blue-800 lg:text-base text-2xl">
+                   👤 Profile
+                </a>
+            </li>
+            <li>
+                <a href="#" id="reports-btn" 
+                    class="block py-2 px-4 rounded hover:bg-blue-800 lg:text-base text-2xl">
+                    📊 Health Reports
+                </a>
+            </li>
+            <li>
+                <a href="#" id="history-btn" 
+                    class="block py-2 px-4 rounded hover:bg-blue-800 lg:text-base text-2xl">
+                    📋 Medical History
+
+                </a>
+            </li>
+            <li>
+                <a href="#" id="consultations-btn" 
+                    class="block py-2 px-4 rounded hover:bg-blue-800 lg:text-base text-2xl">
+                    🩺 Doctor Consultations
+
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'health_risk' %}" 
+                    class="block py-2 px-4 bg-yellow-400 text-black font-bold rounded-lg shadow-lg hover:bg-yellow-500 lg:text-base text-2xl">
+                    🩺 Take Health Assessment
+                </a>
+            </li>
+            <li>
+                <a href="#" id="health-risk-history-btn" 
+                    class="block py-2 px-4 rounded hover:bg-blue-800 lg:text-base text-2xl">
+                    📜 Health Risk History
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'logout' %}" 
+                    class="block py-2 px-4 rounded hover:bg-red-600 lg:text-base text-2xl">
+                    🚪 Logout
+                </a>
+            </li>
             
         </ul>
     </aside>
@@ -25,16 +69,16 @@
     <main class="w-full md:w-3/4 p-8">
         <div id="dynamic-content">
             <h1 class="text-3xl font-bold text-gray-700">Welcome, {{ request.user.username }}! 👋</h1>
-            <p class="text-gray-600 mt-2">Here's an overview of your health data.</p>
+            <p class="text-gray-600 mt-2 lg:text-base text-2xl">Here's an overview of your health data.</p>
 
             <!-- Call to Action Banner -->
-        <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6 rounded-lg shadow-md mt-6 text-center animate-fade-in">
-            <h2 class="text-2xl font-bold">🩺 Take Your Health Risk Assessment</h2>
-            <p class="mt-2">Stay ahead of potential health issues by completing your assessment today.</p>
-            <a href="{% url 'health_risk' %}" class="mt-4 inline-block bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-yellow-500">
+        <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6 rounded-2xl shadow-md mt-6 text-center animate-fade-in ">
+            <h2 class="lg:text-2xl text-4xl font-bold">🩺 Take Your Health Risk Assessment</h2>
+            <p class="mt-2 lg:text-base text-3xl">Stay ahead of potential health issues by completing your assessment today.</p>
+            <a href="{% url 'health_risk' %}" class="mt-4 inline-block bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-yellow-500 lg:text-base text-2xl">
                 🚀 Start Assessment
             </a>
-        </div>
+        </div>        
 
         <!-- Health Assessment Modal -->
         <div id="healthModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
@@ -55,19 +99,19 @@
             <!-- Stats Section -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                 <div class="bg-white p-6 rounded-lg shadow-md text-center">
-                    <h3 class="text-lg font-bold text-blue-600">🩸 Risk Score</h3>
+                    <h3 class="lg:text-lg text-2xl font-bold text-blue-600">🩸 Risk Score</h3>
                     <p class="text-3xl font-bold text-gray-800">85%</p>
-                    <p class="text-gray-500">High risk detected</p>
+                    <p class="text-gray-500 lg:text-lg text-xl">High risk detected</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow-md text-center">
-                    <h3 class="text-lg font-bold text-blue-600">📅 Last Assessment</h3>
+                    <h3 class="lg:text-lg text-2xl font-bold text-blue-600">📅 Last Assessment</h3>
                     <p class="text-3xl font-bold text-gray-800">March 5, 2025</p>
-                    <p class="text-gray-500">AI Health Check</p>
+                    <p class="text-gray-500 lg:text-lg text-xl">AI Health Check</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow-md text-center">
-                    <h3 class="text-lg font-bold text-blue-600">📋 Total Reports</h3>
+                    <h3 class="lg:text-lg text-2xl font-bold text-blue-600">📋 Total Reports</h3>
                     <p class="text-3xl font-bold text-gray-800">12</p>
-                    <p class="text-gray-500">Completed Assessments</p>
+                    <p class="text-gray-500 lg:text-lg text-xl">Completed Assessments</p>
                 </div>
             </div>
         </div>
@@ -88,38 +132,38 @@
 
         document.getElementById("reports-btn").addEventListener("click", function () {
             dynamicContent.innerHTML = `
-                <h2 class="text-2xl font-bold text-gray-700">📊 Health Reports</h2>
-                <p class="text-gray-600 mt-2">Your latest health assessments.</p>
+                <h2 class="text-2xl font-bold text-gray-700 lg:text-base text-4xl">📊 Health Reports</h2>
+                <p class="text-gray-600 mt-2 lg:text-base text-2xl">Your latest health assessments.</p>
                 <ul class="mt-4">
-                    <li class="p-4 bg-white shadow rounded mb-2">🩸 Blood Pressure: 130/90 (High)</li>
-                    <li class="p-4 bg-white shadow rounded mb-2">💉 Sugar Level: 110 mg/dL (Normal)</li>
-                    <li class="p-4 bg-white shadow rounded mb-2">❤️ Heart Rate: 75 bpm (Normal)</li>
+                    <li class="p-4 bg-white shadow rounded mb-2 lg:text-base text-2xl">🩸 Blood Pressure: 130/90 (High)</li>
+                    <li class="p-4 bg-white shadow rounded mb-2 lg:text-base text-2xl">💉 Sugar Level: 110 mg/dL (Normal)</li>
+                    <li class="p-4 bg-white shadow rounded mb-2 lg:text-base text-2xl">❤️ Heart Rate: 75 bpm (Normal)</li>
                 </ul>
             `;
         });
 
         document.getElementById("history-btn").addEventListener("click", function () {
             dynamicContent.innerHTML = `
-                <h2 class="text-2xl font-bold text-gray-700">📋 Medical History</h2>
-                <p class="text-gray-600 mt-2">Here are your past medical records.</p>
+                <h2 class="text-2xl font-bold text-gray-700 lg:text-base text-4xl">📋 Medical History</h2>
+                <p class="text-gray-600 mt-2 lg:text-base text-2xl">Here are your past medical records.</p>
                 <table class="w-full mt-4 bg-white shadow-md rounded-lg">
                     <thead>
                         <tr class="bg-gray-200">
-                            <th class="p-3 text-left">Date</th>
-                            <th class="p-3 text-left">Condition</th>
-                            <th class="p-3 text-left">Doctor</th>
+                            <th class="p-3 text-left lg:text-base text-2xl">Date</th>
+                            <th class="p-3 text-left lg:text-base text-2xl">Condition</th>
+                            <th class="p-3 text-left lg:text-base text-2xl">Doctor</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr class="border-b">
-                            <td class="p-3">Jan 10, 2025</td>
-                            <td class="p-3">Mild Hypertension</td>
-                            <td class="p-3">Dr. Smith</td>
+                            <td class="p-3 lg:text-base text-2xl">Jan 10, 2025</td>
+                            <td class="p-3 lg:text-base text-2xl">Mild Hypertension</td>
+                            <td class="p-3 lg:text-base text-2xl">Dr. Smith</td>
                         </tr>
                         <tr class="border-b">
-                            <td class="p-3">Dec 15, 2024</td>
-                            <td class="p-3">Normal Health Check</td>
-                            <td class="p-3">Dr. Johnson</td>
+                            <td class="p-3 lg:text-base text-2xl">Dec 15, 2024</td>
+                            <td class="p-3 lg:text-base text-2xl">Normal Health Check</td>
+                            <td class="p-3 lg:text-base text-2xl">Dr. Johnson</td>
                         </tr>
                     </tbody>
                 </table>
@@ -160,33 +204,41 @@
         document.getElementById("home-btn").addEventListener("click", function () {
             dynamicContent.innerHTML = `
                 <h1 class="text-3xl font-bold text-gray-700">Welcome, {{ request.user.username }}! 👋</h1>
-                <p class="text-gray-600 mt-2">Here's an overview of your health data.</p>
+                <p class="text-gray-600 mt-2 lg:text-base text-2xl">Here's an overview of your health data.</p>
 
                 <!-- Call to Action Section -->
                 <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6 rounded-lg shadow-md mt-6 text-center animate-fade-in">
-                    <h2 class="text-2xl font-bold">🩺 Take Your Health Risk Assessment</h2>
-                    <p class="mt-2">Stay ahead of potential health issues by completing your assessment today.</p>
-                    <a href="{% url 'health_risk' %}" class="mt-4 inline-block bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-yellow-500 hover-scale">
+                    <h2 class="lg:text-2xl text-4xl font-bold">
+                        🩺 Take Your Health Risk Assessment
+                        </h2>
+                    <p class="mt-2 lg:text-base text-3xl">Stay ahead of potential health issues by completing your assessment today.
+                        </p>
+                    
+                        <a href="{% url 'health_risk' %}" 
+                    class="mt-4 inline-block bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-yellow-500 hover-scale lg:text-base text-2xl">
                         🚀 Start Assessment
                     </a>
+
                 </div>
 
                 <!-- Health Stats -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                     <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition">
-                        <h3 class="text-lg font-bold text-blue-600">🩸 Risk Score</h3>
+                        <h3 class="lg:text-lg text-2xl font-bold text-blue-600">🩸 Risk Score</h3>
                         <p class="text-3xl font-bold text-gray-800">85%</p>
-                        <p class="text-gray-500">High risk detected</p>
+                        <p class="text-gray-500 lg:text-lg text-xl">High risk detected</p>
                     </div>
+                    
                     <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition">
-                        <h3 class="text-lg font-bold text-blue-600">📅 Last Assessment</h3>
+                        <h3 class="lg:text-lg text-2xl font-bold text-blue-600">📅 Last Assessment</h3>
                         <p class="text-3xl font-bold text-gray-800">March 5, 2025</p>
-                        <p class="text-gray-500">AI Health Check</p>
+                        <p class="text-gray-500 lg:text-lg text-xl">AI Health Check</p>
                     </div>
+                    
                     <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition">
-                        <h3 class="text-lg font-bold text-blue-600">📋 Total Reports</h3>
+                        <h3 class="lg:text-lg text-2xl font-bold text-blue-600">📋 Total Reports</h3>
                         <p class="text-3xl font-bold text-gray-800">12</p>
-                        <p class="text-gray-500">Completed Assessments</p>
+                        <p class="text-gray-500 lg:text-lg text-xl">Completed Assessments</p>
                     </div>
                 </div>
             `;

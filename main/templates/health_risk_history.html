@@ -3,38 +3,50 @@
 {% block patient_content %}
 <h1 class="text-3xl font-bold text-blue-600 text-center">Health Risk History</h1>
 
-<div class="max-w-4xl mx-auto bg-white p-6 shadow-lg rounded-lg mt-6">
+<div class="max-w-2xl mx-auto bg-white p-4 shadow-lg rounded-lg mt-6">
     {% if risk_history %}
-    <table class="min-w-full bg-white">
-        <thead>
-            <tr>
-                <th class="py-2 px-4 border-b">Date</th>
-                <th class="py-2 px-4 border-b">Age</th>
-                <th class="py-2 px-4 border-b">Gender</th>
-                <th class="py-2 px-4 border-b">Blood Pressure</th>
-                <th class="py-2 px-4 border-b">Cholesterol</th>
-                <th class="py-2 px-4 border-b">Glucose</th>
-                <th class="py-2 px-4 border-b">Risk Level</th>
-                <th class="py-2 px-4 border-b">Probability</th>
-                <th class="py-2 px-4 border-b">Explanation</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in risk_history %}
-            <tr class="hover:bg-gray-100">
-                <td class="py-2 px-4 border-b">{{ result.created_at }}</td>
-                <td class="py-2 px-4 border-b">{{ result.age }}</td>
-                <td class="py-2 px-4 border-b">{{ result.gender }}</td>
-                <td class="py-2 px-4 border-b">{{ result.blood_pressure }}</td>
-                <td class="py-2 px-4 border-b">{{ result.cholesterol_level }}</td>
-                <td class="py-2 px-4 border-b">{{ result.glucose_level }}</td>
-                <td class="py-2 px-4 border-b">{{ result.risk_level }}</td>
-                <td class="py-2 px-4 border-b">{{ result.risk_probability|floatformat:2 }}</td>
-                <td class="py-2 px-4 border-b">{{ result.explanation }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    
+    <!-- Responsive Table Wrapper -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="py-2 px-4 border-b text-left">Date</th>
+                    <th class="py-2 px-4 border-b text-left">Age</th>
+                    <th class="py-2 px-4 border-b text-left">Gender</th>
+                    <th class="py-2 px-4 border-b text-left">Blood Pressure</th>
+                    <th class="py-2 px-4 border-b text-left">Cholesterol</th>
+                    <th class="py-2 px-4 border-b text-left">Glucose</th>
+                    <th class="py-2 px-4 border-b text-left">Risk Level</th>
+                    <th class="py-2 px-4 border-b text-left">Probability</th>
+                    <th class="py-2 px-4 border-b text-left">Explanation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in risk_history %}
+                <tr class="hover:bg-gray-100 even:bg-gray-50">
+                    <td class="py-2 px-4 border-b whitespace-nowrap">{{ result.created_at }}</td>
+                    <td class="py-2 px-4 border-b">{{ result.age }}</td>
+                    <td class="py-2 px-4 border-b">{{ result.gender }}</td>
+                    <td class="py-2 px-4 border-b text-right">{{ result.blood_pressure }}</td>
+                    <td class="py-2 px-4 border-b text-right">{{ result.cholesterol_level }}</td>
+                    <td class="py-2 px-4 border-b text-right">{{ result.glucose_level }}</td>
+                    <td class="py-2 px-4 border-b font-bold 
+                        {% if result.risk_level == 'High' %} text-red-600 
+                        {% elif result.risk_level == 'Medium' %} text-yellow-500 
+                        {% else %} text-green-600 {% endif %}">
+                        {{ result.risk_level }}
+                    </td>
+                    <td class="py-2 px-4 border-b text-right">{{ result.risk_probability|floatformat:2 }}</td>
+                    <td class="py-2 px-4 border-b max-w-xs truncate hover:whitespace-normal">
+                        {{ result.explanation }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     {% else %}
     <p class="text-center text-gray-600">No risk assessment history found.</p>
     {% endif %}

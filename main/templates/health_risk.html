@@ -1,33 +1,139 @@
 {% extends 'patient_dashboard.html' %}
+{% extends 'patient_dashboard.html' %}
 
 {% block title %}Health Risk Assessment{% endblock %}
 
 {% block patient_content %}
-<h1 class="text-3xl font-bold text-blue-600 text-center">Health Risk Assessment</h1>
+<h1 <h1 class="text-3xl font-bold text-blue-600 text-center mb-6">Health Risk Assessment</h1>
 
-<form method="post" class="max-w-lg mx-auto bg-white p-6 shadow-lg rounded-lg mt-6">
+<for<form method="post" class="max-w-3xl mx-auto bg-white p-6 shadow-lg rounded-lg">
     {% csrf_token %}
-    {{ form.as_p }}
+    
+    <!-- Grid Layout for Form Fields -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-    <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
-        Predict Risk
+        <!-- Age -->
+        <div class="relative">
+            <label for="{{ form.age.id_for_label }}" class="block text-gray-700 font-semibold">Age</label>
+            <input type="number" name="{{ form.age.name }}" id="{{ form.age.id_for_label }}" 
+                   class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" 
+                   placeholder="Enter your age">
+        </div>
+
+        <!-- Gender -->
+        <div>
+            <label for="{{ form.gender.id_for_label }}" class="block text-gray-700 font-semibold">Gender</label>
+            <select name="{{ form.gender.name }}" id="{{ form.gender.id_for_label }}" 
+                    class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-blue-500">
+                {% for choice in form.gender.field.choices %}
+                    <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Blood Pressure -->
+        <div>
+            <label for="{{ form.BP.id_for_label }}" class="block text-gray-700 font-semibold">Blood Pressure</label>
+            <input type="number" name="{{ form.BP.name }}" id="{{ form.BP.id_for_label }}" 
+                   class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500" 
+                   placeholder="e.g., 120">
+        </div>
+
+        <!-- Cholesterol Level -->
+        <div>
+            <label for="{{ form.cholesterol_level.id_for_label }}" class="block text-gray-700 font-semibold">Cholesterol Level</label>
+            <select name="{{ form.cholesterol_level.name }}" id="{{ form.cholesterol_level.id_for_label }}" 
+                    class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-blue-500">
+                {% for choice in form.cholesterol_level.field.choices %}
+                    <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Glucose Level -->
+        <div>
+            <label for="{{ form.glucose_level.id_for_label }}" class="block text-gray-700 font-semibold">Glucose Level</label>
+            <select name="{{ form.glucose_level.name }}" id="{{ form.glucose_level.id_for_label }}" 
+                    class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-blue-500">
+                {% for choice in form.glucose_level.field.choices %}
+                    <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Loop Through Other Fields -->
+        {% for field in form %}
+            {% if field.name not in "age gender BP cholesterol_level glucose_level" %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-gray-700 font-semibold">{{ field.label }}</label>
+                    {% if field.field.widget.input_type == "select" %}
+                        <select name="{{ field.name }}" id="{{ field.id_for_label }}"
+                                class="w-full border border-gray-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-blue-500">
+                            {% for choice in field.field.choices %}
+                                <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                               class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="mt-6 w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 flex items-center justify-center">
+        <span id="btn-text">Predict Risk</span>
     </button>
 </form>
 
-<div class="text-center mt-6">
-    <a href="{% url 'health_risk_history' %}" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
-        View Risk History
-    </a>
-</div>
+        <!-- Hidden Loading Spinner -->
+        <svg id="loading-spinner" class="hidden animate-spin w-5 h-5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0116 0h-4a4 4 0 00-8 0H4z"></path>
+        </svg>
+    </button>
+</form>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+        const submitBtn = document.getElementById("submit-btn");
+        const btnText = document.getElementById("btn-text");
+        const spinner = document.getElementById("loading-spinner");
+
+        form.addEventListener("submit", function () {
+            // Disable the button to prevent multiple clicks
+            submitBtn.disabled = true;
+            submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+            // Change button text and show the loading spinner
+            btnText.textContent = "Processing...";
+            spinner.classList.remove("hidden");
+        });
+    });
+</script>
+
+
 
 {% if risk_result %}
 <div class="mt-6 text-center text-2xl font-bold {% if risk_result.risk_level == 'High' %}text-red-600{% else %}text-green-600{% endif %}">
-    Risk Level: {{ risk_result.risk_level }} <br>
-    Probability: {{ risk_result.risk_probability|floatformat:2 }} <br>
-
-    <div class="mt-4 text-lg text-gray-700">
-        {{ explanation }}
+    <div>
+        <h1>
+            Risk Level: {{ risk_result.risk_level }} 
+        </h1>
+        <h1>
+            Probability: {{ risk_result.risk_probability|floatformat:2 }} 
+        </h1>
     </div>
+
+    <div class="flex flex-row gap-3">
+        <div class="mt-8 bg-white p-6 shadow-lg rounded-lg flex-1">
+            <h1 class="text-2xl font-bold text-blue-600">Explination</h1>
+            <p class="pt-6 mt-4 text-justify">
+                {{ explanation }}
+            </p>
+        </div>
 
     {% if recommendations %}
     <div class="mt-8 bg-white p-6 shadow-lg rounded-lg">
@@ -41,11 +147,13 @@
     {% endif %}
 
     <!-- {% if report and report.id %}
+    <!-- {% if report and report.id %}
     <a href="{% url 'export_report_pdf' report.id %}" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
         Download Report as PDF
     </a>
     {% else %}
     <p class="text-gray-500 mt-4">PDF report is not available.</p>
+    {% endif %} -->
     {% endif %} -->
 </div>
 {% endif %}

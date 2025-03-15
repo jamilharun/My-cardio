@@ -6,8 +6,12 @@
     <title>{% block title %}Risk Assessment{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}" />
-    <link rel="stylesheet" type="text/css" href="{% static 'css/output.css' %}" />
+    <!-- <link rel="stylesheet" type="text/css" href="{% static 'css/output.css' %}" /> -->
     <!-- Tailwind CSS -->
+
+    <!-- icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   </head>
   <body class="bg-gray-100">
 
@@ -33,9 +37,12 @@
         {% endif %}
       </div>
   </nav>
-  <div class="container mx-auto mt-10">
+  <div class="lg:container px-4 sm:px-6 lg:px-8 mx-auto h-screen">
       {% block content %}{% endblock %}
-  </div>
+    </div>
+    
+  
+    
     
   </body>
 </html>

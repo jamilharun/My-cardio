@@ -30,6 +30,10 @@ logger = logging.getLogger(__name__)
 def home(request):
     return render(request, "home.html")
 
+@login_required
+def profile_view(request):
+    return render(request, 'profile.html', {'user': request.user})
+
 def register_user(request):
     if request.method == "POST":
         username = request.POST["username"]
