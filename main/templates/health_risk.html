@@ -1,12 +1,11 @@
 {% extends 'patient_dashboard.html' %}
-{% extends 'patient_dashboard.html' %}
 
 {% block title %}Health Risk Assessment{% endblock %}
 
 {% block patient_content %}
-<h1 <h1 class="text-3xl font-bold text-blue-600 text-center mb-6">Health Risk Assessment</h1>
+<h1 class="text-3xl font-bold text-blue-600 text-center mb-6">Health Risk Assessment</h1>
 
-<for<form method="post" class="max-w-3xl mx-auto bg-white p-6 shadow-lg rounded-lg">
+<form method="post" class="max-w-3xl mx-auto bg-white p-6 shadow-lg rounded-lg">
     {% csrf_token %}
     
     <!-- Grid Layout for Form Fields -->
