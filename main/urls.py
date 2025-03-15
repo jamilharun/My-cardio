@@ -8,8 +8,8 @@ from .views import (
     update_user_role, generate_reports, export_users_csv, export_risk_assessments_csv, export_users_pdf, export_risk_assessments_pdf,
     risk_trends, system_alerts, mark_alert_as_read, delete_alert, patient_list, patient_detail, export_patient_csv, export_patient_pdf,
     book_appointment,doctor_appointments, update_appointment_status, risk_alerts, mark_alert_as_read, patient_risk_chart, 
-    assessment_detail, notifications_panel , mark_notification_as_read, patient_dashboard, health_reports_view, doctor_consultation,
-    patient_health_statistics, health_report_list, health_report_detail
+    assessment_detail, notifications_panel , mark_notification_as_read, patient_dashboard, doctor_consultation,
+    patient_health_statistics
 )
 
 
@@ -21,7 +21,7 @@ urlpatterns = [
     path("profile/", profile_view, name="profile"),
     path("health-risk/", health_risk_assessment, name="health_risk"),
     path("health-risk-history/", health_risk_history, name="health_risk_history"),
-    path("health-reports/", health_reports_view, name="health_reports"),
+    # path("health-reports/", health_reports_view, name="health_reports"),
     path("export-report-pdf/<int:report_id>/", export_report_pdf, name="export_report_pdf"),
     path("assessment/<int:assessment_id>/", assessment_detail, name="assessment_detail"),
     path("consultation/<int:appointment_id>/", doctor_consultation, name="doctor_consultation"),
@@ -68,8 +68,6 @@ urlpatterns = [
     path("patient-dashboard/", patient_dashboard, name="patient_dashboard"),
     path("patient/book-appointment/<int:doctor_id>/", book_appointment, name="book_appointment"),
     path("patient/patient-health-statistics/", patient_health_statistics, name="patient_health_statistics"),
-    path("patient/patient-health-reports/", health_report_list, name="health_report_list"),
-    path("patient/patient-health-report/<int:report_id>/", health_report_detail, name="health_report_detail"),
 ]
 
 
