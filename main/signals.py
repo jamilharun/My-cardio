@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save, post_migrate
 from django.dispatch import receiver
-from .models import UserProfile, CustomUser, HealthHistory, RiskAssessment, SystemAlert
+from .models import UserProfile, CustomUser, HealthHistory, RiskAssessment, SystemAlert, Appointment
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
@@ -91,3 +91,11 @@ def create_risk_alert(sender, instance, created, **kwargs):
                 patient=instance.user,
                 risk_assessment=instance
             )
+
+
+@receiver(post_save, sender=Appointment)
+def notify_patient(sender, instance, created, **kwargs):
+    """Send a notification when a doctor schedules an appointment for a patient."""
+    if created:  # Only notify when the appointment is newly created
+        message = f"You have a new appointment with Dr. {instance.doctor.get_full_name()} on {instance.date} at {instance.time}."
+        Notification.objects.create(user=instance.patient, message=message)

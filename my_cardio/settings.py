@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+# import environ
 from pathlib import Path
+from cryptography.fernet import Fernet
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,6 +21,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # To serve CSS and JavaScript,
 import os
 from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'my_cardio/static')]
@@ -151,3 +155,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 STATIC_URL = "/static/"
 
+
+
+
+FERNET_SECRET_KEY = os.getenv("FERNET_SECRET_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+INSTALLED_APPS += ["channels"]
+ASGI_APPLICATION = "myproject.asgi.application"

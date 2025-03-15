@@ -84,11 +84,11 @@ This checklist outlines the key tasks required to develop the **Web-Based Health
 
 ---
 
-## [ ] **6️⃣ Security & Data Privacy**
+## ✅ **6️⃣ Security & Data Privacy**
 
-- [ ] Encrypt sensitive user data
+- ✅ Encrypt sensitive user data
 - ✅ Implement **secure authentication & authorization**
-- [ ] Ensure **HIPAA/GDPR compliance**
+- ✅ Ensure **HIPAA/GDPR compliance**
 
 ---
 
