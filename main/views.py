@@ -10,7 +10,7 @@ from .forms import (HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientFo
                     ConsultationForm)
 from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report
 from .models import (RiskAssessmentResult, CustomUser, UserProfile, DoctorPatientAssignment, SystemAlert, Recommendation, Appointment,
-                    RiskAlert, HealthReport, HealthReport)
+                    RiskAlert, DataAccessLog, EncryptedFieldMixin, Notification)
 import plotly.graph_objects as go
 import base64
 from io import BytesIO
@@ -977,6 +977,9 @@ def patient_dashboard(request):
     # Fetch upcoming appointments
     appointments = Appointment.objects.filter(patient=request.user, status="Confirmed").order_by("date", "time")
 
+    # Fetch unread notifications
+    notifications = Notification.objects.filter(user=request.user, is_read=False).order_by("-created_at")
+
     # Fetch past risk assessments
     risk_assessments = RiskAssessmentResult.objects.filter(user=request.user).order_by("-created_at")
 
@@ -992,6 +995,7 @@ def patient_dashboard(request):
 
     return render(request, "patient_dashboard.html", {
         "appointments": appointments,
+        "notifications": notifications,
         "risk_assessments": risk_assessments,
         "recommendations": recommendations,
         "labels": json.dumps(labels),
@@ -1000,17 +1004,6 @@ def patient_dashboard(request):
         "glucose": json.dumps(glucose),
         "bmi": json.dumps(bmi),
     })
-
-
-@login_required
-def health_reports_view(request):
-    latest_report = HealthReport.objects.filter(user=request.user).order_by("-assessment_date").first()
-    
-    context = {
-        "latest_report": latest_report
-    }
-    return render(request, "patient/health_reports.html", context)
-
 
 @login_required
 def doctor_consultation(request, appointment_id):
@@ -1059,16 +1052,13 @@ def patient_health_statistics(request):
         "bmi": json.dumps(bmi),
     })
 
-@login_required
-def health_report_list(request):
-    """List all health reports for a patient."""
-    
-    reports = HealthReport.objects.filter(user=request.user).order_by("-created_at")
-    return render(request, "patient/health_report_list.html", {"reports": reports})
 
-@login_required
-def health_report_detail(request, report_id):
-    """View details of a specific health report."""
-    
-    report = get_object_or_404(HealthReport, id=report_id, user=request.user)
-    return render(request, "patient/health_report_detail.html", {"report": report})
+
+def log_data_access(user, data_type, object_id, action="Viewed"):
+    DataAccessLog.objects.create(user=user, data_type=data_type, object_id=object_id, action=action)
+
+
+def notifications_view(request):
+    """Show user notifications"""
+    notifications = Notification.objects.filter(user=request.user, is_read=False)
+    return render(request, "notifications.html", {"notifications": notifications})
