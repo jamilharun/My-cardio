@@ -9,12 +9,32 @@ class UserUpdateForm(forms.ModelForm):
 
 class ProfileUpdateForm(forms.ModelForm):
     """Form for updating user profile"""
+
+    phone_number = forms.CharField(
+        max_length=15, required=False, label="Phone Number"
+    )
+
     class Meta:
         model = UserProfile
         fields = ["profile_picture", "bio", "phone_number", "address", "date_of_birth", "gender", "emergency_contact"]
         widgets = {
             "date_of_birth": forms.DateInput(attrs={"type": "date"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        """Decrypt encrypted fields when populating the form"""
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.phone_number:
+            try:
+                # Decrypt before displaying in the form
+                self.fields["phone_number"].initial = self.instance.phone_number
+            except Exception:
+                pass  # In case of decryption failure, display raw value
+
+    def clean_phone_number(self):
+        """Ensure phone number gets encrypted before saving"""
+        phone_number = self.cleaned_data.get("phone_number")
+        return phone_number
 
 class HealthRiskForm(forms.Form):
     age = forms.IntegerField(label="Age", min_value=1)

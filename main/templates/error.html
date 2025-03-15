@@ -7,18 +7,17 @@
     <p class="text-lg text-gray-700 mt-4">{{ message }}</p>
     
     {% if user.is_authenticated %}
-        {% user.role == "patient" %}
+        {% if user.role == "patient" %}
             <a href="{% url 'patient_dashboard' %}" class="text-blue-600 hover:underline">🔙 Back to Dashboard</a>
-        {% endif %}
-        {% if user.role == "admin" %}
+        {% elif user.role == "admin" %}
             <a href="{% url 'admin_dashboard' %}" class="text-blue-300 hover:underline mr-4">🔙 Back to Dashboard</a>
-        {% endif %}
-        {% if user.role == "doctor" %}
+        {% elif user.role == "doctor" %}
             <a href="{% url 'doctor_dashboard' %}" class="text-blue-300 hover:underline mr-4">🔙 Back to Dashboard</a>
-        {% endif %}            
+        {% endif %}
     {% else %}
         <a href="{% url 'home' %}" class="bg-green-500 px-4 py-2 rounded">🔙 Back to home</a>
     {% endif %}
+
     
 </div>
 {% endblock %}

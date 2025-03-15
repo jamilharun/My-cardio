@@ -9,7 +9,7 @@ from .forms import (HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientFo
                     ConsultationForm)
 from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report
 from .models import (RiskAssessmentResult, CustomUser, UserProfile, DoctorPatientAssignment, SystemAlert, Recommendation, Appointment,
-                    RiskAlert, HealthReport, HealthReport)
+                    RiskAlert, DataAccessLog, EncryptedFieldMixin, Notification)
 import plotly.graph_objects as go
 import base64
 from io import BytesIO
@@ -18,7 +18,7 @@ import json
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 import csv
-
+from django.core.exceptions import PermissionDenied
 
 # debugging tool
 import logging
@@ -136,12 +136,18 @@ def health_risk_assessment(request):
             # Convert gender to numeric format if needed
             user_data["gender"] = 1 if user_data["gender"].lower() == "male" else 0
 
-            # ✅ Ensure height exists before calculating BMI
-            if "height" in user_data and "weight" in user_data:
-                height_m = user_data["height"] / 100  # Convert cm to meters
-                user_data["bmi"] = round(user_data["weight"] / (height_m ** 2), 2)
+            # ✅ Ensure both height and weight are valid before calculating BMI
+            if user_data.get("height") and user_data.get("weight"):
+                try:
+                    height_m = float(user_data["height"]) / 100  # Convert cm to meters
+                    weight_kg = float(user_data["weight"])
+                    user_data["bmi"] = round(weight_kg / (height_m ** 2), 2)
+                except (ValueError, TypeError, ZeroDivisionError) as e:
+                    print(f"Error calculating BMI: {e}")  # Debugging statement
+                    user_data["bmi"] = None  # Avoid crashes by setting BMI to None
             else:
-                user_data["bmi"] = None  # Avoid crash if height is missing
+                print("Missing height or weight, cannot calculate BMI.")  # Debugging statement
+                user_data["bmi"] = None
 
             # Predict health risk using AI model
             risk_result = predict_health_risk(user_data)
@@ -164,7 +170,8 @@ def health_risk_assessment(request):
             # Generate personalized health report
             report = generate_health_report(user_data, risk_result)
 
-            # 
+            print(f"Generated Report: {report}") 
+
             explanation = generate_explanation(risk_result["risk_level"], risk_result["risk_probability"], user_data)
             sanitized_explanation = sanitize_text(explanation)
 
@@ -489,14 +496,14 @@ def generate_reports(request):
 def export_users_csv(request):
     """Export User Statistics as CSV"""
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="users_report.csv"'
+    response["Content-Disposition"] = 'attachment; filename="anonymized_users.csv"'
 
     writer = csv.writer(response)
     writer.writerow(["Username", "Email", "Role", "Date Joined"])
 
     users = CustomUser.objects.all()
     for user in users:
-        writer.writerow([user.username, user.email, user.role, user.date_joined])
+        writer.writerow(["User ID", "Role", "Joined Date"])
 
     return response
 
@@ -945,6 +952,9 @@ def patient_dashboard(request):
     # Fetch upcoming appointments
     appointments = Appointment.objects.filter(patient=request.user, status="Confirmed").order_by("date", "time")
 
+    # Fetch unread notifications
+    notifications = Notification.objects.filter(user=request.user, is_read=False).order_by("-created_at")
+
     # Fetch past risk assessments
     risk_assessments = RiskAssessmentResult.objects.filter(user=request.user).order_by("-created_at")
 
@@ -960,6 +970,7 @@ def patient_dashboard(request):
 
     return render(request, "patient_dashboard.html", {
         "appointments": appointments,
+        "notifications": notifications,
         "risk_assessments": risk_assessments,
         "recommendations": recommendations,
         "labels": json.dumps(labels),
@@ -968,17 +979,6 @@ def patient_dashboard(request):
         "glucose": json.dumps(glucose),
         "bmi": json.dumps(bmi),
     })
-
-
-@login_required
-def health_reports_view(request):
-    latest_report = HealthReport.objects.filter(user=request.user).order_by("-assessment_date").first()
-    
-    context = {
-        "latest_report": latest_report
-    }
-    return render(request, "patient/health_reports.html", context)
-
 
 @login_required
 def doctor_consultation(request, appointment_id):
@@ -1027,16 +1027,13 @@ def patient_health_statistics(request):
         "bmi": json.dumps(bmi),
     })
 
-@login_required
-def health_report_list(request):
-    """List all health reports for a patient."""
-    
-    reports = HealthReport.objects.filter(user=request.user).order_by("-created_at")
-    return render(request, "patient/health_report_list.html", {"reports": reports})
 
-@login_required
-def health_report_detail(request, report_id):
-    """View details of a specific health report."""
-    
-    report = get_object_or_404(HealthReport, id=report_id, user=request.user)
-    return render(request, "patient/health_report_detail.html", {"report": report})
+
+def log_data_access(user, data_type, object_id, action="Viewed"):
+    DataAccessLog.objects.create(user=user, data_type=data_type, object_id=object_id, action=action)
+
+
+def notifications_view(request):
+    """Show user notifications"""
+    notifications = Notification.objects.filter(user=request.user, is_read=False)
+    return render(request, "notifications.html", {"notifications": notifications})

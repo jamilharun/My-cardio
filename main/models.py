@@ -3,6 +3,8 @@ from django.conf import settings
 from django.utils.timezone import now
 from django.db import models
 from django.templatetags.static import static
+from cryptography.fernet import Fernet
+from django.conf import settings
 # from django.contrib.auth import get_user_model
 
 # ER Diagram Representation
@@ -36,6 +38,62 @@ from django.templatetags.static import static
 # Create your models here.
 
 # User Roles Choices
+class EncryptedFieldMixin(models.Field):
+    """Mixin to encrypt and decrypt fields using Fernet encryption."""
+
+    def get_internal_type(self):
+        """Ensure Django treats this as a TextField."""
+        return "TextField"
+
+    def db_type(self, connection):
+        """Define database type for compatibility."""
+        return "text"  
+
+    def from_db_value(self, value, expression, connection):
+        """Decrypt when reading from the database"""
+        if value is None:
+            return None
+            
+        try:
+            f = Fernet(settings.FERNET_SECRET_KEY.encode())
+            return f.decrypt(value.encode()).decode()
+        except Exception:
+            return value
+
+    def get_prep_value(self, value):
+        """Encrypt before saving to the database"""
+        if value is None:
+            return None
+
+        f = Fernet(settings.FERNET_SECRET_KEY.encode())
+        return f.encrypt(value.encode()).decode()
+    
+    def to_python(self, value):
+        """Ensure the field can handle decrypted values correctly."""
+        if value is None:
+            return None
+        
+        if isinstance(value, str):
+            return value
+        return self.from_db_value(value, None, None)
+
+class EncryptedCharField(EncryptedFieldMixin, models.CharField):
+    """Encrypted CharField using Fernet encryption."""
+    def db_type(self, connection):
+        return super().db_type(connection)
+
+class EncryptedTextField(EncryptedFieldMixin, models.TextField):
+    """Encrypted TextField using Fernet encryption."""
+    def db_type(self, connection):
+        return super().db_type(connection)
+
+class EncryptedDecimalField(EncryptedFieldMixin, models.DecimalField):
+    """Encrypted DecimalField using Fernet encryption."""
+    def db_type(self, connection):
+        return super().db_type(connection) 
+
+
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, email, password=None, role="Patient"):
         if not email:
@@ -98,13 +156,18 @@ class UserProfile(models.Model):
         on_delete=models.CASCADE, 
         related_name="profile"
     )
-    profile_picture = models.ImageField(upload_to=user_profile_path, default="profile_pics/default.jpg", blank=True)
+    profile_picture = models.ImageField(
+        upload_to=user_profile_path, 
+        default="profile_pics/default.jpg", 
+        blank=True,
+        null=True)
+
     bio = models.TextField(blank=True, null=True)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
-    address = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = EncryptedCharField(max_length=15, blank=True, null=True)
+    address = EncryptedCharField(max_length=255, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True)
-    emergency_contact = models.CharField(max_length=15, blank=True, null=True)
+    emergency_contact = EncryptedCharField(max_length=15, blank=True, null=True)
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
@@ -119,9 +182,9 @@ class HealthHistory(models.Model):
     """Stores user’s past health assessments"""
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="health_history")
     assessment_date = models.DateTimeField(auto_now_add=True)
-    risk_score = models.DecimalField(max_digits=5, decimal_places=2, help_text="AI-generated risk score")
-    diagnosis = models.CharField(max_length=255, help_text="Health risk assessment result")
-    recommendations = models.TextField(blank=True, help_text="Suggested preventive actions")
+    risk_score = EncryptedDecimalField(max_digits=5, decimal_places=2, help_text="AI-generated risk score")
+    diagnosis = EncryptedCharField(max_length=255, help_text="Health risk assessment result")
+    recommendations = EncryptedTextField(blank=True, help_text="Suggested preventive actions")
     
     def __str__(self):
         return f"{self.user.username} - {self.assessment_date} - {self.diagnosis}"
@@ -236,17 +299,43 @@ class RiskAlert(models.Model):
     def __str__(self):
         return f"⚠ High Risk Alert - {self.patient.username} ({self.risk_assessment.risk_level})"
 
-class HealthReport(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="health_reports")
-    created_at = models.DateTimeField(default=now)
-    risk_level = models.CharField(max_length=10, choices=[("Low", "Low"), ("Medium", "Medium"), ("High", "High")])
-    risk_probability = models.FloatField(default=0)
-    blood_pressure = models.IntegerField(default=0)
-    cholesterol_level = models.FloatField(default=180)
-    glucose_level = models.FloatField(default=0)
-    bmi = models.FloatField(default=25)
-    recommendations = models.TextField(default='')
-    explanation = models.TextField(null=True, blank=True)
+# class HealthReport(models.Model):
+#     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="health_reports")
+#     created_at = models.DateTimeField(default=now)
+#     risk_level = models.CharField(max_length=10, choices=[("Low", "Low"), ("Medium", "Medium"), ("High", "High")])
+#     risk_probability = models.FloatField(default=0)
+#     blood_pressure = models.IntegerField(default=0)
+#     cholesterol_level = models.FloatField(default=180)
+#     glucose_level = models.FloatField(default=0)
+#     bmi = models.FloatField(default=25)
+#     recommendations = models.TextField(default='')
+#     explanation = models.TextField(null=True, blank=True)
+
+#     def __str__(self):
+#         return f"Health Report for {self.user.username} on {self.created_at.strftime('%Y-%m-%d')}"
+
+
+
+
+
+class DataAccessLog(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    accessed_at = models.DateTimeField(auto_now_add=True)
+    data_type = models.CharField(max_length=255)  # e.g., "Health Report"
+    object_id = models.IntegerField()
+    action = models.CharField(max_length=50)  # e.g., "Viewed", "Edited"
 
     def __str__(self):
-        return f"Health Report for {self.user.username} on {self.created_at.strftime('%Y-%m-%d')}"
+        return f"{self.user.username} accessed {self.data_type} (ID: {self.object_id}) on {self.accessed_at}"
+
+
+
+class Notification(models.Model):
+    """Stores notifications for users."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=now)
+
+    def __str__(self):
+        return f"Notification for {self.user.username}: {self.message}"
