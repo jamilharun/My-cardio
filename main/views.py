@@ -392,9 +392,6 @@ def doctor_dashboard(request):
         "low_risk_patients": low_risk_patients,
         "risk_alerts": risk_alerts,
         "appointments": appointments
-
-        "appointments": appointments
-
     })
 
 @login_required
