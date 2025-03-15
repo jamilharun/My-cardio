@@ -41,6 +41,11 @@
                     <td class="py-2 px-4 border-b max-w-xs truncate hover:whitespace-normal">
                         {{ result.explanation }}
                     </td>
+                    <td class="py-2 px-4 border-b">
+                        <a href="{% url 'export_report_pdf' result.id %}" class="bg-blue-500 text-white py-1 px-2 rounded-lg hover:bg-blue-600">
+                            Download PDF
+                        </a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -52,7 +57,7 @@
     {% endif %}
 </div>
 
-<div class="text-center mt-6">
+<!-- <div class="text-center mt-6">
     <a href="{% url 'health_risk' %}" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
         Back to Risk Assessment
     </a>
@@ -64,5 +69,5 @@
     {% else %}
     <p class="text-gray-600 mt-2">Here are your past health risk assessments.</p>
     {% endif %}
-</div>
+</div> -->
 {% endblock %}
