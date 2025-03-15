@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string 
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login, logout
@@ -20,6 +21,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 import csv
 from django.core.exceptions import PermissionDenied
+from weasyprint import HTML
 
 # debugging tool
 import logging
@@ -193,8 +195,6 @@ def health_risk_assessment(request):
             # Generate personalized health report
             report = generate_health_report(user_data, risk_result)
 
-            print(f"Generated Report: {report}") 
-
             explanation = generate_explanation(risk_result["risk_level"], risk_result["risk_probability"], user_data)
             sanitized_explanation = sanitize_text(explanation)
 
@@ -210,7 +210,8 @@ def health_risk_assessment(request):
                     risk_level=risk_result["risk_level"],
                     risk_probability=risk_result["risk_probability"],
                     explanation=explanation,
-                    recommendations=", ".join(recommendations)
+                    recommendations=", ".join(recommendations),
+                    bmi=user_data["bmi"]
                 )
             except UnicodeEncodeError as e:
                 logger.error(f"UnicodeEncodeError: {e}")
@@ -243,12 +244,26 @@ def export_report_pdf(request, report_id):
     # Fetch the report from the database
     report = RiskAssessmentResult.objects.get(id=report_id)
 
+    print(report.age)
+
+    recommendations = report.recommendations.split(", ")
+
     # Generate a static chart using Plotly
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=['January', 'February', 'March', 'April', 'May', 'June', 'July'],  # Example data
         y=[120, 125, 130, 128, 132, 135, 140],  # Example data
         name='Blood Pressure'
+    ))
+    fig.add_trace(go.Scatter(
+        x=['January', 'February', 'March', 'April', 'May', 'June', 'July'],  # Example data
+        y=[180, 190, 200, 195, 205, 210, 215],  # Example data
+        name='Cholesterol Level'
+    ))
+    fig.add_trace(go.Scatter(
+        x=['January', 'February', 'March', 'April', 'May', 'June', 'July'],  # Example data
+        y=[90, 95, 100, 105, 110, 115, 120],  # Example data
+        name='Glucose Level'
     ))
     fig.update_layout(title="Health Metrics Over Time", xaxis_title="Date", yaxis_title="Value")
     
@@ -261,7 +276,8 @@ def export_report_pdf(request, report_id):
     # Render the report as HTML
     html_string = render_to_string("report_pdf_template.html", {
         "report": report, 
-        "chart_image": chart_image
+        "chart_image": chart_image,
+        "recommendations": recommendations
     })
     
     # Convert HTML to PDF
@@ -889,11 +905,19 @@ def risk_alerts(request):
 @login_required
 def mark_alert_as_read(request, alert_id):
     """Doctor - Mark an Alert as Read"""
+
+    print(f"Logged-in doctor: {request.user.username}")
+    print(f"Attempting to mark alert {alert_id} as read.")
+
+    alert = get_object_or_404(RiskAlert, id=alert_id, doctor=request.user)
+
+    print(f"Alert found: {alert}")
     
-    alert = RiskAlert.objects.get(id=alert_id, doctor=request.user)
     alert.is_read = True
     alert.save()
 
+    print(f"Alert {alert_id} marked as read.")
+    
     return redirect("risk_alerts")
 
 

@@ -34,7 +34,7 @@
     <tbody>
         {% for assessment in assessments %}
         <tr class="text-center">
-            <td class="py-2 px-4 border">{{ assessment.patient.username }}</td>
+            <td class="py-2 px-4 border">{{ assessment.user }}</td>
             <td class="py-2 px-4 border {% if assessment.risk_level == 'High' %}text-red-600{% elif assessment.risk_level == 'Medium' %}text-yellow-600{% else %}text-green-600{% endif %}">
                 {{ assessment.risk_level }}
             </td>
