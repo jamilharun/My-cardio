@@ -9,7 +9,7 @@ from .views import (
     risk_trends, system_alerts, mark_alert_as_read, delete_alert, patient_list, patient_detail, export_patient_csv, export_patient_pdf,
     book_appointment,doctor_appointments, update_appointment_status, risk_alerts, mark_alert_as_read, patient_risk_chart, 
     assessment_detail, notifications_panel , mark_notification_as_read, patient_dashboard, doctor_consultation,
-    patient_health_statistics
+    patient_health_statistics,admin_create_appointment, patient_appointments, patient_appointment_detail
 )
 
 
@@ -49,6 +49,7 @@ urlpatterns = [
     path("admin-dashboard/system-alerts/", system_alerts, name="system_alerts"),
     path("admin-dashboard/mark-alert-as-read/<int:alert_id>/", mark_alert_as_read, name="mark_alert_as_read"),
     path("admin-dashboard/delete-alert/<int:alert_id>/", delete_alert, name="delete_alert"),
+    path("admin-dashboard/create_appointment/", admin_create_appointment, name="create_appointment"),
 
     # doctors
     path("doctor-dashboard/patients/", patient_list, name="patient_list"),
@@ -67,6 +68,8 @@ urlpatterns = [
 
     # patient
     path("patient-dashboard/", patient_dashboard, name="patient_dashboard"),
+    path("patient/appointments/", patient_appointments, name="patient_appointments"),
+    path("patient/appointments/<int:appointment_id>/", patient_appointment_detail, name="patient_appointment_detail"),
     path("patient/book-appointment/<int:doctor_id>/", book_appointment, name="book_appointment"),
     path("patient/patient-health-statistics/", patient_health_statistics, name="patient_health_statistics"),
 ]

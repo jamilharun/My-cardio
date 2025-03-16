@@ -1,0 +1,20 @@
+{% extends 'doctor_dashboard.html' %}
+{% block doctor_content %}
+<div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Consultation for Appointment on {{ appointment.date }}</h1>
+    <form method="post" class="bg-white p-6 rounded-lg shadow-md">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="id_consultation_notes">Consultation Notes</label>
+            {{ form.consultation_notes }}
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="id_status">Status</label>
+            {{ form.status }}
+        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            Save Consultation
+        </button>
+    </form>
+</div>
+{% endblock %}

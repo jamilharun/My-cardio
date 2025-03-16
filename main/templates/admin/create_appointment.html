@@ -1,11 +1,17 @@
-{% extends 'patient_dashboard.html' %}
-
-{% block patient_content %}
-
+{% extends 'admin_dashboard.html' %}
+{% block admin_content %}
 <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Book Appointment with Dr. {{ doctor.username }}</h1>
+    <h1 class="text-2xl font-bold mb-4">Create Appointment</h1>
     <form method="post" class="bg-white p-6 rounded-lg shadow-md">
         {% csrf_token %}
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="id_doctor">Doctor</label>
+            {{ form.doctor }}
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="id_patient">Patient</label>
+            {{ form.patient }}
+        </div>
         <div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="id_date">Date</label>
             {{ form.date }}
@@ -19,9 +25,8 @@
             {{ form.consultation_notes }}
         </div>
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-            Book Appointment
+            Create Appointment
         </button>
     </form>
 </div>
-
 {% endblock %}
