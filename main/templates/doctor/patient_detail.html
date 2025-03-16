@@ -77,7 +77,8 @@
 <ul class="mt-4">
     {% for rec in recommendations %}
     <li class="bg-gray-100 p-3 rounded-lg shadow-sm mt-2">
-        <strong>{{ rec.created_at|date:"Y-m-d" }}:</strong> {{ rec.recommendation_text }}
+        <strong>{{ rec.created_at|date:"Y-m-d" }}:</strong> 
+        <p>{{ rec.recommendation_text }}</p>
     </li>
     {% empty %}
     <li class="text-gray-500">No recommendations yet.</li>

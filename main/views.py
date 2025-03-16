@@ -8,7 +8,7 @@ from django.db.models.functions import TruncMonth
 from django.db.models import Count
 
 from .forms import (HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientForm, RoleUpdateForm, AppointmentForm, UserUpdateForm,
-                    ConsultationForm)
+                    ConsultationForm, RecommendationForm)
 from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report
 from .models import (RiskAssessmentResult, CustomUser, UserProfile, DoctorPatientAssignment, SystemAlert, Recommendation, Appointment,
                     RiskAlert, DataAccessLog, EncryptedFieldMixin, Notification)
@@ -19,6 +19,10 @@ from .utils import sanitize_text
 import json
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.units import inch
 import csv
 from django.core.exceptions import PermissionDenied
 from weasyprint import HTML
@@ -444,6 +448,18 @@ def unassign_patient(request, assignment_id):
 
     return render(request, "admin/unassign_patient.html", {"assignment": assignment})
 
+
+# @login_required
+# def doctor_assignments(request):
+#     """Doctor - View Assigned Patients"""
+#     if request.user.role != "doctor":
+#         return render(request, "error.html", {"message": "Access Denied: Only doctors can view assigned patients."})
+    
+#     # Get all assignments for the logged-in doctor
+#     assignments = DoctorPatientAssignment.objects.filter(doctor=request.user)
+    
+#     return render(request, "doctor/doctor_assignments.html", {"assignments": assignments})
+
 @login_required
 @user_passes_test(admin_required)
 def system_analytics(request):
@@ -749,7 +765,7 @@ def patient_detail(request, patient_id):
         return render(request, "error.html", {"message": "You are not assigned to this patient."})
 
     # Fetch patient's health history & past risk assessments
-    risk_assessments = RiskAssessment.objects.filter(user=patient).order_by("-created_at")
+    risk_assessments = RiskAssessmentResult.objects.filter(user=patient).order_by("-created_at")
 
     return render(request, "doctor/patient_detail.html", {
         "patient": patient,
@@ -769,13 +785,13 @@ def export_patient_csv(request, patient_id):
     response["Content-Disposition"] = f'attachment; filename="{patient.username}_report.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(["Patient Name", "Email", "Age", "Gender"])
-    writer.writerow([patient.username, patient.email, patient.age, patient.gender])
+    writer.writerow(["Patient Name", "Email"])
+    writer.writerow([patient.username, patient.email])
 
     writer.writerow([])  # Empty row
     writer.writerow(["Date", "Risk Level", "Explanation"])
 
-    risk_assessments = RiskAssessment.objects.filter(user=patient).order_by("-created_at")
+    risk_assessments = RiskAssessmentResult.objects.filter(user=patient).order_by("-created_at")
     for assessment in risk_assessments:
         writer.writerow([assessment.created_at.strftime("%Y-%m-%d"), assessment.risk_level, assessment.explanation])
 
@@ -790,32 +806,66 @@ def export_patient_pdf(request, patient_id):
     if not DoctorPatientAssignment.objects.filter(doctor=request.user, patient=patient).exists():
         return render(request, "error.html", {"message": "Access Denied: You are not assigned to this patient."})
 
+    # Create a BytesIO buffer for the PDF
+    buffer = BytesIO()
+
+    # Create the PDF object
+    pdf = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=inch,
+        leftMargin=inch,
+        topMargin=inch,
+        bottomMargin=inch,
+    )
+
+    # Container for the PDF content
+    elements = []
+
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = styles["Title"]
+    heading_style = styles["Heading2"]
+    body_style = styles["BodyText"]
+
+    # Add title
+    elements.append(Paragraph(f"Patient Report: {patient.username}", title_style))
+    elements.append(Spacer(1, 12))  # Add space after title
+
+    # Add patient details
+    elements.append(Paragraph(f"<b>Email:</b> {patient.email}", body_style))
+    elements.append(Spacer(1, 12))  # Add space after email
+
+    # Add risk assessments section
+    elements.append(Paragraph("Risk Assessments:", heading_style))
+    elements.append(Spacer(1, 12))  # Add space after heading
+
+    # Fetch risk assessments
+    risk_assessments = RiskAssessmentResult.objects.filter(user=patient).order_by("-created_at")
+
+    # Add risk assessments to the PDF
+    for assessment in risk_assessments:
+        # Format the assessment details
+        assessment_text = (
+            f"<b>Date:</b> {assessment.created_at.strftime('%Y-%m-%d')}<br/>"
+            f"<b>Risk Level:</b> {assessment.risk_level}<br/>"
+            f"<b>Explanation:</b> {assessment.explanation}"
+        )
+        elements.append(Paragraph(assessment_text, body_style))
+        elements.append(Spacer(1, 12))  # Add space between assessments
+
+    # Build the PDF
+    pdf.build(elements)
+
+    # Get the value of the BytesIO buffer and write it to the response
+    pdf_data = buffer.getvalue()
+    buffer.close()
+
+    # Create the HttpResponse object with the PDF data
     response = HttpResponse(content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{patient.username}_report.pdf"'
+    response.write(pdf_data)
 
-    pdf = canvas.Canvas(response, pagesize=letter)
-    pdf.setFont("Helvetica", 12)
-
-    pdf.drawString(100, 750, f"Patient Report: {patient.username}")
-    pdf.drawString(100, 730, f"Email: {patient.email}")
-    pdf.drawString(100, 710, f"Age: {patient.age}")
-    pdf.drawString(100, 690, f"Gender: {patient.gender}")
-
-    y = 670  # Position for risk assessments
-    pdf.drawString(100, y, "Risk Assessments:")
-    y -= 20
-
-    risk_assessments = RiskAssessment.objects.filter(user=patient).order_by("-created_at")
-    for assessment in risk_assessments:
-        pdf.drawString(100, y, f"{assessment.created_at.strftime('%Y-%m-%d')} - {assessment.risk_level}: {assessment.explanation}")
-        y -= 20
-        if y < 100:  # Move to next page if needed
-            pdf.showPage()
-            pdf.setFont("Helvetica", 12)
-            y = 750
-
-    pdf.showPage()
-    pdf.save()
     return response
 
 
@@ -827,37 +877,57 @@ def patient_detail(request, patient_id):
         return render(request, "error.html", {"message": "Access Denied: Only doctors can view patient records."})
 
     # Fetch patient details & ensure they are assigned to this doctor
-    patient = get_object_or_404(CustomUser, id=patient_id, role="Patient")
-    assignment = DoctorPatientAssignment.objects.filter(doctor=request.user, patient=patient).exists()
-
-    if not assignment:
-        return render(request, "error.html", {"message": "You are not assigned to this patient."})
-
-    # Fetch patient's health history & past risk assessments
-    risk_assessments = RiskAssessmentResult.objects.filter(user=patient).order_by("-created_at")
-    recommendations = Recommendation.objects.filter(patient=patient, doctor=request.user).order_by("-created_at")
-
-    # Handle recommendation submission
-    if request.method == "POST":
-        form = RecommendationForm(request.POST)
-        if form.is_valid():
-            recommendation = form.save(commit=False)
-            recommendation.doctor = request.user
-            recommendation.patient = patient
-            latest_assessment = risk_assessments.first()  # Link to most recent assessment
-            recommendation.risk_assessment = latest_assessment
-            recommendation.save()
-            messages.success(request, "Recommendation added successfully!")
-            return redirect("patient_detail", patient_id=patient.id)
-    else:
-        form = RecommendationForm()
-
-    return render(request, "doctor/patient_detail.html", {
-        "patient": patient,
-        "risk_assessments": risk_assessments,
-        "recommendations": recommendations,
-        "form": form,
-    })
+    try:
+        # Add debugging to see what's being looked for
+        print(f"Looking for patient with ID: {patient_id}")
+        
+        # Check if role is case-sensitive
+        patient = get_object_or_404(CustomUser, id=patient_id)
+        print(f"Found patient: {patient.username}, Role: {patient.role}")
+        
+        # Make sure the role check isn't case sensitive 
+        if patient.role.lower() != "patient":
+            return render(request, "error.html", {"message": "Invalid patient record requested."})
+            
+        # Check assignment
+        assignment = DoctorPatientAssignment.objects.filter(doctor=request.user, patient=patient).exists()
+        
+        if not assignment:
+            return render(request, "error.html", {"message": "You are not assigned to this patient."})
+            
+        # Fetch patient's health history & past risk assessments
+        risk_assessments = RiskAssessmentResult.objects.filter(user=patient).order_by("-created_at")
+        recommendations = Recommendation.objects.filter(patient=patient, doctor=request.user).order_by("-created_at")
+    
+        # Handle recommendation submission
+        if request.method == "POST":
+            form = RecommendationForm(request.POST)
+            if form.is_valid():
+                recommendation = form.save(commit=False)
+                recommendation.doctor = request.user
+                recommendation.patient = patient
+                
+                # Get the latest assessment's associated risk assessment object
+                latest_assessment = risk_assessments.first()
+                if latest_assessment:
+                    recommendation.risk_assessment = latest_assessment
+                    
+                recommendation.save()
+                messages.success(request, "Recommendation added successfully!")
+                return redirect("patient_detail", patient_id=patient.id)
+        else:
+            form = RecommendationForm()
+    
+        return render(request, "doctor/patient_detail.html", {
+            "patient": patient,
+            "risk_assessments": risk_assessments,
+            "recommendations": recommendations,
+            "form": form,
+        })
+        
+    except Exception as e:
+        print(f"Error in patient_detail: {str(e)}")
+        return render(request, "error.html", {"message": f"Error loading patient details: {str(e)}"})
 
 
 @login_required
@@ -951,8 +1021,8 @@ def patient_risk_chart(request, patient_id):
         return render(request, "error.html", {"message": "Access Denied: Only doctors can view risk charts."})
 
     # Fetch patient details & risk assessments
-    patient = get_object_or_404(CustomUser, id=patient_id, role="Patient")
-    risk_assessments = RiskAssessment.objects.filter(user=patient).order_by("created_at")
+    patient = get_object_or_404(CustomUser, id=patient_id, role="patient")
+    risk_assessments = RiskAssessmentResult.objects.filter(user=patient).order_by("created_at")
 
     # Prepare data for Chart.js
     labels = [ra.created_at.strftime("%Y-%m-%d") for ra in risk_assessments]
