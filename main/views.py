@@ -381,19 +381,28 @@ def doctor_dashboard(request):
     """Doctor Dashboard Overview"""
     appointments = Appointment.objects.filter(doctor=request.user).order_by("-date")
 
-    total_patients = CustomUser.objects.filter(role="patient").count()
-    high_risk_patients = RiskAssessmentResult.objects.filter(risk_level="High").count()
-    low_risk_patients = RiskAssessmentResult.objects.filter(risk_level="Low").count()
+    # Fetch patients assigned to the logged-in doctor
+    assigned_patients = DoctorPatientAssignment.objects.filter(doctor=request.user).values_list("patient", flat=True)
 
-    risk_alerts = ["Patient John Doe has a high risk of cardiovascular disease!"]
+     # Count total patients assigned to the doctor
+    total_patients = CustomUser.objects.filter(id__in=assigned_patients, role="patient").count()
+
+    # Fetch risk assessments for the assigned patients
+    high_risk_patients = RiskAssessmentResult.objects.filter(
+        user__in=assigned_patients, risk_level="High"
+    ).count()
+    low_risk_patients = RiskAssessmentResult.objects.filter(
+        user__in=assigned_patients, risk_level="Low"
+    ).count()
+
+    risk_alerts = RiskAlert.objects.filter(doctor=request.user, is_read=False).order_by("-created_at")
 
     return render(request, "doctor_dashboard.html", {
         "total_patients": total_patients,
         "high_risk_patients": high_risk_patients,
         "low_risk_patients": low_risk_patients,
         "risk_alerts": risk_alerts,
-        "appointments": appointments
-
+        "appointments": appointments,
     })
 
 @login_required
