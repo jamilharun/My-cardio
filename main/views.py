@@ -672,7 +672,6 @@ def delete_alert(request, alert_id):
     messages.success(request, "Alert deleted successfully.")
     return redirect("system_alerts")
 
-
 @login_required
 def patient_list(request):
     """Doctor - View & Search Assigned Patients"""
@@ -688,29 +687,51 @@ def patient_list(request):
     search_query = request.GET.get("search", "").strip()
     age_filter = request.GET.get("age", "").strip()
     risk_level_filter = request.GET.get("risk_level", "")
-
-    # Apply search filter (by name)
-    if search_query:
-        patients = [p for p in patients if search_query.lower() in p.username.lower()]
-
-    # Apply age filter (exact match)
-    if age_filter:
-        patients = [p for p in patients if str(p.age) == age_filter]
-
-    # Apply risk level filter (only patients with risk assessments)
-    if risk_level_filter:
-        filtered_patients = []
-        for patient in patients:
-            latest_assessment = patient.risk_assessments.order_by("-created_at").first()
-            if latest_assessment and latest_assessment.risk_level == risk_level_filter:
-                filtered_patients.append(patient)
-        patients = filtered_patients
+    
+    # Dictionary to store latest assessment for each patient
+    patient_assessments = {}
+    filtered_patients = []
+    
+    # Process each patient
+    for patient in patients:
+        # Get the latest risk assessment for this patient
+        assessment = RiskAssessmentResult.objects.filter(
+            user=patient  # Using user instead of patient based on your code
+        ).order_by("-created_at").first()
+        
+        # Store the assessment in our dictionary
+        patient_assessments[patient.id] = assessment
+        
+        # Skip filtering if no filters are applied
+        if not search_query and not age_filter and not risk_level_filter:
+            filtered_patients.append(patient)
+            continue
+            
+        # Name search filter
+        if search_query and search_query.lower() not in patient.username.lower():
+            continue
+            
+        # Skip age and risk level filters if patient has no assessment
+        if (age_filter or risk_level_filter) and not assessment:
+            continue
+            
+        # Age filter (if specified)
+        if age_filter and assessment and str(assessment.age) != age_filter:
+            continue
+            
+        # Risk level filter (if specified)
+        if risk_level_filter and assessment and assessment.risk_level != risk_level_filter:
+            continue
+            
+        # If we get here, the patient passed all applied filters
+        filtered_patients.append(patient)
 
     return render(request, "doctor/patient_list.html", {
-        "patients": patients,
+        "patients": filtered_patients,
         "search_query": search_query,
         "age_filter": age_filter,
-        "risk_level_filter": risk_level_filter
+        "risk_level_filter": risk_level_filter,
+        "patient_assessments": patient_assessments,  # Pass the dictionary of assessments
     })
 
 @login_required

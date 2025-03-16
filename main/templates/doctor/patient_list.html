@@ -1,4 +1,7 @@
 {% extends 'doctor_dashboard.html' %}
+
+{% load custom_filters %}
+
 {% block doctor_content %}
 
 <h1 class="text-3xl font-bold text-blue-600 text-center">👨‍⚕️ My Patients</h1>
@@ -41,16 +44,24 @@
         {% for patient in patients %}
         <tr class="text-center">
             <td class="py-2 px-4 border">{{ patient.username }}</td>
-            <td class="py-2 px-4 border">{{ patient.age }}</td>
+            <td class="py-2 px-4 border">
+                {% with assessment=patient_assessments|get_item:patient.id %}
+                    {% if assessment %}
+                        {{ assessment.age }}
+                    {% else %}
+                        <span class="text-gray-500">N/A</span>
+                    {% endif %}
+                {% endwith %}
+            </td>
             <td class="py-2 px-4 border">{{ patient.email }}</td>
             <td class="py-2 px-4 border">
-                {% with assessment=patient.risk_assessments.last %}
+                {% with assessment=patient_assessments|get_item:patient.id %}
                     {% if assessment %}
                         {% if assessment.risk_level == 'High' %}
                             <span class="text-red-600">
                         {% elif assessment.risk_level == 'Medium' %}
                             <span class="text-yellow-600">
-                        {% else %}
+                        {% else %}  
                             <span class="text-green-600">
                         {% endif %}
                             {{ assessment.risk_level }} ({{ assessment.created_at|date:"Y-m-d" }})
@@ -68,7 +79,7 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="4" class="py-2 px-4 border text-center text-gray-500">No patients found.</td>
+            <td colspan="5" class="py-2 px-4 border text-center text-gray-500">No patients found.</td>
         </tr>
         {% endfor %}
     </tbody>
