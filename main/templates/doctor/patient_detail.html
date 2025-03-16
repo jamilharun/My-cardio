@@ -10,8 +10,6 @@
 <div class="bg-white p-6 shadow-lg rounded-lg mt-6">
     <h2 class="text-2xl font-semibold">{{ patient.username }}</h2>
     <p class="text-gray-700 mt-2"><strong>Email:</strong> {{ patient.email }}</p>
-    <p class="text-gray-700"><strong>Age:</strong> {{ patient.age }}</p>
-    <p class="text-gray-700"><strong>Gender:</strong> {{ patient.gender }}</p>
 </div>
 
 <!-- 📥 Export Buttons -->
@@ -77,7 +75,8 @@
 <ul class="mt-4">
     {% for rec in recommendations %}
     <li class="bg-gray-100 p-3 rounded-lg shadow-sm mt-2">
-        <strong>{{ rec.created_at|date:"Y-m-d" }}:</strong> {{ rec.recommendation_text }}
+        <strong>{{ rec.created_at|date:"Y-m-d" }}:</strong> 
+        <p>{{ rec.recommendation_text }}</p>
     </li>
     {% empty %}
     <li class="text-gray-500">No recommendations yet.</li>
