@@ -62,7 +62,7 @@ This checklist outlines the key tasks required to develop the **Web-Based Health
 - ✅ 📑 **Health Report Section** → See details of each assessment
 - ✅ 🔔 **Notifications Panel** → Alert for high-risk patients
 
-### [ ] Develop an **Admin Dashboard** for user management
+### ✅ Develop an **Admin Dashboard** for user management
 
 ### **🔹 Dashboard Features**
 
