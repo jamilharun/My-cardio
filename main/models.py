@@ -5,6 +5,8 @@ from django.db import models
 from django.templatetags.static import static
 from cryptography.fernet import Fernet
 from django.conf import settings
+from django.http import JsonResponse
+
 # from django.contrib.auth import get_user_model
 
 # ER Diagram Representation
@@ -323,3 +325,4 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message}"
+

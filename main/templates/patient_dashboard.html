@@ -18,11 +18,11 @@
         <h1 class="text-xl font-bold text-center py-4 border-b border-gray-600">Dashboard</h1>
 
         <!-- 🔔 Notifications Section -->
-        <div class="p-4 bg-gray-100 border-b border-gray-300">
-            <h2 class="text-lg font-semibold text-gray-700">🔔 Notifications</h2>
-            <ul class="mt-2">
-                {% for notification in notifications %}
-                    <li class="bg-white p-3 rounded-lg shadow-sm mt-2 border border-blue-300">
+        {% with request.resolver_match.url_name as url_name %}
+        <ul class="mt-2">
+            {% for notification in notifications %}
+                <li class="bg-white p-3 rounded-lg shadow-sm mt-2 border border-blue-300">
+                    <a href="{% url 'mark_notification_as_read_patient' notification.id %}" class="block">
                         <p class="text-black">📢 {{ notification.message }}</p>
                         <small class="text-gray-500 block">{{ notification.created_at|date:"Y-m-d H:i" }}</small>
                     </li>

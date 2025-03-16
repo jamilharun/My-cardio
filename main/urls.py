@@ -9,7 +9,7 @@ from .views import (
     risk_trends, system_alerts, mark_alert_as_read, delete_alert, patient_list, patient_detail, export_patient_csv, export_patient_pdf,
     book_appointment,doctor_appointments, update_appointment_status, risk_alerts, mark_alert_as_read, patient_risk_chart, 
     assessment_detail, notifications_panel , mark_notification_as_read, patient_dashboard, doctor_consultation,
-    patient_health_statistics,admin_create_appointment, patient_appointments, patient_appointment_detail
+    patient_health_statistics,admin_create_appointment, patient_appointments, patient_appointment_detail, mark_notification_as_read_patient
 )
 
 
@@ -26,6 +26,7 @@ urlpatterns = [
     path("assessment/<int:assessment_id>/", assessment_detail, name="assessment_detail"),
     path("consultation/<int:appointment_id>/", doctor_consultation, name="doctor_consultation"),
     path("doctor-dashboard/", doctor_dashboard, name="doctor_dashboard"),
+    path("notifications/mark-as-read/<int:notification_id>/", mark_notification_as_read_patient, name="mark_notification_as_read_patient"),
     
     # dashboard roles admin
     path("admin-dashboard/", admin_dashboard, name="admin_dashboard"),
