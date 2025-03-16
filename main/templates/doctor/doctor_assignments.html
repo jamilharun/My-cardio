@@ -1,0 +1,39 @@
+{% extends 'doctor_dashboard.html' %}
+
+{% block doctor_content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">My Assigned Patients</h1>
+    
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full">
+            <thead>
+                <tr class="bg-gray-100 text-gray-600 uppercase text-sm">
+                    <th class="py-3 px-6 text-left">Patient Name</th>
+                    <th class="py-3 px-6 text-left">Assignment Date</th>
+                    <th class="py-3 px-6 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-600">
+                {% for assignment in assignments %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-4 px-6">{{ assignment.patient.username }}</td>
+                    <td class="py-4 px-6">{{ assignment.assigned_at|date:"Y-m-d" }}</td>
+                    <td class="py-4 px-6">
+                        <a href="{% url 'patient_detail' assignment.patient.id %}" 
+                           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            View Details
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="py-4 px-6 text-center text-gray-500">
+                        No patients have been assigned to you yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

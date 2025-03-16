@@ -215,22 +215,6 @@ class DoctorPatientAssignment(models.Model):
     def __str__(self):
         return f"{self.patient.username} → {self.doctor.username}"
 
-class RiskAssessment(models.Model):
-    RISK_LEVEL_CHOICES = [
-        ("Low", "Low"),
-        ("Medium", "Medium"),
-        ("High", "High"),
-    ]
-
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="risk_assessments")
-    risk_level = models.CharField(max_length=10, choices=RISK_LEVEL_CHOICES)
-    risk_probability = models.FloatField()  # AI model confidence score
-    assessment_date = models.DateTimeField(auto_now_add=True)  # Timestamp
-    notes = models.TextField(blank=True, null=True)  # Optional notes from doctors
-
-    def __str__(self):
-        return f"{self.user.username} - {self.risk_level} Risk ({self.risk_probability:.2f})"
-
 class SystemAlert(models.Model):
     ALERT_TYPES = [
         ("Security", "Security"),
@@ -263,7 +247,7 @@ class DoctorPatientAssignment(models.Model):
 class Recommendation(models.Model):
     doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="doctor_recommendations")
     patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="patient_recommendations")
-    risk_assessment = models.ForeignKey(RiskAssessment, on_delete=models.CASCADE, null=True, blank=True)
+    risk_assessment = models.ForeignKey(RiskAssessmentResult, on_delete=models.CASCADE, null=True, blank=True)
     recommendation_text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -292,27 +276,27 @@ class Appointment(models.Model):
 class RiskAlert(models.Model):
     doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="risk_alerts")
     patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="patient_alerts")
-    risk_assessment = models.ForeignKey(RiskAssessment, on_delete=models.CASCADE)
+    risk_assessment = models.ForeignKey(RiskAssessmentResult, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=now)
     is_read = models.BooleanField(default=False)  # Mark as read when viewed
 
     def __str__(self):
         return f"⚠ High Risk Alert - {self.patient.username} ({self.risk_assessment.risk_level})"
 
-# class HealthReport(models.Model):
-#     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="health_reports")
-#     created_at = models.DateTimeField(default=now)
-#     risk_level = models.CharField(max_length=10, choices=[("Low", "Low"), ("Medium", "Medium"), ("High", "High")])
-#     risk_probability = models.FloatField(default=0)
-#     blood_pressure = models.IntegerField(default=0)
-#     cholesterol_level = models.FloatField(default=180)
-#     glucose_level = models.FloatField(default=0)
-#     bmi = models.FloatField(default=25)
-#     recommendations = models.TextField(default='')
-#     explanation = models.TextField(null=True, blank=True)
+class HealthReport(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="health_reports")
+    created_at = models.DateTimeField(default=now)
+    risk_level = models.CharField(max_length=10, choices=[("Low", "Low"), ("Medium", "Medium"), ("High", "High")])
+    risk_probability = models.FloatField(default=0)
+    blood_pressure = models.IntegerField(default=0)
+    cholesterol_level = models.FloatField(default=180)
+    glucose_level = models.FloatField(default=0)
+    bmi = models.FloatField(default=25)
+    recommendations = models.TextField(default='')
+    explanation = models.TextField(null=True, blank=True)
 
-#     def __str__(self):
-#         return f"Health Report for {self.user.username} on {self.created_at.strftime('%Y-%m-%d')}"
+    def __str__(self):
+        return f"Health Report for {self.user.username} on {self.created_at.strftime('%Y-%m-%d')}"
 
 
 

@@ -62,6 +62,7 @@ urlpatterns = [
     path("doctor-dashboard/mark-alert-as-read/<int:alert_id>/", mark_alert_as_read, name="mark_alert_as_read"),
     path("doctor-dashboard/notifications/", notifications_panel, name="notifications_panel"),
     path("doctor-dashboard/mark-notification/<int:alert_id>/", mark_notification_as_read, name="mark_notification_as_read"),
+    # path('doctor-dashboard/assignments/', doctor_assignments, name='doctor_assignments'),
     
 
     # patient

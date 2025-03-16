@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save, post_migrate
 from django.dispatch import receiver
-from .models import UserProfile, CustomUser, HealthHistory, RiskAssessment, SystemAlert, Appointment, DoctorPatientAssignment
+from .models import UserProfile, CustomUser, HealthHistory, RiskAssessmentResult, SystemAlert, Appointment, DoctorPatientAssignment
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
@@ -69,7 +69,7 @@ def user_created_alert(sender, instance, created, **kwargs):
             alert_type="User"
         )
 
-@receiver(post_save, sender=RiskAssessment)
+@receiver(post_save, sender=RiskAssessmentResult)
 def high_risk_alert(sender, instance, created, **kwargs):
     """Create an alert when a high-risk assessment is made"""
     if created and instance.risk_level == "High":
@@ -79,10 +79,10 @@ def high_risk_alert(sender, instance, created, **kwargs):
             alert_type="Risk"
         )
 
-@receiver(post_save, sender=RiskAssessment)
+@receiver(post_save, sender=RiskAssessmentResult)
 def create_risk_alert(sender, instance, created, **kwargs):
     """Automatically create an alert when a high-risk patient is identified"""
-    print(f"Signal triggered for RiskAssessment ID: {instance.id}, Created: {created}, Risk Level: {instance.risk_level}")
+    print(f"Signal triggered for RiskAssessmentResult ID: {instance.id}, Created: {created}, Risk Level: {instance.risk_level}")
 
     if created and instance.risk_level == "High":
         # Find the assigned doctor
