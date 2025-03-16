@@ -16,7 +16,7 @@
                 <li><a href="{% url 'view_assessments' %}" class="block py-2 px-4 rounded {% if url_name == 'view_assessments' %}bg-blue-700{% endif %}">View Risk Assessments</a></li>
                 <li><a href="{% url 'manage_roles' %}" class="block py-2 px-4 rounded {% if url_name == 'manage_roles' %}bg-blue-700{% endif %}">Security & Permissions</a></li>
                 <li><a href="{% url 'generate_reports' %}" class="block py-2 px-4 rounded {% if url_name == 'generate_reports' %}bg-blue-700{% endif %}">Generate Reports</a></li>
-                <!-- <li><a href="#" class="block py-2 px-4 rounded {% if url_name == 'manage_users' %}bg-blue-700{% endif %}">AI Model Settings</a></li> -->
+                <li><a href="{% url 'create_appointment' %}" class="block py-2 px-4 rounded {% if url_name == 'create_appointment' %}bg-blue-700{% endif %}">Create Appointment</a></li>
                 <li><a href="{% url 'system_alerts' %}" class="block py-2 px-4 rounded {% if url_name == 'system_alerts' %}bg-blue-700{% endif %}">System Alerts</a></li>
                 
             </ul>

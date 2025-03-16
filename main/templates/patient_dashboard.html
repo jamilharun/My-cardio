@@ -23,7 +23,7 @@
             <ul class="mt-2">
                 {% for notification in notifications %}
                     <li class="bg-white p-3 rounded-lg shadow-sm mt-2 border border-blue-300">
-                        📢 {{ notification.message }}
+                        <p class="text-black">📢 {{ notification.message }}</p>
                         <small class="text-gray-500 block">{{ notification.created_at|date:"Y-m-d H:i" }}</small>
                     </li>
                 {% empty %}
@@ -35,6 +35,7 @@
         {% with request.resolver_match.url_name as url_name %}
         <ul class="space-y-4">
             <li><a href="{% url 'patient_dashboard' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_dashboard' %}bg-blue-700{% endif %}">🏠 Overview</a></li>
+            <li><a href="{% url 'patient_appointments' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_appointments' %}bg-blue-700{% endif %}">🏠 Appointments</a></li>
             <li><a href="{% url 'health_risk' %}" class="block py-2 px-4 bg-yellow-400 text-black font-bold rounded-lg shadow-lg hover:bg-yellow-500">🩺 Take Risk Assessment</a></li>
             <li><a href="{% url 'health_risk_history' %}" class="block py-2 px-4 rounded {% if url_name == 'health_risk_history' %}bg-blue-700{% endif %}">📋 Health Risk History</a></li>
             <li><a href="{% url 'patient_health_statistics' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_health_statistics' %}bg-blue-700{% endif %}">📊 Health Statistics</a></li>

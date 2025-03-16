@@ -944,7 +944,6 @@ def patient_detail(request, patient_id):
 @login_required
 def book_appointment(request, doctor_id):
     """Patient - Book an Appointment with a Doctor"""
-    
     doctor = get_object_or_404(CustomUser, id=doctor_id, role="doctor")
 
     # Ensure the patient is assigned to this doctor
@@ -952,18 +951,17 @@ def book_appointment(request, doctor_id):
         return render(request, "error.html", {"message": "Access Denied: You are not assigned to this doctor."})
 
     if request.method == "POST":
-        form = AppointmentForm(request.POST)
+        form = AppointmentForm(request.POST, is_admin=False)  # Use the form without doctor/patient fields
         if form.is_valid():
             appointment = form.save(commit=False)
             appointment.doctor = doctor
             appointment.patient = request.user
-            appointment.status = "Pending"  # Default status
+            appointment.status = "Pending"  # Default status for patient-created appointments
             appointment.save()
             messages.success(request, "Appointment request sent successfully!")
             return redirect("patient_dashboard")
-
     else:
-        form = AppointmentForm()
+        form = AppointmentForm(is_admin=False)  # Use the form without doctor/patient fields
 
     return render(request, "patient/book_appointment.html", {
         "form": form,
@@ -982,6 +980,23 @@ def doctor_appointments(request):
     return render(request, "doctor/appointments.html", {"appointments": appointments})
 
 @login_required
+def patient_appointments(request):
+    """Patient - View and Manage Appointments"""
+    
+    if request.user.role != "patient":
+        return render(request, "error.html", {"message": "Access Denied: Only patient can manage appointments."})
+
+    appointments = Appointment.objects.filter(patient=request.user).order_by("-date", "-time")
+
+    return render(request, "patient/appointments.html", {"appointments": appointments})
+
+@login_required
+def patient_appointment_detail(request, appointment_id):
+    """Patient - View Detailed Information About an Appointment"""
+    appointment = get_object_or_404(Appointment, id=appointment_id, patient=request.user)
+    return render(request, "patient/appointment_detail.html", {"appointment": appointment})
+
+@login_required
 def update_appointment_status(request, appointment_id, status):
     """Doctor - Approve, Cancel, or Reschedule an Appointment"""
     
@@ -992,6 +1007,22 @@ def update_appointment_status(request, appointment_id, status):
     messages.success(request, f"Appointment {status.lower()} successfully!")
     return redirect("doctor_appointments")
 
+@login_required
+@user_passes_test(admin_required)  # Ensure only admins can access this view
+def admin_create_appointment(request):
+    """Admin - Create an Appointment for a Doctor and Patient"""
+    if request.method == "POST":
+        form = AppointmentForm(request.POST, is_admin=True)  # Use the form with doctor/patient fields
+        if form.is_valid():
+            appointment = form.save(commit=False)
+            appointment.status = "Confirmed"  # Default status for admin-created appointments
+            appointment.save()
+            messages.success(request, "Appointment created successfully!")
+            return redirect("admin_dashboard")  # Redirect to admin dashboard or another appropriate page
+    else:
+        form = AppointmentForm(is_admin=True)  # Use the form with doctor/patient fields
+
+    return render(request, "admin/create_appointment.html", {"form": form})
 
 @login_required
 def risk_alerts(request):

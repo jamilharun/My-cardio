@@ -89,12 +89,28 @@ class RecommendationForm(forms.ModelForm):
         }
 
 class AppointmentForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.is_admin = kwargs.pop("is_admin", False)  # Check if the user is an admin
+        super().__init__(*args, **kwargs)
+
+        # Add doctor and patient fields for admins
+        if self.is_admin:
+            self.fields["doctor"] = forms.ModelChoiceField(
+                queryset=CustomUser.objects.filter(role="doctor"),
+                widget=forms.Select(attrs={"class": "border p-2 w-full rounded-lg"})
+            )
+            self.fields["patient"] = forms.ModelChoiceField(
+                queryset=CustomUser.objects.filter(role="patient"),
+                widget=forms.Select(attrs={"class": "border p-2 w-full rounded-lg"})
+            )
+
     class Meta:
         model = Appointment
-        fields = ["date", "time"]
+        fields = ["doctor", "patient", "date", "time", "consultation_notes"]
         widgets = {
             "date": forms.DateInput(attrs={"type": "date", "class": "border p-2 w-full rounded-lg"}),
-            "time": forms.TimeInput(attrs={"type": "time", "class": "border p-2 w-full rounded-lg"})
+            "time": forms.TimeInput(attrs={"type": "time", "class": "border p-2 w-full rounded-lg"}),
+            "consultation_notes": forms.Textarea(attrs={"class": "border p-2 w-full rounded-lg", "rows": 4}),
         }
 
 class ConsultationForm(forms.ModelForm):
