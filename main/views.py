@@ -1196,3 +1196,15 @@ def notifications_view(request):
     """Show user notifications"""
     notifications = Notification.objects.filter(user=request.user, is_read=False)
     return render(request, "notifications.html", {"notifications": notifications})
+
+
+@login_required
+def mark_notification_as_read_patient(request, notification_id):
+    """Mark a notification as read."""
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notification.is_read = True
+    notification.save()
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({"status": "success"})
+    return redirect("patient_appointments")

@@ -18,22 +18,20 @@
         <h1 class="text-xl font-bold text-center py-4 border-b border-gray-600">Dashboard</h1>
 
         <!-- 🔔 Notifications Section -->
-        <div class="p-4 bg-gray-100 border-b border-gray-300">
-            <h2 class="text-lg font-semibold text-gray-700">🔔 Notifications</h2>
-            <ul class="mt-2">
-                {% for notification in notifications %}
-                    <li class="bg-white p-3 rounded-lg shadow-sm mt-2 border border-blue-300">
+        {% with request.resolver_match.url_name as url_name %}
+        <ul class="mt-2">
+            {% for notification in notifications %}
+                <li class="bg-white p-3 rounded-lg shadow-sm mt-2 border border-blue-300">
+                    <a href="{% url 'mark_notification_as_read_patient' notification.id %}" class="block">
                         <p class="text-black">📢 {{ notification.message }}</p>
                         <small class="text-gray-500 block">{{ notification.created_at|date:"Y-m-d H:i" }}</small>
-                    </li>
-                {% empty %}
-                    <li class="text-gray-500">No new notifications.</li>
-                {% endfor %}
-            </ul>
-        </div>
-        patient_appointments
-
-        {% with request.resolver_match.url_name as url_name %}
+                    </a>
+                </li>
+            {% empty %}
+                <li class="text-gray-500">No new notifications.</li>
+            {% endfor %}
+        </ul>
+        
         <ul class="space-y-4">
             <li><a href="{% url 'patient_dashboard' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_dashboard' %}bg-blue-700{% endif %}">🏠 Overview</a></li>
             <li><a href="{% url 'patient_appointments' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_appointments' %}bg-blue-700{% endif %}">🏠 Appointments</a></li>
@@ -120,5 +118,33 @@
 </div>
 
 
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const notificationLinks = document.querySelectorAll(".mark-as-read");
+    
+        notificationLinks.forEach(link => {
+            link.addEventListener("click", function(event) {
+                event.preventDefault();  // Prevent the default link behavior
+    
+                const notificationId = link.getAttribute("data-notification-id");
+    
+                // Send an AJAX request to mark the notification as read
+                fetch(`/notifications/mark-as-read/${notificationId}/`, {
+                    method: "GET",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                }).then(response => {
+                    if (response.ok) {
+                        // Redirect to the appointments page
+                        window.location.href = link.href;
+                    }
+                });
+            });
+        });
+    });
+    </script>
 
 {% endblock %}
