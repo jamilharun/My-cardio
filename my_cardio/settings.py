@@ -35,8 +35,7 @@ CSRF_COOKIE_SECURE = True
 # Allow CSRF cookie to be sent with cross-origin requests
 CSRF_COOKIE_SAMESITE = 'None'
 
-
-
+ALLOWED_HOSTS = ['192.168.18.100', 'localhost', '127.0.0.1', 'jskibidi.jhomelabs.co']
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'my_cardio/static')]
@@ -52,8 +51,6 @@ SECRET_KEY = 'django-insecure-_!5^e88nese-b3f&xpiwmnd58tr!c8$+f7wyfd!xo&$p1b0%+a
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -112,6 +109,7 @@ DATABASES = {
         'PORT': '5432',  # Default PostgreSQL port
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
