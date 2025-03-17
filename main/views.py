@@ -61,9 +61,9 @@ def register_user(request):
         login(request, user)
         messages.success(request, "Registration successful!")
         # ✅ Redirect based on role
-        if role == "Doctor":
+        if role == "doctor":
             return redirect("doctor_dashboard")
-        elif role == "Admin":
+        elif role == "admin":
             return redirect("admin_dashboard")
         else:
             return redirect("patient_dashboard")  # Default fallback patient
