@@ -92,3 +92,18 @@ python manage.py migrate
 #how to access database in arch linuc
 psql -U admin -d mycardiodb -h localhost
 ```
+
+<!--how odocker commands -->
+
+docker-compose build django
+
+docker-compose up -d
+docker-compose down
+
+docker compose exec django python manage.py migrate
+
+docker compose ps
+
+docker exec -it django_app /bin/bash
+
+cat my_cardio/settings.py | grep ALLOWED_HOSTS
