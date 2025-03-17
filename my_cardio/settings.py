@@ -35,7 +35,7 @@ CSRF_COOKIE_SECURE = True
 # Allow CSRF cookie to be sent with cross-origin requests
 CSRF_COOKIE_SAMESITE = 'None'
 
-ALLOWED_HOSTS = ['192.168.18.100', 'localhost', 'skibidi.jhomelabs.co']
+ALLOWED_HOSTS = ['192.168.18.100', 'localhost', '127.0.0.1', 'skibidi.jhomelabs.co']
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'my_cardio/static')]
