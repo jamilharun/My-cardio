@@ -25,14 +25,13 @@
                     <a href="{% url 'mark_notification_as_read_patient' notification.id %}" class="block">
                         <p class="text-black">📢 {{ notification.message }}</p>
                         <small class="text-gray-500 block">{{ notification.created_at|date:"Y-m-d H:i" }}</small>
-                    </li>
-                {% empty %}
-                    <li class="text-gray-500">No new notifications.</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        {% with request.resolver_match.url_name as url_name %}
+                    </a>
+                </li>
+            {% empty %}
+                <li class="text-gray-500">No new notifications.</li>
+            {% endfor %}
+        </ul>
+        
         <ul class="space-y-4">
             <li><a href="{% url 'patient_dashboard' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_dashboard' %}bg-blue-700{% endif %}">🏠 Overview</a></li>
             <li><a href="{% url 'patient_appointments' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_appointments' %}bg-blue-700{% endif %}">🏠 Appointments</a></li>
@@ -121,6 +120,32 @@
 <<<<<<< HEAD
 
 
-=======
->>>>>>> ddfc7b5 (feat: doctor and patient dashboard done)
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const notificationLinks = document.querySelectorAll(".mark-as-read");
+    
+        notificationLinks.forEach(link => {
+            link.addEventListener("click", function(event) {
+                event.preventDefault();  // Prevent the default link behavior
+    
+                const notificationId = link.getAttribute("data-notification-id");
+    
+                // Send an AJAX request to mark the notification as read
+                fetch(`/notifications/mark-as-read/${notificationId}/`, {
+                    method: "GET",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                }).then(response => {
+                    if (response.ok) {
+                        // Redirect to the appointments page
+                        window.location.href = link.href;
+                    }
+                });
+            });
+        });
+    });
+    </script>
+
 {% endblock %}
