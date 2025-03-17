@@ -104,15 +104,14 @@ WSGI_APPLICATION = 'my_cardio.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mycardiodb',
-        'USER': 'admin',
-        'PASSWORD': 'admin123',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.postgresql',  # Use PostgreSQL backend
+        'NAME': 'mydatabase',  # Database name (must match POSTGRES_DB in compose.yaml)
+        'USER': 'myuser',  # Database user (must match POSTGRES_USER in compose.yaml)
+        'PASSWORD': 'mypassword',  # Database password (must match POSTGRES_PASSWORD in compose.yaml)
+        'HOST': 'db',  # Use the service name from compose.yaml
+        'PORT': '5432',  # Default PostgreSQL port
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
