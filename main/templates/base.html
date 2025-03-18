@@ -16,7 +16,7 @@
   <body class="bg-gray-100">
 
     <nav class="p-4 bg-blue-500 text-white flex justify-between">
-      <a href="/" class="text-lg font-bold">My Cardio</a>
+      <a href="/" class="text-3xl font-bold">My Cardio</a>
       <div>
 
         {% if user.is_authenticated %}
@@ -43,6 +43,23 @@
     
   
     
-    
+    <script>
+      function toggleFooter() {
+          var footer = document.getElementById("footer");
+          var windowHeight = window.innerHeight; // Viewport height
+          var pageHeight = document.documentElement.scrollHeight; // Total page height
+  
+          if (pageHeight > windowHeight * 1.5) {  // If page is significantly longer
+              footer.style.display = "none";  // Hide footer
+          } else {
+              footer.style.display = "block"; // Show footer
+          }
+      }
+  
+      // Run on page load and when resizing
+      document.addEventListener("DOMContentLoaded", toggleFooter);
+      window.addEventListener("resize", toggleFooter);
+  </script>
+  
   </body>
 </html>

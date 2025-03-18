@@ -40,9 +40,10 @@
             <td class="py-2 px-4 border {% if assessment.risk_level == 'High' %}text-red-600{% elif assessment.risk_level == 'Medium' %}text-yellow-600{% else %}text-green-600{% endif %}">
                 {{ assessment.risk_level }}
             </td>
-            <td class="py-2 px-4 border">
-                <a href="{% url 'assessment_detail' assessment.id %}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                    📄 View Report
+            <td class="py-2 px-4 border text-center">
+                <a href="{% url 'patient_detail' patient.id %}" 
+                   class="bg-blue-500 text-white px-3 py-1 md:px-4 md:py-2 text-sm md:text-base rounded-lg hover:bg-blue-600 block w-full md:inline-block">
+                    📄 View Record
                 </a>
             </td>
             <td class="py-2 px-4 border">{{ assessment.explanation|default:"No explanation available" }}</td>

@@ -38,6 +38,7 @@
             <th class="py-2 px-4 border">Age</th>
             <th class="py-2 px-4 border">Email</th>
             <th class="py-2 px-4 border">Recent Risk Assessment</th>
+            <th class="py-2 px-4 border">Action</th> <!-- Add Action Column -->
         </tr>
     </thead>
     <tbody>
@@ -71,8 +72,9 @@
                     {% endif %}
                 {% endwith %}
             </td>
-            <td class="py-2 px-4 border">
-                <a href="{% url 'patient_detail' patient.id %}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+            <td class="py-2 px-4 border text-center">
+                <a href="{% url 'patient_detail' patient.id %}" 
+                   class="bg-blue-500 text-white px-3 py-1 md:px-4 md:py-2 text-sm md:text-base rounded-lg hover:bg-blue-600 block w-full md:inline-block">
                     📄 View Record
                 </a>
             </td>
