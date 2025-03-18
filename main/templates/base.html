@@ -16,16 +16,16 @@
   <body class="bg-gray-100">
 
     <nav class="p-4 bg-blue-500 text-white flex justify-between">
-      <a href="/" class="text-lg font-bold">My Cardio</a>
+      <a href="/" class="text-3xl font-bold">My Cardio</a>
       <div>
 
         {% if user.is_authenticated %}
             {% if user.role == "patient" %}
-                <a href="{% url 'patient_dashboard' %}" class="text-blue-600 hover:underline">Patient Dashboard</a>
+                <a href="{% url 'patient_dashboard' %}" class="text-white hover:underline">Patient Dashboard</a>
             {% elif user.role == "admin" %}
-                <a href="{% url 'admin_dashboard' %}" class="text-blue-300 hover:underline mr-4">Admin Dashboard</a>
+                <a href="{% url 'admin_dashboard' %}" class="text-white hover:underline mr-4">Admin Dashboard</a>
             {% elif user.role == "doctor" %}
-                <a href="{% url 'doctor_dashboard' %}" class="text-blue-300 hover:underline mr-4">Doctor Dashboard</a>
+                <a href="{% url 'doctor_dashboard' %}" class="text-white hover:underline mr-4">Doctor Dashboard</a>
             {% endif %}
             
             <a href="{% url 'profile' %}" class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
@@ -40,5 +40,26 @@
     <div class="lg:container px-4 sm:px-6 lg:px-8 mx-auto h-screen">
       {% block content %}{% endblock %}
     </div>
+    
+  
+    
+    <script>
+      function toggleFooter() {
+          var footer = document.getElementById("footer");
+          var windowHeight = window.innerHeight; // Viewport height
+          var pageHeight = document.documentElement.scrollHeight; // Total page height
+  
+          if (pageHeight > windowHeight * 1.5) {  // If page is significantly longer
+              footer.style.display = "none";  // Hide footer
+          } else {
+              footer.style.display = "block"; // Show footer
+          }
+      }
+  
+      // Run on page load and when resizing
+      document.addEventListener("DOMContentLoaded", toggleFooter);
+      window.addEventListener("resize", toggleFooter);
+  </script>
+  
   </body>
 </html>

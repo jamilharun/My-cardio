@@ -25,6 +25,20 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# Trust requests from this domain
+CSRF_TRUSTED_ORIGINS = [
+    'https://skibidi.jhomelabs.co',
+]
+
+# Ensure CSRF cookie is only sent over HTTPS
+CSRF_COOKIE_SECURE = True
+
+# Allow CSRF cookie to be sent with cross-origin requests
+CSRF_COOKIE_SAMESITE = 'None'
+
+
+
+
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'my_cardio/static')]
 

@@ -4,7 +4,7 @@
 {% block content %}
 <div class="flex h-screen bg-gray-100">
     <!-- ✅ Sidebar Navigation -->
-    <aside class="w-64 bg-blue-900 text-white flex flex-col">
+    <aside class="w-64 bg-blue-900 text-white flex flex-col h-screen">
         <h1 class="text-xl font-bold text-center py-4 border-b border-gray-600">Doctor Dashboard</h1>
         <nav class="flex-1">
             {% with request.resolver_match.url_name as url_name %}
@@ -103,4 +103,7 @@
         {% endblock %}
     </main>
 </div>
+
+{% include 'footer.html' %}
+
 {% endblock %}

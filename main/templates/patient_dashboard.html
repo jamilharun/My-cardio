@@ -28,7 +28,7 @@
                     </a>
                 </li>
             {% empty %}
-                <li class="text-gray-500">No new notifications.</li>
+                <li class="text-gray-500 mx-2">No new notifications.</li>
             {% endfor %}
         </ul>
         
@@ -147,5 +147,7 @@
         });
     });
     </script>
+
+{% include 'footer.html' %}
 
 {% endblock %}
