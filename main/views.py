@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
+
 from .forms import (HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientForm, RoleUpdateForm, AppointmentForm, UserUpdateForm,
                     ConsultationForm, RecommendationForm)
 from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report
@@ -67,6 +68,7 @@ def register_user(request):
             return redirect("admin_dashboard")
         else:
             return redirect("patient_dashboard")  # Default fallback patient
+            return redirect("patient_dashboard")  # Default fallback patient
 
     return render(request, "register.html")
 
@@ -92,6 +94,7 @@ def user_login(request):
                 return redirect("admin_dashboard")
             else:
                 return redirect("patient_dashboard")  # Default fallback patient
+                return redirect("patient_dashboard")  # Default fallback patient
 
         else:
             messages.error(request, "Invalid email or password.")
@@ -106,7 +109,15 @@ def user_logout(request):
 @login_required
 def profile_view(request):
     """Display and edit user profile"""
+    """Display and edit user profile"""
     if request.method == "POST":
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            return redirect("profile")  # Redirect to profile page after saving
+
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
         if user_form.is_valid() and profile_form.is_valid():
@@ -117,13 +128,21 @@ def profile_view(request):
     else:
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=request.user.profile)
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=request.user.profile)
 
     context = {
         "user_form": user_form,
         "profile_form": profile_form,
     }
     return render(request, "users/profile.html", context)
+    context = {
+        "user_form": user_form,
+        "profile_form": profile_form,
+    }
+    return render(request, "users/profile.html", context)
 
+@login_required
 @login_required
 def health_risk_assessment(request):
     risk_result = None
