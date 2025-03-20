@@ -106,4 +106,4 @@ docker compose ps
 
 docker exec -it django_app /bin/bash
 
-cat my_cardio/settings.py | grep ALLOWED_HOSTS
+cat my_cardio/settings.py | grep INSTALLED_APPS
