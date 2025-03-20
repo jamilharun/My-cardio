@@ -25,9 +25,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Trust requests from this domain
-CSRF_TRUSTED_ORIGINS = [
-    'https://skibidi.jhomelabs.co',
-]
+CSRF_TRUSTED_ORIGINS = ['https://skibidi.jhomelabs.co', 'https://mycardio.jhomelabs.co']
 
 # Ensure CSRF cookie is only sent over HTTPS
 CSRF_COOKIE_SECURE = True
@@ -35,7 +33,7 @@ CSRF_COOKIE_SECURE = True
 # Allow CSRF cookie to be sent with cross-origin requests
 CSRF_COOKIE_SAMESITE = 'None'
 
-ALLOWED_HOSTS = ['192.168.18.100', 'localhost', '127.0.0.1', 'skibidi.jhomelabs.co']
+ALLOWED_HOSTS = ['192.168.18.100', 'localhost', '127.0.0.1', 'skibidi.jhomelabs.co', 'mycardio.jhomelabs.co']
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'my_cardio/static')]
@@ -63,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -171,7 +170,7 @@ STATIC_URL = "/static/"
 FERNET_SECRET_KEY = os.getenv("FERNET_SECRET_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-INSTALLED_APPS += ["channels"]
+INSTALLED_APPS += []
 ASGI_APPLICATION = "myproject.asgi.application"
 
 
