@@ -30,13 +30,19 @@
             />
     
             <label class="block font-semibold mt-4 mb-2 lg:text-base text-4xl text-gray-700">Password</label>
-            <input
-                type="password"
-                name="password"
-                required
-                placeholder="*****"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 lg:text-base text-4xl focus:ring-blue-500"
-            />
+            <div class="relative w-full">
+                <input 
+                    id="password" 
+                    type="password" 
+                    name="password" 
+                    required 
+                    placeholder="*****"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 lg:text-base text-4xl focus:ring-blue-500"
+                />
+                <button type="button" onclick="togglePassword()" class="absolute right-3 top-2 text-gray-500">
+                    👁
+                </button>
+            </div>
     
             <button
                 type="submit"
@@ -52,4 +58,15 @@
         </p>
     </div>
 </div>
+
+<script>
+    function togglePassword() {
+        let passwordInput = document.getElementById("password");
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+        } else {
+            passwordInput.type = "password";
+        }
+    }
+</script>
 {% endblock %}

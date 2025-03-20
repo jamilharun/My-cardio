@@ -11,151 +11,54 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Check if model already exists
+# Define file paths
 model_path = "main/models/cardio_risk_model.pkl"
 feature_names_path = "main/models/feature_names.pkl"
+data_path = "main/datasets/cardio_train.csv"
+cleaned_data_path = "main/datasets/cleaned_cardio_data_V2.csv"
 
+# Check if model exists
 if os.path.exists(model_path) and os.path.exists(feature_names_path):
     print("\n✅ Existing model found. Skipping model training...")
     model = joblib.load(model_path)
     feature_names = joblib.load(feature_names_path)
 else:
-    # Load Datasets
-    print("Loading datasets...")
-    df1 = pd.read_csv("main/datasets/cardio_train.csv", sep=";")  # Fix separator issue
-    df2 = pd.read_csv("main/datasets/Cardiovascular_Disease_Dataset.csv")  # Default separator is ','
+    print("Loading dataset...")
+    df = pd.read_csv(data_path, sep=";")  # Fix separator issue
 
-    print("Original columns in Dataset 1:", df1.columns.tolist())
-    print("Original columns in Dataset 2:", df2.columns.tolist())
-
-    # Check which columns are available in each dataset
-    available_columns_df1 = set(df1.columns)
-    available_columns_df2 = set(df2.columns)
-
-    print("\nRenaming columns for consistency...")
     # Rename columns for consistency
-    df1 = df1.rename(columns={
+    df = df.rename(columns={
         "ap_hi": "BP",  # Systolic BP
         "cholesterol": "cholesterol_level",
         "gluc": "glucose_level",
         "cardio": "heart_disease"
     })
-
-    df2 = df2.rename(columns={
-        "restingBP": "BP",
-        "serumcholestrol": "cholesterol_level",
-        "fastingbloodsugar": "glucose_level",
-        "target": "heart_disease"
-    })
-
-    print("Dataset 1 Columns after renaming:", df1.columns.tolist())
-    print("Dataset 2 Columns after renaming:", df2.columns.tolist())
-
-    # Define common columns that exist in both datasets after renaming
-    # First, get the intersection of columns
-    common_columns = set(df1.columns).intersection(set(df2.columns))
-    print("\nCommon columns in both datasets:", common_columns)
-
-    # Define essential columns we want to include
-    target_columns = ["heart_disease"]
-    demographic_columns = ["age", "gender"]
-    clinical_columns = ["BP", "cholesterol_level", "glucose_level"]
-
-    # Check which lifestyle columns are available in both datasets
-    lifestyle_columns = []
-    for col in ["smoke", "alco", "active"]:
-        if col in common_columns:
-            lifestyle_columns.append(col)
-
-    # Check which additional clinical features are available
-    additional_clinical = []
-    for col in ["chestpain", "restingrelectro", "maxheartrate", "exerciseangia"]:
-        if col in common_columns:
-            additional_clinical.append(col)
-
-    # Combine all selected columns
-    selected_columns = demographic_columns + clinical_columns + lifestyle_columns + additional_clinical + target_columns
-
-    print("\nSelected columns for the final dataset:", selected_columns)
-
-    # Check if selected columns exist in both datasets
-    df1_available = [col for col in selected_columns if col in df1.columns]
-    df2_available = [col for col in selected_columns if col in df2.columns]
-
-    print("\nColumns available in Dataset 1:", df1_available)
-    print("Columns available in Dataset 2:", df2_available)
-
-    # Handle missing columns by creating them with default values
-    for col in selected_columns:
-        if col not in df1.columns:
-            print(f"Creating missing column '{col}' in Dataset 1")
-            if col in ["smoke", "alco", "active", "heart_disease"]:
-                df1[col] = 0  # Default for binary columns
-            elif col in ["chestpain", "restingrelectro", "exerciseangia"]:
-                df1[col] = 0  # Default categorical
-            elif col == "maxheartrate":
-                df1[col] = 120  # Default average heart rate
-
-        if col not in df2.columns:
-            print(f"Creating missing column '{col}' in Dataset 2")
-            if col in ["smoke", "alco", "active", "heart_disease"]:
-                df2[col] = 0  # Default for binary columns
-            elif col in ["chestpain", "restingrelectro", "exerciseangia"]:
-                df2[col] = 0  # Default categorical
-            elif col == "maxheartrate":
-                df2[col] = 120  # Default average heart rate
-
-    # Select only the columns we want
-    df1_selected = df1[selected_columns]
-    df2_selected = df2[selected_columns]
-
-    # Handle data types - ensure consistency
-    for col in selected_columns:
-        # Convert to the same data type (numeric for most)
-        if col != "gender":  # Keep gender as is
-            df1_selected[col] = pd.to_numeric(df1_selected[col], errors='coerce')
-            df2_selected[col] = pd.to_numeric(df2_selected[col], errors='coerce')
-
+    
+    # Select relevant columns
+    selected_columns = [
+        "age", "gender", "BP", "cholesterol_level", "glucose_level", "heart_disease"
+    ]
+    df = df[selected_columns]
+    
+    # Convert gender to binary
+    df["gender"] = df["gender"].map({1: 0, 2: 1})  # 0: Male, 1: Female
+    
     # Fill missing values
-    print("\nFilling missing values...")
-    # For numeric columns, fill with mean
-    numeric_cols = df1_selected.select_dtypes(include=['number']).columns
-    for col in numeric_cols:
-        df1_mean = df1_selected[col].mean()
-        df2_mean = df2_selected[col].mean()
-
-        df1_selected[col].fillna(df1_mean, inplace=True)
-        df2_selected[col].fillna(df2_mean, inplace=True)
-
-    # For categorical columns, fill with mode
-    categorical_cols = df1_selected.select_dtypes(exclude=['number']).columns
-    for col in categorical_cols:
-        df1_mode = df1_selected[col].mode()[0]
-        df2_mode = df2_selected[col].mode()[0]
-
-        df1_selected[col].fillna(df1_mode, inplace=True)
-        df2_selected[col].fillna(df2_mode, inplace=True)
-
-    # Merge both datasets
-    print("\nMerging datasets...")
-    final_dataset = pd.concat([df1_selected, df2_selected], ignore_index=True)
-
-    # Save the cleaned dataset
-    final_dataset.to_csv("main/datasets/cleaned_cardio_data.csv", index=False)
-
-    print("✅ Final dataset created with", final_dataset.shape[0], "rows and", final_dataset.shape[1], "columns")
-
+    df.fillna(df.mean(), inplace=True)
+    
+    # Save cleaned data
+    df.to_csv(cleaned_data_path, index=False)
+    print("✅ Cleaned dataset saved.")
+    
     # Train model
     print("\nTraining model...")
-    X = final_dataset.drop("heart_disease", axis=1)
-    y = final_dataset["heart_disease"]
-    
-    # Handle remaining categorical variables
-    X = pd.get_dummies(X, drop_first=True)
+    X = df.drop("heart_disease", axis=1)
+    y = df["heart_disease"]
     
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    # Create and train model
+    # Train classifier
     model = RandomForestClassifier(n_estimators=100, random_state=42)
     model.fit(X_train, y_train)
     
@@ -163,13 +66,12 @@ else:
     accuracy = model.score(X_test, y_test)
     print(f"Model accuracy: {accuracy:.2f}")
     
-    # Save the model
-    joblib.dump(model, "main/models/cardio_risk_model.pkl")
-    print("✅ Model saved successfully")
-    
-    # Feature names for prediction
-    feature_names = X.columns.tolist()
-    joblib.dump(feature_names, "main/models/feature_names.pkl")
+    # Save model & features
+    joblib.dump(model, model_path)
+    joblib.dump(X.columns.tolist(), feature_names_path)
+    print("✅ Model saved successfully.")
+
+
 
 def predict_health_risk(user_data):
     """
@@ -264,6 +166,7 @@ def assess_risk(request):
 
 
 def generate_explanation(risk_level, risk_probability, user_data):
+    print("run DEEP SEEK AI ")
     # Prepare the prompt for GPT
     prompt = f"""
     A user has been assessed for cardiovascular risk. The results are:
@@ -277,24 +180,18 @@ def generate_explanation(risk_level, risk_probability, user_data):
     # Call OpenAI API
 
     client = OpenAI(
-        api_key=OPENAI_API_KEY,  # This is the default and can be omitted
+        api_key=DEEPSEEK_API_KEY,
+        base_url=DEEPSEEK_API_URL
     )
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="deepseek-chat",
             messages=[
-                {
-                    "role": "system", 
-                    "content": "You are a helpful health assistant."},
-                {
-                    "role": "user", 
-                    "content": [
-                        {"type": "text", "text": prompt},
-                    ]
-                }
+                {"role": "system", "content": "You are a helpful assistant"},
+                {"role": "user", "content": prompt},
             ],
-            max_tokens=300 
+            stream=False
         )
 
         # Extract the explanation
@@ -302,7 +199,7 @@ def generate_explanation(risk_level, risk_probability, user_data):
         return explanation
     except Exception as e:
         # Handle API errors (e.g., quota exceeded, network issues)
-        # print(f"Error generating explanation: {e}")
+        print(f"Error generating explanation: {e}")
 
         # Fallback explanation
         fallback_explanation = (

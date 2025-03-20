@@ -46,7 +46,7 @@ def register_user(request):
         username = request.POST["username"]
         email = request.POST["email"]
         password = request.POST["password"]
-        role = request.POST["role"]  # Patient, Doctor, Admin
+        role = "patient"
 
         if CustomUser.objects.filter(email=email).exists():
             messages.error(request, "Email is already registered.")
@@ -67,8 +67,7 @@ def register_user(request):
         elif role == "admin":
             return redirect("admin_dashboard")
         else:
-            return redirect("patient_dashboard")  # Default fallback patient
-            return redirect("patient_dashboard")  # Default fallback patient
+            return redirect("patient_dashboard") 
 
     return render(request, "register.html")
 
@@ -143,7 +142,6 @@ def profile_view(request):
     return render(request, "users/profile.html", context)
 
 @login_required
-@login_required
 def health_risk_assessment(request):
     risk_result = None
     explanation = None
@@ -211,11 +209,14 @@ def health_risk_assessment(request):
                     blood_pressure=user_data["BP"],
                     cholesterol_level=user_data["cholesterol_level"],
                     glucose_level=user_data["glucose_level"],
-                    risk_level=risk_result["risk_level"],
+                    risk_level=risk_result["risk_level"],       
                     risk_probability=risk_result["risk_probability"],
                     explanation=explanation,
                     recommendations=", ".join(recommendations),
-                    bmi=user_data["bmi"]
+                    bmi=user_data["bmi"],
+                    smoke_frequency=user_data.get("smoke_frequency", ""),
+                    alco_frequency=user_data.get("alco_frequency", ""),
+                    workout_frequency=user_data.get("workout_frequency", 0)
                 )
             except UnicodeEncodeError as e:
                 logger.error(f"UnicodeEncodeError: {e}")

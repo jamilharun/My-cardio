@@ -38,24 +38,19 @@
             />
     
             <label class="block font-semibold mt-4 mb-2 text-gray-700 lg:text-base text-4xl">Password</label>
-            <input
-                type="password"
-                name="password"
-                required
-                placeholder="your password"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 lg:text-base text-4xl"
-            />
-    
-            <label class="block font-semibold mt-4 mb-2 text-gray-700 lg:text-base text-4xl">Role</label>
-            <select
-                name="role"
-                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 lg:text-base text-3xl"
-            >
-                <option value="patient">Patient</option>
-                <option value="doctor">Doctor</option>
-                <option value="admin">Admin</option>
-            </select>
-    
+            <div class="relative w-full">
+                <input 
+                    id="password" 
+                    type="password" 
+                    name="password" 
+                    required 
+                    placeholder="*****"
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 lg:text-base text-4xl focus:ring-blue-500"
+                />
+                <button type="button" onclick="togglePassword()" class="absolute right-3 top-2 text-gray-500">
+                    👁
+                </button>
+            </div>
             <button
                 type="submit"
                 class="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition lg:text-base text-3xl"
@@ -70,4 +65,16 @@
         </p>
     </div>
 </div>
+
+<script>
+    function togglePassword() {
+        let passwordInput = document.getElementById("password");
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+        } else {
+            passwordInput.type = "password";
+        }
+    }
+</script>
+
 {% endblock %}

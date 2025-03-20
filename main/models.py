@@ -204,6 +204,9 @@ class RiskAssessmentResult(models.Model):
     explanation = models.TextField(blank=True, null=True)
     recommendations = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    smoke_frequency = models.CharField(max_length=20, null=True, blank=True)  
+    alco_frequency = models.CharField(max_length=20, null=True, blank=True)  
+    workout_frequency = models.IntegerField(null=True, blank=True)  
 
     def __str__(self):
         return f"Risk Assessment for {self.user} on {self.created_at}"
@@ -236,16 +239,6 @@ class SystemAlert(models.Model):
 
 
 # for doctors
-
-class DoctorPatientAssignment(models.Model):
-    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="assigned_patients")
-    patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="assigned_doctor")
-    assigned_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.patient.username} → {self.doctor.username}"
-
-
 class Recommendation(models.Model):
     doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="doctor_recommendations")
     patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="patient_recommendations")
