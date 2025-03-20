@@ -239,16 +239,6 @@ class SystemAlert(models.Model):
 
 
 # for doctors
-
-class DoctorPatientAssignment(models.Model):
-    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="assigned_patients")
-    patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="assigned_doctor")
-    assigned_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.patient.username} → {self.doctor.username}"
-
-
 class Recommendation(models.Model):
     doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="doctor_recommendations")
     patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="patient_recommendations")

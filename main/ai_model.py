@@ -166,6 +166,7 @@ def assess_risk(request):
 
 
 def generate_explanation(risk_level, risk_probability, user_data):
+    print("run DEEP SEEK AI ")
     # Prepare the prompt for GPT
     prompt = f"""
     A user has been assessed for cardiovascular risk. The results are:
@@ -179,24 +180,18 @@ def generate_explanation(risk_level, risk_probability, user_data):
     # Call OpenAI API
 
     client = OpenAI(
-        api_key=OPENAI_API_KEY,  # This is the default and can be omitted
+        api_key=DEEPSEEK_API_KEY,
+        base_url=DEEPSEEK_API_URL
     )
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="deepseek-chat",
             messages=[
-                {
-                    "role": "system", 
-                    "content": "You are a helpful health assistant."},
-                {
-                    "role": "user", 
-                    "content": [
-                        {"type": "text", "text": prompt},
-                    ]
-                }
+                {"role": "system", "content": "You are a helpful assistant"},
+                {"role": "user", "content": prompt},
             ],
-            max_tokens=300 
+            stream=False
         )
 
         # Extract the explanation
@@ -204,7 +199,7 @@ def generate_explanation(risk_level, risk_probability, user_data):
         return explanation
     except Exception as e:
         # Handle API errors (e.g., quota exceeded, network issues)
-        # print(f"Error generating explanation: {e}")
+        print(f"Error generating explanation: {e}")
 
         # Fallback explanation
         fallback_explanation = (
