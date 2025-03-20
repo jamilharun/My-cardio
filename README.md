@@ -95,6 +95,10 @@ psql -U admin -d mycardiodb -h localhost
 
 <!--how odocker commands -->
 
+docker restart django_app
+
+docker start relaxed_pare
+
 docker-compose build django
 
 docker-compose up -d
