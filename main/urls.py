@@ -10,7 +10,7 @@ from .views import (
     book_appointment,doctor_appointments, update_appointment_status, risk_alerts, mark_alert_as_read, patient_risk_chart, 
     assessment_detail, notifications_panel , mark_notification_as_read, patient_dashboard, doctor_consultation,
     patient_health_statistics,admin_create_appointment, patient_appointments, patient_appointment_detail, mark_notification_as_read_patient,
-    quick_password_reset
+    quick_password_reset, custom_password_reset_done, SimplePasswordResetView
 )
 from django.contrib.auth import views as auth_views
 
@@ -78,12 +78,15 @@ urlpatterns = [
 
 
     # reset password
-    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='password_reset.html'), name='password_reset'),
-    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='password_reset_done.html'), name='password_reset_done'),
+    path('password_reset/', SimplePasswordResetView.as_view(
+        template_name='password_reset.html', 
+        email_template_name='password_reset_email.html'),
+        name='password_reset'),    # path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='password_reset_done.html'), name='password_reset_done'),
+    path('password_reset/done/', custom_password_reset_done, name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
     path('quick_reset/', quick_password_reset, name='quick_reset'),
 ]
-
+    
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

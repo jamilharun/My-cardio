@@ -1,33 +1,36 @@
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.views import PasswordResetView
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import PermissionDenied
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string 
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from django.db.models.functions import TruncMonth
-from django.db.models import Count
-from django.contrib.auth.tokens import default_token_generator
+from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
+from io import BytesIO
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from weasyprint import HTML
 from .forms import (HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientForm, RoleUpdateForm, AppointmentForm, UserUpdateForm,
                     ConsultationForm, RecommendationForm)
 from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report
 from .models import (RiskAssessmentResult, CustomUser, UserProfile, DoctorPatientAssignment, SystemAlert, Recommendation, Appointment,
                     RiskAlert, DataAccessLog, EncryptedFieldMixin, Notification)
+from .utils import sanitize_text
 import plotly.graph_objects as go
 import base64
-from io import BytesIO
-from .utils import sanitize_text
 import json
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.units import inch
 import csv
-from django.core.exceptions import PermissionDenied
-from weasyprint import HTML
 
 # debugging tool
 import logging
@@ -1250,3 +1253,38 @@ def quick_password_reset(request):
             return redirect('password_reset')
     
     return render(request, 'quick_password_reset.html')
+
+
+def custom_password_reset_done(request):
+    reset_link = request.session.get('dev_reset_link', None)  # ✅ Retrieve from session
+    
+    print(f"DEBUG: Reset Link in Session: {reset_link}")  # 🔍 Check if it exists
+
+    return render(request, 'password_reset_done.html', {'dev_reset_link': reset_link})
+
+
+
+class SimplePasswordResetView(PasswordResetView):
+    def form_valid(self, form):
+        response = super().form_valid(form)  # ✅ Call parent class first
+
+        if settings.DEBUG:
+            email = form.cleaned_data['email']
+            users = form.get_users(email)  # ✅ Correct way to get users
+            user = next(users, None)  # ✅ Get the first user from the generator
+
+            if user:
+                token = default_token_generator.make_token(user)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+                reset_link = self.request.build_absolute_uri(
+                    reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+                )
+
+                # ✅ Store in session
+                self.request.session['dev_reset_link'] = reset_link
+                self.request.session.modified = True  # ✅ Force session update
+
+                print(f"DEBUG: Stored Reset Link: {reset_link}")  # 🔍 Debugging Output
+
+        return response  # ✅ Return the response at the end
