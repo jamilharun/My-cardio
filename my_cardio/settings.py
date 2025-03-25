@@ -175,3 +175,5 @@ INSTALLED_APPS += []
 ASGI_APPLICATION = "myproject.asgi.application"
 
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# AUTH_PASSWORD_VALIDATORS = []  # Disable temporarily for testing

@@ -6,7 +6,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.db.models.functions import TruncMonth
 from django.db.models import Count
-
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 from .forms import (HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientForm, RoleUpdateForm, AppointmentForm, UserUpdateForm,
                     ConsultationForm, RecommendationForm)
 from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report
@@ -1228,3 +1230,23 @@ def mark_notification_as_read_patient(request, notification_id):
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return JsonResponse({"status": "success"})
     return redirect("patient_appointments")
+
+
+def quick_password_reset(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = CustomUser.objects.get(email=email)
+            # Generate token and uid
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            
+            # Create reset URL
+            reset_url = f"/reset/{uid}/{token}/"
+            
+            return render(request, 'quick_reset_link.html', {'reset_url': reset_url})
+        except CustomUser.DoesNotExist:
+            messages.error(request, "No user with that email exists")
+            return redirect('password_reset')
+    
+    return render(request, 'quick_password_reset.html')

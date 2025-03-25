@@ -12,7 +12,13 @@
         {% if messages %}
         <div class="mb-4">
             {% for message in messages %}
-            <p class="text-red-500 text-sm">{{ message }}</p>
+                {% if message.tags == 'error' %}
+                    <p class="text-red-500 text-sm">{{ message }}</p>
+                {% elif message.tags == 'success' %}
+                    <p class="text-green-500 text-sm">{{ message }}</p>
+                {% else %}
+                    <p class="text-blue-500 text-sm">{{ message }}</p>
+                {% endif %}
             {% endfor %}
         </div>
         {% endif %}
@@ -55,6 +61,9 @@
         <p class="mt-4 text-center lg:text-base text-3xl text-gray-600">
             Don't have an account?
             <a href="{% url 'register' %}" class="text-blue-500">Register</a>
+        </p>
+        <p class="mt-2 text-center lg:text-base text-3xl text-gray-600">
+            <a href="{% url 'password_reset' %}" class="text-blue-500">Forgot Password?</a>
         </p>
     </div>
 </div>
