@@ -1,38 +1,82 @@
 {% extends 'admin_dashboard.html' %}
 {% block admin_content %}
 
-<h1 class="text-3xl font-bold text-blue-600 text-center">🚨 System Alerts</h1>
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-3xl font-bold text-blue-600 text-center mb-6 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        System Alerts
+    </h1>
 
-<table class="min-w-full bg-white shadow-md rounded-lg mt-4">
-    <thead>
-        <tr>
-            <th class="py-2 px-4 border">Type</th>
-            <th class="py-2 px-4 border">Title</th>
-            <th class="py-2 px-4 border">Message</th>
-            <th class="py-2 px-4 border">Date</th>
-            <th class="py-2 px-4 border">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for alert in alerts %}
-        <tr class="text-center {% if not alert.is_read %}bg-red-100{% endif %}">
-            <td class="py-2 px-4 border">{{ alert.alert_type }}</td>
-            <td class="py-2 px-4 border font-bold">{{ alert.title }}</td>
-            <td class="py-2 px-4 border">{{ alert.message }}</td>
-            <td class="py-2 px-4 border">{{ alert.created_at }}</td>
-            <td class="py-2 px-4 border">
-                {% if not alert.is_read %}
-                <a href="{% url 'mark_alert_as_read' alert.id %}" class="text-green-500 hover:underline">✔ Mark as Read</a> |
-                {% endif %}
-                <a href="{% url 'delete_alert' alert.id %}" class="text-red-500 hover:underline">🗑 Delete</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" class="py-2 px-4 border text-center text-gray-500">No alerts found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <div class="overflow-x-auto rounded-lg shadow-lg">
+        <table class="min-w-full bg-white">
+            <thead class="bg-blue-50 border-b">
+                <tr>
+                    <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Type</th>
+                    <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                    <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Message</th>
+                    <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Date</th>
+                    <th class="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for alert in alerts %}
+                <tr class="hover:bg-gray-50 transition duration-200 
+                    {% if not alert.is_read %}bg-red-50 hover:bg-red-100{% endif %}">
+                    <td class="py-4 px-4 hidden md:table-cell">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                            {% if alert.alert_type == 'critical' %}bg-red-100 text-red-800
+                            {% elif alert.alert_type == 'warning' %}bg-yellow-100 text-yellow-800
+                            {% else %}bg-blue-100 text-blue-800{% endif %}">
+                            {{ alert.alert_type }}
+                        </span>
+                    </td>
+                    <td class="py-4 px-4 font-semibold text-gray-900">{{ alert.title }}</td>
+                    <td class="py-4 px-4 text-gray-500 hidden lg:table-cell">
+                        <div class="truncate max-w-xs">{{ alert.message }}</div>
+                    </td>
+                    <td class="py-4 px-4 text-gray-500 hidden md:table-cell">
+                        <time datetime="{{ alert.created_at|date:'Y-m-d H:i' }}">
+                            {{ alert.created_at|date:"M d, Y H:i" }}
+                        </time>
+                    </td>
+                    <td class="py-4 px-4 text-center">
+                        <div class="flex justify-center space-x-2">
+                            {% if not alert.is_read %}
+                            <a href="{% url 'mark_alert_as_read' alert.id %}" 
+                               class="text-green-600 hover:text-green-800 transition duration-200 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                Mark Read
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'delete_alert' alert.id %}" 
+                               class="text-red-600 hover:text-red-800 transition duration-200 flex items-center ml-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                Delete
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="py-6 text-center text-gray-500">
+                        <div class="flex flex-col items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-xl">No alerts found.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
 {% endblock %}
