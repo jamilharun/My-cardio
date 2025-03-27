@@ -1,15 +1,62 @@
 {% extends 'admin_dashboard.html' %}
 {% block admin_content %}
+<div class="bg-white rounded-xl shadow-md p-6">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            Risk Trends Over Time
+        </h1>
+        <div class="mt-4 md:mt-0">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center">
+                    <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                    <span class="text-sm text-gray-600">High Risk</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                    <span class="text-sm text-gray-600">Medium Risk</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                    <span class="text-sm text-gray-600">Low Risk</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<h1 class="text-3xl font-bold text-blue-600 text-center">📈 Risk Trends Over Time</h1>
+    <!-- Chart Container -->
+    <div class="bg-gray-50 p-4 md:p-6 rounded-lg border border-gray-200">
+        <div class="relative" style="height: 400px;">
+            <canvas id="riskTrendChart"></canvas>
+        </div>
+    </div>
 
-<!-- 📊 Risk Trends Chart -->
-<div class="bg-white p-6 shadow-lg rounded-lg">
-    <canvas id="riskTrendChart"></canvas>
+    <!-- Time Period Selector -->
+    <div class="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div class="mb-4 sm:mb-0">
+            <h3 class="text-lg font-medium text-gray-900">Time Period</h3>
+            <p class="text-sm text-gray-500">Select the time range for analysis</p>
+        </div>
+        <div class="flex space-x-2">
+            <button class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                Last 6 Months
+            </button>
+            <button class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                Last 12 Months
+            </button>
+            <button class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                Custom Range
+            </button>
+        </div>
+    </div>
 </div>
 
-<!-- 📊 Chart.js Integration -->
+<!-- Chart.js Integration -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script>
     var ctx = document.getElementById("riskTrendChart").getContext("2d");
     var riskData = JSON.parse('{{ risk_data_json|escapejs }}');
@@ -27,29 +74,75 @@
                 {
                     label: "High Risk",
                     data: highRisk,
-                    borderColor: "#ff0000",
-                    backgroundColor: "rgba(255,0,0,0.2)",
-                    fill: true
+                    borderColor: "#ef4444",
+                    backgroundColor: "rgba(239, 68, 68, 0.1)",
+                    borderWidth: 2,
+                    pointBackgroundColor: "#ef4444",
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.3
                 },
                 {
                     label: "Medium Risk",
                     data: mediumRisk,
-                    borderColor: "#ffcc00",
-                    backgroundColor: "rgba(255,204,0,0.2)",
-                    fill: true
+                    borderColor: "#f59e0b",
+                    backgroundColor: "rgba(245, 158, 11, 0.1)",
+                    borderWidth: 2,
+                    pointBackgroundColor: "#f59e0b",
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.3
                 },
                 {
                     label: "Low Risk",
                     data: lowRisk,
-                    borderColor: "#00cc66",
-                    backgroundColor: "rgba(0,204,102,0.2)",
-                    fill: true
+                    borderColor: "#10b981",
+                    backgroundColor: "rgba(16, 185, 129, 0.1)",
+                    borderWidth: 2,
+                    pointBackgroundColor: "#10b981",
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.3
                 }
             ]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Number of Patients'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
         }
     });
 </script>
