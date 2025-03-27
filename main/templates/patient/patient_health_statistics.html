@@ -2,24 +2,80 @@
 {% block title %}Health Statistics{% endblock %}
 
 {% block patient_content %}
-<a href="{% url 'patient_dashboard' %}" class="text-blue-500 hover:underline flex items-center mb-4">
-    🔙 Back to Dashboard
-</a>
+<div class="max-w-6xl mx-auto p-4 md:p-6">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 text-white">
+            <h1 class="text-2xl font-bold flex items-center">
+                <i class="fas fa-chart-line mr-3"></i> Health Statistics
+            </h1>
+            <p class="mt-1 text-blue-100">Track your health metrics over time</p>
+        </div>
 
-<h1 class="text-3xl font-bold text-blue-600 text-center">📈 Health Statistics</h1>
+        <!-- Content -->
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Blood Pressure Chart -->
+                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-heartbeat text-red-500 mr-2"></i> Blood Pressure
+                    </h3>
+                    <div class="chart-container" style="position: relative; height: 250px;">
+                        <canvas id="bloodPressureChart"></canvas>
+                    </div>
+                </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
-        <canvas id="bloodPressureChart"></canvas>
-    </div>
-    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
-        <canvas id="cholesterolChart"></canvas>
-    </div>
-    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
-        <canvas id="glucoseChart"></canvas>
-    </div>
-    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
-        <canvas id="bmiChart"></canvas>
+                <!-- Cholesterol Chart -->
+                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-tint text-orange-500 mr-2"></i> Cholesterol
+                    </h3>
+                    <div class="chart-container" style="position: relative; height: 250px;">
+                        <canvas id="cholesterolChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Glucose Chart -->
+                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-vial text-green-500 mr-2"></i> Glucose
+                    </h3>
+                    <div class="chart-container" style="position: relative; height: 250px;">
+                        <canvas id="glucoseChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- BMI Chart -->
+                <div class="bg-white p-4 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-weight text-blue-500 mr-2"></i> BMI
+                    </h3>
+                    <div class="chart-container" style="position: relative; height: 250px;">
+                        <canvas id="bmiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Stats -->
+            <!-- <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                    <h4 class="text-sm font-medium text-gray-500">Average BP</h4>
+                    <p class="text-2xl font-bold mt-1">{{ avg_bp|default:"N/A" }}</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                    <h4 class="text-sm font-medium text-gray-500">Average Glucose</h4>
+                    <p class="text-2xl font-bold mt-1">{{ avg_glucose|default:"N/A" }}</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+                    <h4 class="text-sm font-medium text-gray-500">Average Cholesterol</h4>
+                    <p class="text-2xl font-bold mt-1">{{ avg_cholesterol|default:"N/A" }}</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
+                    <h4 class="text-sm font-medium text-gray-500">Average BMI</h4>
+                    <p class="text-2xl font-bold mt-1">{{ avg_bmi|default:"N/A" }}</p>
+                </div>
+            </div> -->
+        </div>
     </div>
 </div>
 
@@ -42,25 +98,43 @@
                     label: label,
                     data: data,
                     borderColor: borderColor,
-                    backgroundColor: "rgba(0,0,0,0.1)",
+                    backgroundColor: "rgba(0,0,0,0.05)",
+                    borderWidth: 2,
+                    pointBackgroundColor: borderColor,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
                 scales: {
-                    y: { beginAtZero: false }
+                    y: { 
+                        beginAtZero: false,
+                        grid: {
+                            color: "rgba(0,0,0,0.05)"
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
                 }
             }
         });
     }
 
-    createChart("bloodPressureChart", "Blood Pressure", bloodPressureData, "#ff0000");
-    createChart("cholesterolChart", "Cholesterol Level", cholesterolData, "#ffa500");
-    createChart("glucoseChart", "Glucose Level", glucoseData, "#008000");
-    createChart("bmiChart", "BMI", bmiData, "#0000ff");
+    createChart("bloodPressureChart", "Blood Pressure", bloodPressureData, "#ef4444");
+    createChart("cholesterolChart", "Cholesterol Level", cholesterolData, "#f59e0b");
+    createChart("glucoseChart", "Glucose Level", glucoseData, "#10b981");
+    createChart("bmiChart", "BMI", bmiData, "#3b82f6");
 </script>
-
 {% endblock %}

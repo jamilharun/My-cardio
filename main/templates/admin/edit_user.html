@@ -2,45 +2,142 @@
 {% block title %}Edit User{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto mt-8">
-    <!-- 🔙 Back Button -->
-    <a href="{% url 'manage_users' %}" class="inline-block mb-4 text-blue-500 hover:underline flex items-center">
-        🔙 Back to Manage Users
-    </a>
-
-    <!-- 📝 Edit User Title -->
-    <h1 class="text-3xl font-bold text-blue-600 text-center">Edit User</h1>
-
-    <!-- 📝 User Edit Form -->
-    <div class="bg-white p-6 shadow-lg rounded-lg mt-6">
-        <form method="post" class="space-y-4">
-            {% csrf_token %}
-            
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-semibold">Username</label>
-                {{ form.username }}
-            </div>
-            
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-semibold">Email</label>
-                {{ form.email }}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-xl mx-auto">
+        <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+            <div class="bg-blue-50 px-6 py-4 border-b border-blue-100 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <h1 class="text-2xl font-bold text-blue-600">Edit User</h1>
             </div>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-semibold">Role</label>
-                {{ form.role }}
-            </div>
+            <form method="post" class="p-6 space-y-6">
+                {% csrf_token %}
+                
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Username
+                        </label>
+                        <div class="relative">
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if form.username.errors %}
+                            <p class="mt-1 text-sm text-red-600">
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </p>
+                        {% endif %}
+                    </div>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-semibold">Password (Leave blank to keep current)</label>
-                {{ form.password }}
-            </div>
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email
+                        </label>
+                        <div class="relative">
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if form.email.errors %}
+                            <p class="mt-1 text-sm text-red-600">
+                                {% for error in form.email.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </p>
+                        {% endif %}
+                    </div>
 
-            <!-- ✅ Save Button -->
-            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
-                💾 Save Changes
-            </button>
-        </form>
+                    <div class="form-group">
+                        <label for="{{ form.role.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Role
+                        </label>
+                        <div class="relative">
+                            {{ form.role }}
+                            {% if form.role.errors %}
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if form.role.errors %}
+                            <p class="mt-1 text-sm text-red-600">
+                                {% for error in form.role.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Password <span class="text-gray-500 text-xs">(Leave blank to keep current)</span>
+                        </label>
+                        <div class="relative">
+                            {{ form.password }}
+                            {% if form.password.errors %}
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if form.password.errors %}
+                            <p class="mt-1 text-sm text-red-600">
+                                {% for error in form.password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="mt-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                <ul class="list-disc list-inside">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="mt-4 text-center">
+            <a href="{% url 'manage_users' %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Back to Manage Users
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}

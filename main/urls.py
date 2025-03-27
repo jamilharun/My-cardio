@@ -23,7 +23,10 @@ urlpatterns = [
     path("profile/", profile_view, name="profile"),
     path("health-risk/", health_risk_assessment, name="health_risk"),
     path("health-risk-history/", health_risk_history, name="health_risk_history"),
+
+    # im not sure if im gonna ass this
     # path("health-reports/", health_reports_view, name="health_reports"),
+
     path("export-report-pdf/<int:report_id>/", export_report_pdf, name="export_report_pdf"),
     path("assessment/<int:assessment_id>/", assessment_detail, name="assessment_detail"),
     path("consultation/<int:appointment_id>/", doctor_consultation, name="doctor_consultation"),
@@ -74,8 +77,10 @@ urlpatterns = [
     path("patient-dashboard/", patient_dashboard, name="patient_dashboard"),
     path("patient/appointments/", patient_appointments, name="patient_appointments"),
     path("patient/appointments/<int:appointment_id>/", patient_appointment_detail, name="patient_appointment_detail"),
-    path("patient/book-appointment/<int:doctor_id>/", book_appointment, name="book_appointment"),
     path("patient/patient-health-statistics/", patient_health_statistics, name="patient_health_statistics"),
+
+    # im not sure if im gonna add this or not
+    path("patient/book-appointment/<int:doctor_id>/", book_appointment, name="book_appointment"), 
 
 
     # reset password

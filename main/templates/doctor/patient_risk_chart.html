@@ -1,18 +1,45 @@
 {% extends 'doctor_dashboard.html' %}
 {% block doctor_content %}
 
-<a href="{% url 'patient_detail' patient.id %}" class="text-blue-500 hover:underline flex items-center mb-4">
-    🔙 Back to Patient Record
-</a>
+<div class="bg-white rounded-xl shadow-md p-6">
+    <a href="{% url 'patient_detail' patient.id %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6">
+        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to Patient Record
+    </a>
 
-<h1 class="text-3xl font-bold text-blue-600 text-center">📈 Patient Risk Trends</h1>
+    <h1 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+        </svg>
+        Patient Risk Trends: {{ patient.username }}
+    </h1>
 
-<!-- 📊 Risk Trend Chart -->
-<div class="bg-white p-6 shadow-lg rounded-lg mt-6">
-    <canvas id="riskTrendChart"></canvas>
+    <div class="bg-gray-50 p-6 rounded-lg">
+        <canvas id="riskTrendChart" height="400"></canvas>
+    </div>
+
+    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Risk Level Key</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="flex items-center">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 mr-2">High</span>
+                <span class="text-sm text-gray-600">3 - Immediate attention required</span>
+            </div>
+            <div class="flex items-center">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 mr-2">Medium</span>
+                <span class="text-sm text-gray-600">2 - Monitor closely</span>
+            </div>
+            <div class="flex items-center">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">Low</span>
+                <span class="text-sm text-gray-600">1 - Normal monitoring</span>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- 📊 Chart.js Integration -->
+<!-- Chart.js Integration -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     var ctx = document.getElementById("riskTrendChart").getContext("2d");
@@ -26,8 +53,12 @@
             datasets: [{
                 label: "Risk Level",
                 data: riskValues,
-                borderColor: ["#ff0000"],
-                backgroundColor: "rgba(255,0,0,0.2)",
+                borderColor: "#ef4444",
+                backgroundColor: "rgba(239, 68, 68, 0.1)",
+                borderWidth: 2,
+                pointBackgroundColor: "#ef4444",
+                pointRadius: 5,
+                pointHoverRadius: 7,
                 fill: true,
                 tension: 0.4
             }]
@@ -35,6 +66,15 @@
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ["", "Low", "Medium", "High"][context.raw] || "";
+                        }
+                    }
+                }
+            },
             scales: {
                 y: {
                     beginAtZero: true,

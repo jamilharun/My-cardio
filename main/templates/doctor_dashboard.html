@@ -2,108 +2,266 @@
 {% block title %}Doctor Dashboard{% endblock %}
 
 {% block content %}
-<div class="flex h-screen bg-gray-100">
-    <!-- ✅ Sidebar Navigation -->
-    <aside class="w-64 bg-blue-900 text-white flex flex-col h-screen">
-        <h1 class="text-xl font-bold text-center py-4 border-b border-gray-600">Doctor Dashboard</h1>
-        <nav class="flex-1">
+<div class="flex flex-col md:flex-row h-screen bg-gray-50">
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-blue-900 text-white p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">Doctor Dashboard</h1>
+        <button id="menu-toggle" class="text-white focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="w-full md:w-64 bg-blue-900 text-white flex-col h-screen hidden md:flex transform -translate-x-full md:transform-none transition-transform duration-300 fixed md:relative z-10">
+        <h1 class="text-xl font-bold text-center py-4 border-b border-blue-800 hidden md:block">Doctor Dashboard</h1>
+        <nav class="flex-1 overflow-y-auto">
             {% with request.resolver_match.url_name as url_name %}
             <ul class="space-y-2 p-4">
-                <li><a href="{% url 'doctor_dashboard' %}" class="block py-2 px-4 rounded {% if url_name == 'doctor_dashboard' %}bg-blue-700{% endif %}">Overview</a></li>
-                <li><a href="{% url 'patient_list' %}" class="block py-2 px-4 rounded {% if url_name == 'patient_list' %}bg-blue-700{% endif %}">Patient List</a></li>
-                <li><a href="{% url 'doctor_appointments' %}" class="block py-2 px-4 rounded {% if url_name == 'doctor_appointments' %}bg-blue-700{% endif %}">Appointments</a></li>
-                <li><a href="{% url 'risk_alerts' %}" class="block py-2 px-4 rounded {% if url_name == 'risk_alerts' %}bg-blue-700{% endif %}">Risk Alerts</a></li>
+                <li>
+                    <a href="{% url 'doctor_dashboard' %}" class="flex items-center py-2 px-4 rounded hover:bg-blue-800 transition-colors {% if url_name == 'doctor_dashboard' %}bg-blue-700{% endif %}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                        </svg>
+                        Overview
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'patient_list' %}" class="flex items-center py-2 px-4 rounded hover:bg-blue-800 transition-colors {% if url_name == 'patient_list' %}bg-blue-700{% endif %}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        Patient List
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'doctor_appointments' %}" class="flex items-center py-2 px-4 rounded hover:bg-blue-800 transition-colors {% if url_name == 'doctor_appointments' %}bg-blue-700{% endif %}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Appointments
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'risk_alerts' %}" class="flex items-center py-2 px-4 rounded hover:bg-blue-800 transition-colors {% if url_name == 'risk_alerts' %}bg-blue-700{% endif %}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        Risk Alerts
+                    </a>
+                </li>
             </ul>
             {% endwith %}
         </nav>
+        
         {% if notifications %}
-        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-4">
-            <p class="font-bold">⚠ High-Risk Patient Notifications:</p>
-            <ul>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4 rounded-lg">
+            <p class="font-bold flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                High-Risk Patient Notifications:
+            </p>
+            <ul class="mt-2 space-y-2">
                 {% for notification in notifications %}
-                <li class="mt-2">
-                    <a href="{% url 'patient_detail' notification.patient.id %}" class="text-blue-500 hover:underline">
+                <li class="flex flex-wrap items-center justify-between">
+                    <a href="{% url 'patient_detail' notification.patient.id %}" class="text-blue-500 hover:underline flex-1 truncate">
                         {{ notification.patient.username }} - {{ notification.risk_assessment.risk_level }} Risk ({{ notification.risk_assessment.created_at|date:"Y-m-d" }})
                     </a>
-                    <a href="{% url 'mark_notification_as_read' notification.id %}" class="text-green-500 hover:underline ml-2">✔ Mark as Read</a>
+                    <a href="{% url 'mark_notification_as_read' notification.id %}" class="text-green-500 hover:underline ml-2 whitespace-nowrap">
+                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Mark as Read
+                    </a>
                 </li>
                 {% endfor %}
             </ul>
         </div>
         {% endif %}
-
     </aside>
 
-    {% if alerts %}
-    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-4">
-        <p class="font-bold">⚠ High-Risk Patients Alert:</p>
-        <ul>
-            {% for alert in alerts %}
-            <li class="mt-2">
-                <a href="{% url 'patient_detail' alert.patient.id %}" class="text-blue-500 hover:underline">
-                    {{ alert.patient.username }} - {{ alert.risk_assessment.risk_level }} Risk ({{ alert.risk_assessment.created_at|date:"Y-m-d" }})
-                </a>
-                <a href="{% url 'mark_alert_as_read' alert.id %}" class="text-green-500 hover:underline ml-2">✔ Mark as Read</a>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
-
-    <!-- ✅ Main Content -->
-    <main class="flex-1 p-6">
-        
-        <!-- 📊 Risk Analysis Section -->
-        {% block doctor_content %}
-        <h2 class="text-2xl font-bold text-blue-900">Doctor Dashboard Overview</h2>
-        <div class="grid grid-cols-3 gap-6 mt-6">
-            <div class="bg-white p-6 shadow rounded-lg">
-                <h3 class="text-xl font-semibold">Total Patients</h3>
-                <p class="text-2xl text-gray-700">{{ total_patients }}</p>
-            </div>
-            <div class="bg-white p-6 shadow rounded-lg">
-                <h3 class="text-xl font-semibold text-red-600">High-Risk Assessments</h3>
-                <p class="text-2xl text-red-600">{{ high_risk_patients }}</p>
-            </div>
-            <div class="bg-white p-6 shadow rounded-lg">
-                <h3 class="text-xl font-semibold text-green-600">Low-Risk Assessment</h3>
-                <p class="text-2xl text-green-600">{{ low_risk_patients }}</p>
-            </div>
-        </div>
-
-        <!-- 🔔 Notifications Panel -->
-        <h2 class="text-2xl font-bold text-blue-900 mt-6">High-Risk Alerts</h2>
-        <div class="bg-white p-4 shadow-md rounded-lg">
-            <ul class="list-disc pl-6">
-                {% for alert in risk_alerts %}
-                <li class="mt-2 text-red-600 font-semibold">{{ alert }}</li>
-                {% empty %}
-                <li class="text-gray-600">No alerts at the moment.</li>
+    <!-- Main Content -->
+    <main class="flex-1 p-4 md:p-6 overflow-y-auto">
+        {% if alerts %}
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-lg">
+            <p class="font-bold flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                High-Risk Patients Alert:
+            </p>
+            <ul class="mt-2 space-y-2">
+                {% for alert in alerts %}
+                <li class="flex flex-wrap items-center justify-between">
+                    <a href="{% url 'patient_detail' alert.patient.id %}" class="text-blue-500 hover:underline flex-1 truncate">
+                        {{ alert.patient.username }} - {{ alert.risk_assessment.risk_level }} Risk ({{ alert.risk_assessment.created_at|date:"Y-m-d" }})
+                    </a>
+                    <a href="{% url 'mark_alert_as_read' alert.id %}" class="text-green-500 hover:underline ml-2 whitespace-nowrap">
+                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Mark as Read
+                    </a>
+                </li>
                 {% endfor %}
             </ul>
         </div>
-
-        <p class="text-gray-600 mt-2">Manage your patient appointments.</p>
-    
-        <ul class="mt-4">
-            {% for appointment in appointments|slice:":5" %}
-            <li class="p-4 bg-white shadow rounded mb-2">
-                📅 <strong>{{ appointment.appointment_date }}</strong> - 
-                🏥 <strong>{{ appointment.patient.username }}</strong> - 
-                Status: <span class="font-bold {% if appointment.status == 'Pending' %}text-yellow-500{% elif appointment.status == 'Confirmed' %}text-green-500{% elif appointment.status == 'Cancelled' %}text-red-500{% elif appointment.status == 'Completed' %}text-gray-500{% endif %}">{{ appointment.status }}</span>
-                <a href="{% url 'doctor_consultation' appointment.id %}" class="ml-4 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    📝 View
-                </a>
-            </li>
-            {% empty %}
-            <p class="text-gray-500 mt-4">No appointments yet.</p>
-            {% endfor %}
-        </ul>
+        {% endif %}
         
+        <!-- Dashboard Content -->
+        {% block doctor_content %}
+        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-blue-900 mb-4">Doctor Dashboard Overview</h2>
+            
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">Total Patients</h3>
+                            <p class="text-2xl font-semibold text-gray-800">{{ total_patients }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">High-Risk Patients</h3>
+                            <p class="text-2xl font-semibold text-red-600">{{ high_risk_patients }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">Low-Risk Patients</h3>
+                            <p class="text-2xl font-semibold text-green-600">{{ low_risk_patients }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Section -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-blue-900">High-Risk Alerts</h2>
+                <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                    {{ risk_alerts|length }} Active
+                </span>
+            </div>
+            
+            <div class="space-y-3">
+                {% for alert in risk_alerts %}
+                <div class="flex items-start p-4 border border-red-200 rounded-lg bg-red-50">
+                    <div class="flex-shrink-0 mt-1 mr-3 text-red-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-red-800">{{ alert }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No alerts at the moment</h3>
+                    <p class="mt-1 text-sm text-gray-500">All patients are currently at low risk.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Appointments Section -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-blue-900">Upcoming Appointments</h2>
+                <a href="{% url 'doctor_appointments' %}" class="text-sm text-blue-600 hover:underline">View all</a>
+            </div>
+            
+            <div class="space-y-3">
+                {% for appointment in appointments|slice:":5" %}
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div class="mb-2 sm:mb-0">
+                        <div class="flex items-center">
+                            <span class="text-gray-500 mr-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </span>
+                            <span class="font-medium">{{ appointment.appointment_date }}</span>
+                        </div>
+                        <div class="flex items-center mt-1">
+                            <span class="text-gray-500 mr-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                            </span>
+                            <span>{{ appointment.patient.username }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                            {% if appointment.status == 'Pending' %}bg-yellow-100 text-yellow-800
+                            {% elif appointment.status == 'Confirmed' %}bg-green-100 text-green-800
+                            {% elif appointment.status == 'Cancelled' %}bg-red-100 text-red-800
+                            {% elif appointment.status == 'Completed' %}bg-gray-100 text-gray-800
+                            {% endif %}">
+                            {{ appointment.status }}
+                        </span>
+                        <a href="{% url 'doctor_consultation' appointment.id %}" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            View
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No upcoming appointments</h3>
+                    <p class="mt-1 text-sm text-gray-500">You don't have any appointments scheduled yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
         {% endblock %}
     </main>
 </div>
 
-{% include 'footer.html' %}
+<script>
+    // Mobile menu toggle
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('translate-x-0');
+        sidebar.classList.toggle('-translate-x-full');
+    });
+</script>
 
 {% endblock %}

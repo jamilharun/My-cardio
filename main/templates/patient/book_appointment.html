@@ -1,27 +1,73 @@
 {% extends 'patient_dashboard.html' %}
 
 {% block patient_content %}
+<div class="max-w-2xl mx-auto p-4 md:p-6">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 text-white">
+            <h1 class="text-2xl font-bold flex items-center">
+                <i class="fas fa-calendar-plus mr-3"></i> Book Appointment
+            </h1>
+            <p class="mt-1 text-blue-100">With Dr. {{ doctor.username }}</p>
+        </div>
 
-<div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Book Appointment with Dr. {{ doctor.username }}</h1>
-    <form method="post" class="bg-white p-6 rounded-lg shadow-md">
-        {% csrf_token %}
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="id_date">Date</label>
-            {{ form.date }}
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="id_time">Time</label>
-            {{ form.time }}
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="id_consultation_notes">Consultation Notes</label>
-            {{ form.consultation_notes }}
-        </div>
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-            Book Appointment
-        </button>
-    </form>
+        <!-- Form -->
+        <form method="post" class="p-6">
+            {% csrf_token %}
+            
+            <div class="space-y-4">
+                <!-- Date Field -->
+                <div>
+                    <label for="id_date" class="block text-gray-700 font-medium mb-2">Date</label>
+                    <div class="relative">
+                        {{ form.date }}
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="far fa-calendar text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time Field -->
+                <div>
+                    <label for="id_time" class="block text-gray-700 font-medium mb-2">Time</label>
+                    <div class="relative">
+                        {{ form.time }}
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="far fa-clock text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consultation Notes -->
+                <div>
+                    <label for="id_consultation_notes" class="block text-gray-700 font-medium mb-2">Notes</label>
+                    {{ form.consultation_notes }}
+                    <p class="mt-1 text-sm text-gray-500">Briefly describe the reason for your appointment</p>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mt-8">
+                <button type="submit" 
+                        class="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center">
+                    <i class="fas fa-calendar-check mr-2"></i> Book Appointment
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
+<style>
+    /* Style the date and time inputs */
+    input[type="date"], input[type="time"] {
+        @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+        -webkit-appearance: none;
+    }
+    
+    /* Style the textarea */
+    textarea {
+        @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+        min-height: 100px;
+    }
+</style>
 {% endblock %}

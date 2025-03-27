@@ -3,63 +3,121 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MediRisk{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'css/output.css' %}" />
-    <!-- Tailwind CSS -->
-
     <!-- icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
   </head>
-  <body class="bg-gray-100">
+  <body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- Mobile menu button -->
+    <div class="md:hidden fixed top-4 right-4 z-50">
+      <button id="mobile-menu-button" class="p-2 rounded-md text-white bg-blue-600 focus:outline-none">
+        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
 
-    <nav class="p-4 bg-blue-500 text-white flex justify-between">
-      <a href="/" class="text-3xl font-bold">MediRisk</a>
-      <div>
-
+    <!-- Navigation -->
+    <nav class="p-4 bg-blue-500 text-white flex flex-col md:flex-row justify-between items-center sticky top-0 z-40">
+      <a href="/" class="text-2xl md:text-3xl font-bold mb-4 md:mb-0">MediRisk</a>
+      
+      <div id="nav-links" class="hidden md:flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4 w-full md:w-auto">
         {% if user.is_authenticated %}
+          <div class="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
             {% if user.role == "patient" %}
-                <a href="{% url 'patient_dashboard' %}" class="text-white hover:underline">Patient Dashboard</a>
+              <a href="{% url 'patient_dashboard' %}" class="text-white hover:underline px-3 py-1 rounded hover:bg-blue-600 transition">Patient Dashboard</a>
             {% elif user.role == "admin" %}
-                <a href="{% url 'admin_dashboard' %}" class="text-white hover:underline mr-4">Admin Dashboard</a>
+              <a href="{% url 'admin_dashboard' %}" class="text-white hover:underline px-3 py-1 rounded hover:bg-blue-600 transition">Admin Dashboard</a>
             {% elif user.role == "doctor" %}
-                <a href="{% url 'doctor_dashboard' %}" class="text-white hover:underline mr-4">Doctor Dashboard</a>
+              <a href="{% url 'doctor_dashboard' %}" class="text-white hover:underline px-3 py-1 rounded hover:bg-blue-600 transition">Doctor Dashboard</a>
             {% endif %}
             
-            <a href="{% url 'profile' %}" class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
-              Profile
+            <a href="{% url 'profile' %}" class="px-3 py-1 text-white bg-blue-600 rounded hover:bg-blue-700 transition whitespace-nowrap">
+              <i class="fas fa-user mr-1"></i> Profile
             </a>
-            <a href="{% url 'logout' %}" class="bg-red-500 px-4 py-2 rounded">Logout</a>
+            <a href="{% url 'logout' %}" class="px-3 py-1 bg-red-500 rounded hover:bg-red-600 transition whitespace-nowrap">
+              <i class="fas fa-sign-out-alt mr-1"></i> Logout
+            </a>
+          </div>
         {% else %}
-            <a href="{% url 'login' %}" class="bg-green-500 px-4 py-2 rounded">Login</a>
+          <a href="{% url 'login' %}" class="px-3 py-1 bg-green-500 rounded hover:bg-green-600 transition whitespace-nowrap">
+            <i class="fas fa-sign-in-alt mr-1"></i> Login
+          </a>
         {% endif %}
       </div>
     </nav>
-    <div class="lg:container px-4 sm:px-6 lg:px-8 mx-auto h-screen">
+
+    <!-- Main content -->
+    <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {% block content %}{% endblock %}
-    </div>
-    
-  
-    
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6 mt-auto">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="mb-4 md:mb-0">
+            <h3 class="text-xl font-bold">MediRisk</h3>
+            <p class="text-gray-400">Health Risk Assessment System</p>
+          </div>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-400 hover:text-white transition">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+        <div class="border-t border-gray-700 mt-6 pt-6 text-sm text-gray-400 text-center">
+          &copy; {% now "Y" %} MediRisk. All rights reserved.
+        </div>
+      </div>
+    </footer>
+
     <script>
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', function() {
+        const navLinks = document.getElementById('nav-links');
+        navLinks.classList.toggle('hidden');
+        navLinks.classList.toggle('flex');
+      });
+
+      // Close mobile menu when clicking outside
+      document.addEventListener('click', function(event) {
+        const navLinks = document.getElementById('nav-links');
+        const menuButton = document.getElementById('mobile-menu-button');
+        
+        if (!navLinks.contains(event.target) && event.target !== menuButton && !menuButton.contains(event.target)) {
+          navLinks.classList.add('hidden');
+          navLinks.classList.remove('flex');
+        }
+      });
+
+      // Responsive footer handling
       function toggleFooter() {
-          var footer = document.getElementById("footer");
-          var windowHeight = window.innerHeight; // Viewport height
-          var pageHeight = document.documentElement.scrollHeight; // Total page height
-  
-          if (pageHeight > windowHeight * 1.5) {  // If page is significantly longer
-              footer.style.display = "none";  // Hide footer
-          } else {
-              footer.style.display = "block"; // Show footer
-          }
+        var footer = document.querySelector("footer");
+        var windowHeight = window.innerHeight;
+        var pageHeight = document.documentElement.scrollHeight;
+        var mainHeight = document.querySelector("main").scrollHeight;
+
+        if (mainHeight > windowHeight * 0.7) {
+          footer.style.display = "block";
+        } else {
+          footer.style.display = "none";
+        }
       }
-  
-      // Run on page load and when resizing
+
       document.addEventListener("DOMContentLoaded", toggleFooter);
       window.addEventListener("resize", toggleFooter);
-  </script>
-  
+    </script>
   </body>
 </html>
