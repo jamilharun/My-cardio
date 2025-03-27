@@ -3,10 +3,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>{% block title %}Risk Assessment{% endblock %}</title>
+    <title>{% block title %}MediRisk{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}" />
-    <!-- <link rel="stylesheet" type="text/css" href="{% static 'css/output.css' %}" /> -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/output.css' %}" />
     <!-- Tailwind CSS -->
 
     <!-- icons -->
@@ -16,7 +16,7 @@
   <body class="bg-gray-100">
 
     <nav class="p-4 bg-blue-500 text-white flex justify-between">
-      <a href="/" class="text-3xl font-bold">My Cardio</a>
+      <a href="/" class="text-3xl font-bold">MediRisk</a>
       <div>
 
         {% if user.is_authenticated %}
