@@ -1288,3 +1288,34 @@ class SimplePasswordResetView(PasswordResetView):
                 print(f"DEBUG: Stored Reset Link: {reset_link}")  # 🔍 Debugging Output
 
         return response  # ✅ Return the response at the end
+
+@login_required
+def patient_detail_assessment(request, assessment_id):
+    # Verify the user is a doctor
+    if not request.user.role == 'doctor':
+        return JsonResponse({'error': 'Unauthorized access'}, status=403)
+    
+    # Get the assessment
+    assessment = get_object_or_404(RiskAssessmentResult, id=assessment_id)
+    
+    # Verify the doctor is assigned to this patient
+    is_assigned = DoctorPatientAssignment.objects.filter(
+        doctor=request.user,
+        patient=assessment.user
+    ).exists()
+    
+    if not is_assigned:
+        return JsonResponse({'error': 'You are not assigned to this patient'}, status=403)
+    
+    # Get all assessments for this patient (sorted by most recent first)
+    all_assessments = RiskAssessmentResult.objects.filter(
+        user=assessment.user
+    ).order_by('-created_at')
+    
+    context = {
+        'assessment': assessment,
+        'patient': assessment.user,
+        'all_assessments': all_assessments,
+    }
+    
+    return render(request, 'doctor/patient_assessment_detail.html', context)
