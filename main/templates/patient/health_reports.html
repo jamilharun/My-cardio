@@ -1,19 +1,99 @@
 {% extends 'patient_dashboard.html' %}
 
 {% block patient_content %}
-<div class="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
-    <h2 class="text-2xl font-bold text-gray-700">📊 Health Reports</h2>
-    <p class="text-gray-600 mt-2">Your latest health assessments.</p>
+<div class="max-w-4xl mx-auto p-4 md:p-6">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 text-white">
+            <h1 class="text-2xl font-bold flex items-center">
+                <i class="fas fa-file-medical-alt mr-3"></i> Health Reports
+            </h1>
+            <p class="mt-1 text-blue-100">Your latest health metrics and assessments</p>
+        </div>
 
-    {% if latest_report %}
-    <ul class="mt-4">
-        <li class="p-4 bg-white shadow rounded mb-2">🩸 Blood Pressure: {{ latest_report.blood_pressure }} ({{ latest_report.get_bp_status }})</li>
-        <li class="p-4 bg-white shadow rounded mb-2">💉 Sugar Level: {{ latest_report.sugar_level }} ({{ latest_report.get_sugar_status }})</li>
-        <li class="p-4 bg-white shadow rounded mb-2">❤️ Heart Rate: {{ latest_report.heart_rate }} bpm ({{ latest_report.get_hr_status }})</li>
-        <li class="p-4 bg-gray-100 shadow rounded mt-4">📅 Report Date: {{ latest_report.assessment_date|date:"F j, Y" }}</li>
-    </ul>
-    {% else %}
-    <p class="text-gray-500 mt-4">No health reports available.</p>
-    {% endif %}
+        <!-- Content -->
+        <div class="p-6">
+            {% if latest_report %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Blood Pressure -->
+                <div class="bg-white p-4 rounded-lg border-l-4 border-red-500 shadow-sm">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Blood Pressure</h3>
+                            <p class="text-2xl font-bold mt-1">{{ latest_report.blood_pressure }} mmHg</p>
+                            <p class="text-sm mt-1 text-gray-600">{{ latest_report.get_bp_status }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sugar Level -->
+                <div class="bg-white p-4 rounded-lg border-l-4 border-blue-500 shadow-sm">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Glucose Level</h3>
+                            <p class="text-2xl font-bold mt-1">{{ latest_report.sugar_level }} mg/dL</p>
+                            <p class="text-sm mt-1 text-gray-600">{{ latest_report.get_sugar_status }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Heart Rate -->
+                <div class="bg-white p-4 rounded-lg border-l-4 border-green-500 shadow-sm">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Heart Rate</h3>
+                            <p class="text-2xl font-bold mt-1">{{ latest_report.heart_rate }} bpm</p>
+                            <p class="text-sm mt-1 text-gray-600">{{ latest_report.get_hr_status }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Date -->
+                <div class="bg-white p-4 rounded-lg border-l-4 border-purple-500 shadow-sm">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                            <i class="far fa-calendar"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Report Date</h3>
+                            <p class="text-xl font-bold mt-1">{{ latest_report.assessment_date|date:"F j, Y" }}</p>
+                            <p class="text-sm mt-1 text-gray-600">Last assessment</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            {% if latest_report.recommendations %}
+            <div class="mt-6 bg-blue-50 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold text-blue-800 mb-2">Recommendations</h3>
+                <div class="prose max-w-none">
+                    {{ latest_report.recommendations|linebreaks }}
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-8">
+                <i class="fas fa-file-medical text-4xl text-gray-400 mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-600">No health reports available</h3>
+                <p class="text-gray-500 mt-2">Complete a health assessment to generate your first report.</p>
+                <a href="{% url 'health_risk' %}" 
+                   class="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                    <i class="fas fa-heartbeat mr-2"></i> Take Assessment
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

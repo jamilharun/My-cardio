@@ -1,73 +1,124 @@
 {% extends 'patient_dashboard.html' %}
 
 {% block patient_content %}
-<h1 class="text-3xl font-bold text-blue-600 text-center">Health Risk History</h1>
+<div class="max-w-6xl mx-auto p-4 md:p-6">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 text-white">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <h1 class="text-2xl font-bold flex items-center">
+                    <i class="fas fa-history mr-3"></i> Health Risk History
+                </h1>
+                <a href="{% url 'health_risk' %}" 
+                   class="mt-2 md:mt-0 px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 flex items-center">
+                    <i class="fas fa-plus mr-2"></i> New Assessment
+                </a>
+            </div>
+        </div>
 
-<div class="max-w-2xl mx-auto bg-white p-4 shadow-lg rounded-lg mt-6">
-    {% if risk_history %}
-    
-    <!-- Responsive Table Wrapper -->
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-white border-collapse border border-gray-300">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="py-2 px-4 border-b text-left">Date</th>
-                    <th class="py-2 px-4 border-b text-left">Age</th>
-                    <th class="py-2 px-4 border-b text-left">Gender</th>
-                    <th class="py-2 px-4 border-b text-left">Blood Pressure</th>
-                    <th class="py-2 px-4 border-b text-left">Cholesterol</th>
-                    <th class="py-2 px-4 border-b text-left">Glucose</th>
-                    <th class="py-2 px-4 border-b text-left">Risk Level</th>
-                    <th class="py-2 px-4 border-b text-left">Probability</th>
-                    <th class="py-2 px-4 border-b text-left">Explanation</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for result in risk_history %}
-                <tr class="hover:bg-gray-100 even:bg-gray-50">
-                    <td class="py-2 px-4 border-b whitespace-nowrap">{{ result.created_at }}</td>
-                    <td class="py-2 px-4 border-b">{{ result.age }}</td>
-                    <td class="py-2 px-4 border-b">{{ result.gender }}</td>
-                    <td class="py-2 px-4 border-b text-right">{{ result.blood_pressure }}</td>
-                    <td class="py-2 px-4 border-b text-right">{{ result.cholesterol_level }}</td>
-                    <td class="py-2 px-4 border-b text-right">{{ result.glucose_level }}</td>
-                    <td class="py-2 px-4 border-b font-bold 
-                        {% if result.risk_level == 'High' %} text-red-600 
-                        {% elif result.risk_level == 'Medium' %} text-yellow-500 
-                        {% else %} text-green-600 {% endif %}">
-                        {{ result.risk_level }}
-                    </td>
-                    <td class="py-2 px-4 border-b text-right">{{ result.risk_probability|floatformat:2 }}</td>
-                    <td class="py-2 px-4 border-b max-w-xs truncate hover:whitespace-normal">
-                        {{ result.explanation }}
-                    </td>
-                    <td class="py-2 px-4 border-b">
-                        <a href="{% url 'export_report_pdf' result.id %}" class="bg-blue-500 text-white py-1 px-2 rounded-lg hover:bg-blue-600">
-                            Download PDF
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <!-- Content -->
+        <div class="p-6">
+            {% if risk_history %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BP</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMI</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cholesterol</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Glucose</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Level</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for result in risk_history %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ result.created_at|date:"M j, Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ result.age }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ result.gender }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ result.blood_pressure }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ result.bmi }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ result.cholesterol_level }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ result.glucose_level }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs rounded-full font-medium 
+                                    {% if result.risk_level == 'High' %}bg-red-100 text-red-800
+                                    {% elif result.risk_level == 'Medium' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-green-100 text-green-800{% endif %}">
+                                    {{ result.risk_level }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex space-x-2">
+                                    <a href="{% url 'assessment_detail' result.id %}" 
+                                       class="text-blue-600 hover:text-blue-900 flex items-center">
+                                        <i class="fas fa-eye mr-1"></i> View
+                                    </a>
+                                    <a href="{% url 'export_report_pdf' result.id %}" 
+                                       class="text-green-600 hover:text-green-900 flex items-center">
+                                        <i class="fas fa-file-pdf mr-1"></i> PDF
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="mt-6 flex items-center justify-between">
+                <div class="text-sm text-gray-500">
+                    Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </div>
+                <div class="flex space-x-2">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" 
+                       class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                        Previous
+                    </a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" 
+                       class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                        Next
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-8">
+                <i class="fas fa-file-medical text-4xl text-gray-400 mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-600">No assessment history found</h3>
+                <p class="text-gray-500 mt-2">Complete your first health risk assessment to get started.</p>
+                <a href="{% url 'health_risk' %}" 
+                   class="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                    <i class="fas fa-heartbeat mr-2"></i> Take Assessment
+                </a>
+            </div>
+            {% endif %}
+        </div>
     </div>
-
-    {% else %}
-    <p class="text-center text-gray-600">No risk assessment history found.</p>
-    {% endif %}
 </div>
-
-<!-- <div class="text-center mt-6">
-    <a href="{% url 'health_risk' %}" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
-        Back to Risk Assessment
-    </a>
-
-    {% if report and report.id %}
-    <a href="{% url 'export_report_pdf' report.id %}" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">
-        Download Report as PDF
-    </a>
-    {% else %}
-    <p class="text-gray-600 mt-2">Here are your past health risk assessments.</p>
-    {% endif %}
-</div> -->
 {% endblock %}

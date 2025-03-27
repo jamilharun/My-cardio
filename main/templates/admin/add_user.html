@@ -2,46 +2,152 @@
 {% block title %}Add User{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto mt-8">
-    <!-- 🔙 Back Button -->
-    <a href="{% url 'manage_users' %}" class="inline-block mb-4 text-blue-500 hover:underline flex items-center">
-        🔙 Back to Manage Users
+<div class="max-w-2xl mx-auto p-4 md:p-6">
+    <!-- Back Button -->
+    <a href="{% url 'manage_users' %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6 transition-colors">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to Manage Users
     </a>
 
-    <!-- 🏷️ Page Title -->
-    <h1 class="text-3xl font-bold text-blue-600 text-center">Add New User</h1>
+    <!-- Page Title -->
+    <div class="text-center mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center justify-center">
+            <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            </svg>
+            Add New User
+        </h1>
+        <p class="text-gray-600 mt-2">Fill in the details below to create a new user account</p>
+    </div>
 
-    <!-- 📝 User Form -->
-    <div class="bg-white p-6 shadow-lg rounded-lg mt-6">
-        <form method="post" class="space-y-4">
+    <!-- User Form -->
+    <div class="bg-white p-6 md:p-8 shadow-md rounded-xl border border-gray-100">
+        <form method="post" class="space-y-6">
             {% csrf_token %}
             
-            <!-- 🏷️ Custom Form Styling -->
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-semibold">Username</label>
+            <!-- Username Field -->
+            <div class="space-y-2">
+                <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    Username
+                    <span class="text-red-500">*</span>
+                </label>
                 {{ form.username }}
+                {% if form.username.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.username.errors.as_text }}</p>
+                {% endif %}
             </div>
             
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-semibold">Email</label>
+            <!-- Email Field -->
+            <div class="space-y-2">
+                <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    Email
+                    <span class="text-red-500">*</span>
+                </label>
                 {{ form.email }}
+                {% if form.email.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.email.errors.as_text }}</p>
+                {% endif %}
             </div>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-semibold">Role</label>
-                {{ form.role }}
+            <!-- Role Field -->
+            <div class="space-y-2">
+                <label for="{{ form.role.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    Role
+                    <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    {{ form.role }}
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                </div>
+                {% if form.role.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.role.errors.as_text }}</p>
+                {% endif %}
             </div>
 
-            <div class="flex flex-col">
-                <label class="text-gray-700 font-semibold">Password</label>
-                {{ form.password }}
+            <!-- Password Field -->
+            <div class="space-y-2">
+                <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    Password
+                    <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    {{ form.password }}
+                    <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none" onclick="togglePasswordVisibility()">
+                        <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </button>
+                </div>
+                {% if form.password.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.password.errors.as_text }}</p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">Password must be at least 8 characters long</p>
             </div>
 
-            <!-- ✅ Save Button -->
-            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
-                ➕ Save User
-            </button>
+            <!-- Save Button -->
+            <div class="pt-4">
+                <button type="submit" class="w-full flex justify-center items-center px-4 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                    </svg>
+                    Save User
+                </button>
+            </div>
         </form>
     </div>
 </div>
+
+<script>
+    // Toggle password visibility
+    function togglePasswordVisibility() {
+        const passwordField = document.getElementById('{{ form.password.id_for_label }}');
+        const eyeIcon = document.getElementById('eye-icon');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+        } else {
+            passwordField.type = 'password';
+            eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+        }
+    }
+</script>
+
+<style>
+    /* Custom form input styling */
+    input, select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        background-color: #f9fafb;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    input:focus, select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        background-color: white;
+    }
+    
+    /* Custom select dropdown arrow */
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 1.5em;
+    }
+</style>
+
 {% endblock %}

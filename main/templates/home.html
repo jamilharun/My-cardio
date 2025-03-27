@@ -1,110 +1,205 @@
 {% extends 'base.html' %}
 
-{% block title %}My Cardio - Risk Assessment{% endblock %}
+{% block title %}MediRisk - Risk Assessment{% endblock %}
 
 {% block content %}
 
 {% load static %}
 
 <!-- Hero Section -->
-<section class="relative bg-blue-600 text-white text-center py-20 px-6 rounded-2xl mt-40 ">
-    <div class="max-w-3xl mx-auto ">
-        <h1 class="text-7xl lg:text-5xl font-bold leading-tight">Take Control of Your Heart Health</h1>
-        <p class="mt-4 text-6xl pt-5 lg:pt-0 lg:text-lg opacity-90">Assess your cardiovascular risks with our AI-powered platform.</p>
+<section class="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white text-center py-12 md:py-20 px-6 rounded-2xl mt-8 md:mt-16 mb-16 overflow-hidden">
+    <!-- Decorative elements -->
+    <div class="absolute top-0 left-0 w-full h-full opacity-10">
+        <div class="absolute top-20 left-10 w-32 h-32 rounded-full bg-blue-400"></div>
+        <div class="absolute bottom-10 right-10 w-40 h-40 rounded-full bg-blue-300"></div>
+    </div>
+    
+    <div class="max-w-4xl mx-auto relative z-10">
+        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-5xl font-bold leading-tight mb-4 animate-fadeIn">
+            Take Control of Your <span class="text-blue-200">Heart Health</span>
+        </h1>
+        <p class="text-xl md:text-2xl lg:text-lg opacity-90 mb-8 max-w-2xl mx-auto">
+            Assess your cardiovascular risks with our AI-powered platform.
+        </p>
 
-        {% if user.is_authenticated %}
-            {% if user.role == "patient" %}
-                <a href="{% url 'patient_dashboard' %}" class="mt-6 inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition">
-                    Patient Dashboard
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            {% if user.is_authenticated %}
+                {% if user.role == "patient" %}
+                    <a href="{% url 'patient_dashboard' %}" class="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg shadow-lg hover:bg-gray-100 transition transform hover:-translate-y-1">
+                        <div class="flex items-center justify-center">
+                            <i class="fas fa-heartbeat mr-2"></i>
+                            Patient Dashboard
+                        </div>
+                    </a>
+                {% elif user.role == "admin" %}
+                    <a href="{% url 'admin_dashboard' %}" class="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg shadow-lg hover:bg-gray-100 transition transform hover:-translate-y-1">
+                        Admin Dashboard
+                    </a>
+                {% elif user.role == "doctor" %}
+                    <a href="{% url 'doctor_dashboard' %}" class="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg shadow-lg hover:bg-gray-100 transition transform hover:-translate-y-1">
+                        <div class="flex items-center justify-center">
+                            <i class="fas fa-user-md mr-2"></i>
+                            Doctor Dashboard
+                        </div>
+                    </a>
+                {% endif %}
+
+                <a href="{% url 'logout' %}" class="px-8 py-3 bg-red-500 text-white rounded-lg shadow-lg hover:bg-red-600 transition transform hover:-translate-y-1">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        Logout
+                    </div>
                 </a>
-            {% elif user.role == "admin" %}
-                <a href="{% url 'admin_dashboard' %}" class="mt-6 inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition">
-                    Admin Dashboard
+                
+            {% else %}
+                <a href="{% url 'register' %}" class="px-8 py-3 bg-green-500 text-white rounded-lg shadow-lg hover:bg-green-600 transition transform hover:-translate-y-1">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-play-circle mr-2"></i>
+                        Get Started
+                    </div>
                 </a>
-            {% elif user.role == "doctor" %}
-                <a href="{% url 'doctor_dashboard' %}" class="mt-6 inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition">
-                    Doctor Dashboard
+                <a href="{% url 'login' %}" class="px-8 py-3 bg-gray-700 text-white rounded-lg shadow-lg hover:bg-gray-800 transition transform hover:-translate-y-1">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Login
+                    </div>
                 </a>
             {% endif %}
-
-            <a href="{% url 'logout' %}" class="mt-6 inline-block bg-red-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-red-600 transition ml-2">
-                Logout
-            </a>
-            
-        {% else %}
-            <a href="{% url 'register' %}" class="mt-6 w-40 h-16 lg:w-32 lg:h-14 inline-block bg-green-500 text-white  rounded-lg shadow-md hover:bg-green-600 transition">
-                <div class="flex justify-center items-center h-full">
-                    <p class="text-center my-auto lg:text-base text-lg">Get Started</p>
-                </div>
-            </a>
-            <a href="{% url 'login' %}" class="mt-6 w-40 h-16 lg:w-32 lg:h-14 inline-block items-center bg-gray-700 text-white   rounded-lg shadow-md hover:bg-gray-800 transition ml-2">
-                <div class="flex justify-center items-center h-full" >
-                    <p class="lg:text-base text-lg">Login</p>
-                </div>
-            </a>
-        {% endif %}
+        </div>
     </div>
 </section>
 
-
 <!-- Features Section -->
-<section class="py-20 text-center">
-    <div class="max-w-5xl mx-auto">
-        <h2 class="text-5xl font-bold text-gray-800">Why Choose My Cardio?</h2>
-        <p class="lg:text-lg text-3xl text-gray-600 mt-4">Our platform offers personalized risk assessment based on medical data.</p>
+<section class="py-12 md:py-20 px-4">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Why Choose <span class="text-blue-600">MediRisk</span>?</h2>
+            <div class="w-20 h-1 bg-blue-500 mx-auto mb-4"></div>
+            <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
+                Our platform offers personalized risk assessment based on medical data.
+            </p>
+        </div>
 
-        <div class="flex flex-col lg:flex-row gap-8 mt-12">
-            <div class="p-6 bg-white shadow-lg rounded-lg lg:h-96 flex flex-col justify-between items-center">
-                <img src="{% static 'assets/aipoeredvardio.jpg' %}" class="mx-auto w-full my-auto lg:w-52" alt="Heart Icon">
-                <div>
-                    <h3 class="lg:text-xl text-5xl font-semibold mt-4">AI-Powered Analysis</h3>
-                    <p class="mt-2 text-5xl lg:text-sm text-gray-600">Get instant insights using advanced machine learning models.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition border-t-4 border-blue-500 transform hover:-translate-y-2">
+                <div class="text-center">
+                    <div class="bg-blue-100 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+                        <img src="{% static 'assets/aipoeredvardio.jpg' %}" class="w-12 h-12 object-contain" alt="AI Icon">
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">AI-Powered Analysis</h3>
+                    <p class="text-gray-600">
+                        Get instant insights using advanced machine learning models trained on thousands of cases.
+                    </p>
                 </div>
             </div>
 
-            <div class="p-6 bg-white shadow-lg rounded-lg lg:h-96 flex flex-col justify-between items-center">
-                <img src="https://img.icons8.com/ios/100/stethoscope.png" class="mx-auto my-auto w-[500px] lg:w-36  " alt="Doctor Icon">
-                <h3 class="lg:text-xl text-5xl font-semibold mt-4">Doctor-Reviewed Reports</h3>
-                <p class="mt-2 text-5xl lg:text-sm text-gray-600">Every assessment is validated by medical professionals.</p>
+            <!-- Feature 2 -->
+            <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition border-t-4 border-blue-500 transform hover:-translate-y-2">
+                <div class="text-center">
+                    <div class="bg-blue-100 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+                        <img src="https://img.icons8.com/ios/100/stethoscope.png" class="w-12 h-12 object-contain" alt="Doctor Icon">
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Doctor-Reviewed</h3>
+                    <p class="text-gray-600">
+                        Every assessment is validated by board-certified cardiologists for accuracy.
+                    </p>
+                </div>
             </div>
 
-            <div class="p-6 bg-white shadow-lg rounded-lg lg:h-96 flex flex-col justify-between items-center">
-                <img src="https://img.icons8.com/ios/100/security-checked.png" class="mx-auto w-[500px] my-auto lg:w-36 " alt="Security Icon">
-                <h3 class="lg:text-xl text-5xl font-semibold mt-4">Secure & Confidential</h3>
-                <p class="mt-2 text-5xl lg:text-sm text-gray-600">Your health data is encrypted and fully secure.</p>
+            <!-- Feature 3 -->
+            <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition border-t-4 border-blue-500 transform hover:-translate-y-2">
+                <div class="text-center">
+                    <div class="bg-blue-100 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+                        <img src="https://img.icons8.com/ios/100/security-checked.png" class="w-12 h-12 object-contain" alt="Security Icon">
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Secure & Private</h3>
+                    <p class="text-gray-600">
+                        HIPAA-compliant encryption ensures your health data remains confidential.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Testimonials Section -->
-<section class="py-20 text-center">
-    <div class="max-w-4xl mx-auto">
-        <h2 class="lg:text-4xl text-5xl font-bold text-gray-800">What Our Users Say</h2>
-        <p class="lg:text-lg text-3xl text-gray-600 mt-4">Join thousands who have improved their heart health with My Cardio.</p>
 
-        <div class="mt-12">
-            <div class="p-6 bg-gray-100 rounded-lg shadow-lg">
-                <p class="italic lg:text-lg text-3xl text-gray-700">"My Cardio gave me insights I never expected. It helped me detect early signs of risk!"</p>
-                <p class="mt-4 font-bold lg:text-lg text-3xl text-gray-800">— John D.</p>
+
+<!-- Testimonials Section -->
+<section class="py-12 md:py-20 px-4">
+    <div class="max-w-4xl mx-auto">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Testimonial 1 -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                        <i class="fas fa-user text-blue-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-800">John D.</h4>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-600 italic">
+                    "MediRisk gave me insights I never expected. It helped me detect early signs of risk that my regular checkup missed!"
+                </p>
             </div>
 
-            <div class="p-6 bg-gray-100 rounded-lg shadow-lg mt-6">
-                <p class="italic lg:text-lg text-3xl text-gray-700">"This tool is a must-have for anyone serious about their health!"</p>
-                <p class="mt-4 font-bold lg:text-lg text-3xl text-gray-800">— Sarah M.</p>
+            <!-- Testimonial 2 -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                        <i class="fas fa-user text-blue-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-800">Sarah M.</h4>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-gray-600 italic">
+                    "This tool is a must-have for anyone serious about their health! The recommendations helped me make important lifestyle changes."
+                </p>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Call to Action -->
-<section class="py-20 bg-blue-600 text-center text-white rounded-2xl">
-    <h2 class="lg:text-5xl text-5xl font-bold">Start Your Risk Assessment Today</h2>
-    <p class="lg:text-lg text-3xl opacity-90 mt-4">It only takes 2 minutes to check your heart health.</p>
+<section class="py-12 md:py-20 bg-gradient-to-r from-blue-600 to-blue-800 text-center text-white rounded-2xl mb-8 mx-4">
+    <div class="max-w-4xl mx-auto px-4">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Start Your Risk Assessment Today</h2>
+        <p class="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
+            It only takes 2 minutes to check your heart health and get personalized recommendations.
+        </p>
 
-    <a href="{% url 'register' %}" class="mt-6 inline-block bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-gray-200 transition">
-        Get Started
-    </a>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{% url 'register' %}" class="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg shadow-lg hover:bg-gray-100 transition transform hover:-translate-y-1">
+                <div class="flex items-center justify-center">
+                    <i class="fas fa-play-circle mr-2"></i>
+                    Get Started Free
+                </div>
+            </a>
+            <a href="#" class="px-8 py-3 bg-transparent border-2 border-white text-white rounded-lg shadow-lg hover:bg-white hover:text-blue-600 transition transform hover:-translate-y-1">
+                <div class="flex items-center justify-center">
+                    <i class="fas fa-question-circle mr-2"></i>
+                    Learn More
+                </div>
+            </a>
+        </div>
+    </div>
 </section>
 
 {% endblock %}
