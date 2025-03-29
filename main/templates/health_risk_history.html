@@ -47,16 +47,22 @@
                                 {{ result.gender }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ result.blood_pressure }}
+                                {{ result.blood_pressure}}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ result.bmi }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ result.cholesterol_level }}
+                                {% if result.cholesterol_level == 0 %}Normal
+                                {% elif result.cholesterol_level == 1 %}Above Normal
+                                {% elif result.cholesterol_level == 2 %}Well Above Normal
+                                {% else %}Unknown{% endif %}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ result.glucose_level }}
+                                {% if result.glucose_level == 0 %}Normal
+                                {% elif result.glucose_level == 1 %}Above Normal
+                                {% elif result.glucose_level == 2 %}Well Above Normal
+                                {% else %}Unknown{% endif %}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 py-1 text-xs rounded-full font-medium 
