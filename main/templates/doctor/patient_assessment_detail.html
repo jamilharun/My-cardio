@@ -45,19 +45,39 @@
                 <div class="space-y-4">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Blood Pressure</p>
-                        <p class="text-gray-900">{{ assessment.blood_pressure }}</p>
+                        <p class="text-gray-900">
+                            {{ assessment.blood_pressure }}
+                        </p>
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">Cholesterol Level</p>
-                        <p class="text-gray-900">{{ assessment.cholesterol_level }}</p>
+                        <p class="text-gray-900">
+                            {% if assessment.cholesterol_level == 0 %}Normal
+                            {% elif assessment.cholesterol_level == 1 %}Above Normal
+                            {% elif assessment.cholesterol_level == 2 %}Well Above Normal
+                            {% else %}Unknown{% endif %}
+                        </p>
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">Glucose Level</p>
-                        <p class="text-gray-900">{{ assessment.glucose_level }}</p>
+                        <p class="text-gray-900">
+                            {% if assessment.glucose_level == 0 %}Normal
+                            {% elif assessment.glucose_level == 1 %}Above Normal
+                            {% elif assessment.glucose_level == 2 %}Well Above Normal
+                            {% else %}Unknown{% endif %}
+                        </p>
                     </div>
                     <div>
-                        <p class="text-sm font-medium text-gray-500">BMI</p>
-                        <p class="text-gray-900">{{ assessment.bmi|default:"N/A" }}</p>
+                        <p class="text-sm font-medium text-gray-500">smoke frequency</p>
+                        <p class="text-gray-900">{{ assessment.smoke_frequency }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">alcohol frequency</p>
+                        <p class="text-gray-900">{{ assessment.alco_frequency }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">workout frequency</p>
+                        <p class="text-gray-900">{{ assessment.workout_frequency }}</p>
                     </div>
                 </div>
             </div>

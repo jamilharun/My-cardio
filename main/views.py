@@ -15,7 +15,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from io import BytesIO
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
@@ -31,6 +31,7 @@ import plotly.graph_objects as go
 import base64
 import json
 import csv
+import io
 
 # debugging tool
 import logging
@@ -569,29 +570,51 @@ def export_users_csv(request):
     response["Content-Disposition"] = 'attachment; filename="anonymized_users.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(["Username", "Email", "Role", "Date Joined"])
+    writer.writerow(["Username", "Email", "Role", "Date Joined"])  # ✅ Correct headers
 
     users = CustomUser.objects.all()
     for user in users:
-        writer.writerow(["User ID", "Role", "Joined Date"])
+        writer.writerow([user.username, user.email, user.role, user.date_joined])  # ✅ Write actual data
 
     return response
 
 @login_required
 @user_passes_test(admin_required)
 def export_risk_assessments_csv(request):
-    """Export Risk Assessment Data as CSV"""
+    """Export all Risk Assessment Data as CSV"""
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="risk_assessments_report.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(["Patient", "Risk Level", "Risk Probability", "Date"])
 
+    # **Column Headers**
+    writer.writerow([
+        "Patient", "Age", "Gender", "Blood Pressure", "Cholesterol Level",
+        "Glucose Level", "BMI", "Risk Level", "Risk Probability",
+        "Explanation", "Recommendations", "Smoke Frequency",
+        "Alcohol Frequency", "Workout Frequency", "Date Created"
+    ])
+
+    # **Fetch all risk assessments**
     assessments = RiskAssessmentResult.objects.all()
     for assessment in assessments:
         writer.writerow([
-            assessment.user.username, assessment.risk_level, 
-            f"{assessment.risk_probability:.2f}", assessment.created_at
+            assessment.user.username if assessment.user else "Anonymous",
+            assessment.age,
+            assessment.gender,
+            assessment.blood_pressure,
+            # ✅ Convert 0/1/2 for BP, Cholesterol, and Glucose into human-readable text
+            "Normal" if assessment.cholesterol_level == 0 else "Above Normal" if assessment.cholesterol_level == 1 else "Well Above Normal",
+            "Normal" if assessment.glucose_level == 0 else "Above Normal" if assessment.glucose_level == 1 else "Well Above Normal",
+            f"{assessment.bmi:.2f}" if assessment.bmi else "N/A",  # Format BMI with 2 decimal places
+            assessment.risk_level,
+            f"{assessment.risk_probability:.2%}",  # Converts to percentage (e.g., 0.15 → "15.00%")
+            assessment.explanation or "N/A",
+            assessment.recommendations or "N/A",
+            assessment.smoke_frequency or "None",
+            assessment.alco_frequency or "None",
+            assessment.workout_frequency if assessment.workout_frequency is not None else "None",
+            assessment.created_at.strftime("%Y-%m-%d %H:%M")  # Format date properly
         ])
 
     return response
@@ -599,53 +622,116 @@ def export_risk_assessments_csv(request):
 @login_required
 @user_passes_test(admin_required)
 def export_users_pdf(request):
-    """Export User Statistics as PDF"""
-    response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="users_report.pdf"'
+    """Export User Statistics as a PDF with better formatting"""
+    buffer = io.BytesIO()
+    pdf = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
 
-    pdf = canvas.Canvas(response, pagesize=letter)
-    pdf.setFont("Helvetica", 12)
-    pdf.drawString(100, 750, "User Statistics Report")
-    
+    # Title
+    title = [["User Statistics Report"]]
+    title_table = Table(title)
+    title_table.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 14),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+    ]))
+    elements.append(title_table)
+
+    # Column Headers
+    data = [["Username", "Email", "Role", "Date Joined"]]
+
     users = CustomUser.objects.all()
-    y = 730
     for user in users:
-        # ✅ Use getattr to avoid AttributeError if date_joined is missing
-        date_joined = getattr(user, "date_joined", "N/A")  
-        pdf.drawString(100, y, f"{user.username} | {user.email} | {user.role} | {date_joined}")
-        y -= 20
-        if y < 100:
-            pdf.showPage()
-            pdf.setFont("Helvetica", 12)
-            y = 750
+        date_joined = user.date_joined.strftime("%Y-%m-%d %H:%M") if user.date_joined else "N/A"
+        data.append([user.username, user.email, user.role, date_joined])
 
-    pdf.showPage()
-    pdf.save()
+    # Create Table
+    table = Table(data, colWidths=[100, 150, 80, 100])
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
+    ]))
+    elements.append(table)
+
+    # Build PDF
+    pdf.build(elements)
+    buffer.seek(0)
+
+    # Create HTTP Response
+    response = HttpResponse(buffer, content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="users_report.pdf"'
     return response
 
 @login_required
 @user_passes_test(admin_required)
 def export_risk_assessments_pdf(request):
-    """Export Risk Assessment Data as PDF"""
+    """Export Risk Assessment Data as a well-formatted PDF"""
     response = HttpResponse(content_type="application/pdf")
     response["Content-Disposition"] = 'attachment; filename="risk_assessments_report.pdf"'
 
-    pdf = canvas.Canvas(response, pagesize=letter)
-    pdf.setFont("Helvetica", 12)
-    pdf.drawString(100, 750, "Risk Assessments Report")
+    # ✅ Switch to Portrait Mode (More Readable)
+    pdf = SimpleDocTemplate(response, pagesize=letter, leftMargin=0.5 * inch, rightMargin=0.5 * inch)
+    elements = []  
 
+    styles = getSampleStyleSheet()
+    title = Paragraph("Risk Assessments Report", styles["Title"])
+    elements.append(title)
+
+    # ✅ Shorter Column Titles to Save Space
+    data = [[
+        "Patient", "Age", "BP", "Chol", "Glu", "BMI", "Risk", "Prob", "Date"
+    ]]
+
+    # ✅ Fetch Risk Assessment Data
     assessments = RiskAssessmentResult.objects.all()
-    y = 730
     for assessment in assessments:
-        pdf.drawString(100, y, f"{assessment.user.username} | {assessment.risk_level} | {assessment.risk_probability:.2f} | {assessment.created_at}")
-        y -= 20
-        if y < 100:
-            pdf.showPage()
-            pdf.setFont("Helvetica", 12)
-            y = 750
+        data.append([
+            assessment.user.username if assessment.user else "Anonymous",
+            assessment.age,
+            assessment.blood_pressure,
+            "N" if assessment.cholesterol_level == 0 else "AN" if assessment.cholesterol_level == 1 else "WAN",
+            "N" if assessment.glucose_level == 0 else "AN" if assessment.glucose_level == 1 else "WAN",
+            f"{assessment.bmi:.1f}" if assessment.bmi else "N/A",
+            assessment.risk_level[:4],  # Show only first 4 letters (e.g., "High")
+            f"{assessment.risk_probability:.1%}",
+            assessment.created_at.strftime("%Y-%m-%d")
+        ])
 
-    pdf.showPage()
-    pdf.save()
+    # ✅ Set Column Widths Dynamically
+    col_widths = [
+        1.2 * inch,  # Patient
+        0.6 * inch,  # Age
+        0.5 * inch,  # BP
+        0.5 * inch,  # Chol
+        0.5 * inch,  # Glu
+        0.8 * inch,  # BMI
+        0.8 * inch,  # Risk
+        0.8 * inch,  # Prob
+        1.2 * inch,  # Date
+    ]
+
+    # ✅ Table Styling
+    table = Table(data, repeatRows=1, colWidths=col_widths)
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 8),  # ✅ Reduce Font Size
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 6),
+        ("BACKGROUND", (0, 1), (-1, -1), colors.beige),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
+    ]))
+
+    elements.append(table)
+    pdf.build(elements)
+
     return response
 
 @login_required

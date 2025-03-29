@@ -60,14 +60,30 @@
         <h2>User Information</h2>
         <p><strong>Age:</strong> {{ report.age }}</p>
         <p><strong>Gender:</strong> {{ report.gender }}</p>
+        <p><strong>BMI:</strong> {{ report.bmi }}</p>
+        <p><strong>smoke frequency:</strong> {{ report.smoke_frequency }}</p>
+        <p><strong>alcohol frequency:</strong> {{ report.alco_frequency }}</p>
+        <p><strong>workout frequency:</strong> {{ report.workout_frequency }}</p>
     </div>
 
     <!-- Assessment Summary -->
     <div class="section">
         <h2>Assessment Summary</h2>
-        <p><strong>Blood Pressure:</strong> {{ report.blood_pressure }}</p>
-        <p><strong>Cholesterol Level:</strong> {{ report.cholesterol_level }}</p>
-        <p><strong>Glucose Level:</strong> {{ report.glucose_level }}</p>
+        <p><strong>Blood Pressure:</strong>
+            {{ report.blood_pressure }}
+        </p>
+        <p><strong>Cholesterol Level:</strong> 
+            {% if report.cholesterol_level == 0 %}Normal
+            {% elif report.cholesterol_level == 1 %}Above Normal
+            {% elif report.cholesterol_level == 2 %}Well Above Normal
+            {% else %}Unknown{% endif %}
+        </p>
+        <p><strong>Glucose Level:</strong> 
+            {% if report.glucose_level == 0 %}Normal
+            {% elif report.glucose_level == 1 %}Above Normal
+            {% elif report.glucose_level == 2 %}Well Above Normal
+            {% else %}Unknown{% endif %}
+        </p>
     </div>
 
     <!-- Risk Level -->

@@ -72,6 +72,22 @@ class HealthRiskForm(forms.Form):
         self.fields["smoke_frequency"].widget.attrs["style"] = "display:none"
         self.fields["alco_frequency"].widget.attrs["style"] = "display:none"
         self.fields["workout_frequency"].widget.attrs["style"] = "display:none"
+    
+    def clean(self):
+        cleaned_data = super().clean()
+
+        smoke = cleaned_data.get("smoke")
+        alco = cleaned_data.get("alco")
+
+        # If user does not smoke, set smoke_frequency to None
+        if smoke == "0":
+            cleaned_data["smoke_frequency"] = None
+
+        # If user does not drink alcohol, set alco_frequency to None
+        if alco == "0":
+            cleaned_data["alco_frequency"] = None
+
+        return cleaned_data
 
 
 class UserForm(forms.ModelForm):

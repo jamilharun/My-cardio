@@ -2,7 +2,7 @@
 {% block title %}Health Report{% endblock %}
 
 {% block content %}
-<a href="{% url 'patient_detail' assessment.user.id %}" class="text-blue-500 hover:underline flex items-center mb-4">
+<a href="{% url 'health_risk_history' %}" class="text-blue-500 hover:underline flex items-center mb-4">
     🔙 Back to Patient Record
 </a>
 
@@ -23,9 +23,35 @@
 
 <table class="min-w-full bg-white shadow-md rounded-lg mt-4">
     <tr><td class="py-2 px-4 border font-semibold">Age</td><td class="py-2 px-4 border">{{ assessment.age }}</td></tr>
-    <tr><td class="py-2 px-4 border font-semibold">Blood Pressure</td><td class="py-2 px-4 border">{{ assessment.blood_pressure }}</td></tr>
-    <tr><td class="py-2 px-4 border font-semibold">Cholesterol Level</td><td class="py-2 px-4 border">{{ assessment.cholesterol_level }}</td></tr>
-    <tr><td class="py-2 px-4 border font-semibold">Glucose Level</td><td class="py-2 px-4 border">{{ assessment.glucose_level }}</td></tr>
+    <tr><td class="py-2 px-4 border font-semibold">Gender</td><td class="py-2 px-4 border">{{ assessment.gender }}</td></tr>
+    <tr><td class="py-2 px-4 border font-semibold">BMI</td><td class="py-2 px-4 border">{{ assessment.bmi }}</td></tr>
+    <tr>
+        <td class="py-2 px-4 border font-semibold">Blood Pressure</td>
+        <td class="py-2 px-4 border">
+            {{ assessment.blood_pressure }}
+        </td>
+    </tr>
+    <tr>
+        <td class="py-2 px-4 border font-semibold">Cholesterol Level</td>
+        <td class="py-2 px-4 border">
+            {% if assessment.cholesterol_level == 0 %}Normal
+            {% elif assessment.cholesterol_level == 1 %}Above Normal
+            {% elif assessment.cholesterol_level == 2 %}Well Above Normal
+            {% else %}Unknown{% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td class="py-2 px-4 border font-semibold">Glucose Level</td>
+        <td class="py-2 px-4 border">
+            {% if assessment.glucose_level == 0 %}Normal
+            {% elif assessment.glucose_level == 1 %}Above Normal
+            {% elif assessment.glucose_level == 2 %}Well Above Normal
+            {% else %}Unknown{% endif %}
+        </td>
+    </tr>    
+    <tr><td class="py-2 px-4 border font-semibold">Smoke Frequebcy</td><td class="py-2 px-4 border">{{ assessment.smoke_frequency }}</td></tr>
+    <tr><td class="py-2 px-4 border font-semibold">Alcohol Frequebcy</td><td class="py-2 px-4 border">{{ assessment.alco_frequency }}</td></tr>
+    <tr><td class="py-2 px-4 border font-semibold">Workout Frequebcy</td><td class="py-2 px-4 border">{{ assessment.workout_frequency }}</td></tr>
 </table>
 
 <!-- 📌 AI Explanation -->
