@@ -95,6 +95,8 @@ psql -U admin -d mycardiodb -h localhost
 
 <!--how odocker commands -->
 
+docker exec -it django_app sh -c "python manage.py runserver 0.0.0.0:8000"
+
 docker restart django_app
 
 docker start relaxed_pare
