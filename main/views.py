@@ -1093,16 +1093,16 @@ def export_patient_pdf(request, patient_id):
 
     # Patient Information Section
     patient_data = [
-        ["<b>Patient Name</b>", patient.get_full_name() or patient.username],
-        ["<b>Email</b>", patient.email],
-        ["<b>Date Joined</b>", patient.date_joined.strftime("%Y-%m-%d")],
-        ["<b>Role</b>", patient.get_role_display()],
+        ["Patient Name", patient.get_full_name() or patient.username],
+        ["Email", patient.email],
+        ["Date Joined", patient.date_joined.strftime("%Y-%m-%d")],
+        ["Role", patient.get_role_display()],
     ]
     
     if hasattr(patient, 'date_of_birth') and patient.date_of_birth:
-        patient_data.append(["<b>Date of Birth</b>", patient.date_of_birth.strftime("%Y-%m-%d")])
+        patient_data.append(["Date of Birth", patient.date_of_birth.strftime("%Y-%m-%d")])
     if hasattr(patient, 'gender') and patient.gender:
-        patient_data.append(["<b>Gender</b>", patient.get_gender_display()])
+        patient_data.append(["Gender", patient.get_gender_display()])
 
     patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
     patient_table.setStyle(TableStyle([
@@ -1114,13 +1114,13 @@ def export_patient_pdf(request, patient_id):
         ('GRID', (0,0), (-1,-1), 1, colors.black),
     ]))
     
-    elements.append(Paragraph("<b>PATIENT INFORMATION</b>", styles['Heading2']))
+    elements.append(Paragraph("PATIENT INFORMATION", styles['Heading2']))
     elements.append(Spacer(1, 12))
     elements.append(patient_table)
     elements.append(Spacer(1, 24))
 
     # Risk Assessments Section
-    elements.append(Paragraph("<b>RISK ASSESSMENT HISTORY</b>", styles['Heading2']))
+    elements.append(Paragraph("RISK ASSESSMENT HISTORY", styles['Heading2']))
     elements.append(Spacer(1, 12))
 
     risk_assessments = RiskAssessmentResult.objects.filter(user=patient).order_by("-created_at")
@@ -1138,16 +1138,16 @@ def export_patient_pdf(request, patient_id):
         )
         
         risk_summary = [
-            ["<b>Risk Level</b>", f"<font color='{risk_color}'>{assessment.risk_level}</font>"],
-            ["<b>Risk Probability</b>", f"{assessment.risk_probability:.2%}"],
-            ["<b>Age at Assessment</b>", assessment.age],
-            ["<b>Blood Pressure</b>", f"{assessment.blood_pressure} mmHg"],
-            ["<b>Cholesterol</b>", assessment.get_cholesterol_level_display() if hasattr(assessment, 'get_cholesterol_level_display') else assessment.cholesterol_level],
-            ["<b>Glucose</b>", assessment.get_glucose_level_display() if hasattr(assessment, 'get_glucose_level_display') else assessment.glucose_level],
-            ["<b>BMI</b>", f"{assessment.bmi:.1f}" if assessment.bmi else "N/A"],
-            ["<b>Smoker</b>", "Yes" if assessment.smoke else "No"],
-            ["<b>Exercise Frequency</b>", f"{assessment.workout_frequency} times/week" if assessment.workout_frequency else "None"],
-            ["<b>Chest Pain</b>", "Yes" if assessment.chestpain else "No"],
+            ["Risk Level", f"<font color='{risk_color}'>{assessment.risk_level}</font>"],
+            ["Risk Probability", f"{assessment.risk_probability:.2%}"],
+            ["Age at Assessment", assessment.age],
+            ["Blood Pressure", f"{assessment.blood_pressure} mmHg"],
+            ["Cholesterol", assessment.get_cholesterol_level_display() if hasattr(assessment, 'get_cholesterol_level_display') else assessment.cholesterol_level],
+            ["Glucose", assessment.get_glucose_level_display() if hasattr(assessment, 'get_glucose_level_display') else assessment.glucose_level],
+            ["BMI", f"{assessment.bmi:.1f}" if assessment.bmi else "N/A"],
+            ["Smoker", "Yes" if assessment.smoke else "No"],
+            ["Exercise Frequency", f"{assessment.workout_frequency} times/week" if assessment.workout_frequency else "None"],
+            ["Chest Pain", "Yes" if assessment.chestpain else "No"],
         ]
         
         # Create assessment table
@@ -1166,12 +1166,12 @@ def export_patient_pdf(request, patient_id):
         elements.append(Spacer(1, 12))
         
         # Explanation and recommendations
-        elements.append(Paragraph("<b>Explanation:</b>", styles['Heading4']))
+        elements.append(Paragraph("Explanation:", styles['Heading4']))
         elements.append(Paragraph(assessment.explanation or "No explanation provided", styles['BodyText']))
         elements.append(Spacer(1, 12))
         
         if assessment.recommendations:
-            elements.append(Paragraph("<b>Recommendations:</b>", styles['Heading4']))
+            elements.append(Paragraph("Recommendations:", styles['Heading4']))
             elements.append(Paragraph(assessment.recommendations, styles['BodyText']))
         
         elements.append(Spacer(1, 24))  # Extra space between assessments
