@@ -76,18 +76,73 @@
                 {% for field in form %}
                     {% if field.name not in "age gender BP cholesterol_level glucose_level" %}
                         <div id="{{ field.id_for_label }}" class="{% if 'frequency' in field.name %}hidden{% endif %}">
-                            <label for="{{ field.id_for_label }}" class="block text-gray-700 font-medium mb-2">{{ field.label }}</label>
+                            <label for="{{ field.id_for_label }}" class="block text-gray-700 font-medium mb-2">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                    <span class="text-red-500">*</span>
+                                {% endif %}
+                            </label>
+                            
                             {% if field.field.widget.input_type == "select" %}
+                                <!-- Select fields -->
                                 <select name="{{ field.name }}" id="{{ field.id_for_label }}"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    {% if not field.field.required %}
+                                        <option value="">-- Select an option --</option>
+                                    {% endif %}
                                     {% for choice in field.field.choices %}
-                                        <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                        <option value="{{ choice.0 }}" 
+                                                {% if field.value == choice.0 %}selected{% endif %}>
+                                            {{ choice.1 }}
+                                        </option>
                                     {% endfor %}
                                 </select>
+                                
+                            {% elif field.field.widget.input_type == "number" %}
+                                <!-- Number input fields -->
+                                <input type="number" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                                    class="placeholder:whitespace-normal w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="
+                                    {% if field.name == 'height' %}Enter height in cm (e.g., 170)
+                                    {% elif field.name == 'weight' %}Enter weight in kg (e.g., 70)
+                                    {% elif field.name == 'maxheartrate' %}Enter your maximum heart rate (e.g., 150)
+                                    {% else %}Enter {{ field.label|lower }}{% endif %}"
+                                    min="{{ field.field.min_value|default_if_none:0 }}"
+                                    max="{{ field.field.max_value|default_if_none:'' }}"
+                                    {% if field.value %}value="{{ field.value }}"{% endif %}
+                                    {% if field.field.required %}required{% endif %}>
+                                
                             {% else %}
+                                <!-- Other input fields (text, etc.) -->
                                 <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="
+                                    {% if field.name == 'chestpain' %}Do you experience chest pain? (Yes/No)
+                                    {% elif field.name == 'exerciseangia' %}Do you get angina during exercise? (Yes/No)
+                                    {% elif field.name == 'restingrelectro' %}Select your ECG results
+                                    {% else %}Enter {{ field.label|lower }}{% endif %}"
+                                    {% if field.value %}value="{{ field.value }}"{% endif %}
+                                    {% if field.field.required %}required{% endif %}>
                             {% endif %}
+                            
+                            <!-- Help text for specific fields -->
+                            <p class="mt-1 text-sm text-gray-500">
+                                {% if field.name == 'height' %}
+                                    Enter your height in centimeters (cm)
+                                {% elif field.name == 'weight' %}
+                                    Enter your weight in kilograms (kg)
+                                {% elif field.name == 'maxheartrate' %}
+                                    Your maximum heart rate during exercise (typically 220 minus your age)
+                                {% elif field.name == 'restingrelectro' %}
+                                    Select your most recent resting electrocardiogram results
+                                {% elif field.name == 'exerciseangia' %}
+                                    Angina is chest pain caused by reduced blood flow to the heart
+                                {% elif field.name == 'chestpain' %}
+                                    Any chest pain or discomfort you experience regularly
+                                {% elif field.name == 'workout_frequency' %}
+                                    How many times per week you exercise
+                                {% endif %}
+                            </p>
                         </div>
                     {% endif %}
                 {% endfor %}

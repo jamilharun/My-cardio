@@ -1,3 +1,4 @@
+import logging
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -11,6 +12,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string 
 from django.urls import reverse
+from django.utils import timezone 
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from io import BytesIO
@@ -23,9 +25,9 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from weasyprint import HTML
 from .forms import (HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientForm, RoleUpdateForm, AppointmentForm, UserUpdateForm,
                     ConsultationForm, RecommendationForm)
-from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report
+from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report, convert_form_data_to_model_format    
 from .models import (RiskAssessmentResult, CustomUser, UserProfile, DoctorPatientAssignment, SystemAlert, Recommendation, Appointment,
-                    RiskAlert, DataAccessLog, EncryptedFieldMixin, Notification)
+                    RiskAlert, DataAccessLog, EncryptedFieldMixin, Notification, TermsAcceptance)
 from .utils import sanitize_text
 import plotly.graph_objects as go
 import base64
@@ -34,7 +36,7 @@ import csv
 import io
 
 # debugging tool
-import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -46,28 +48,49 @@ def home(request):
 @login_required
 def profile_view(request):
     return render(request, 'profile.html', {'user': request.user})
-
 def register_user(request):
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
         password = request.POST["password"]
         role = "patient"
-
+        
+        # Check if terms were accepted
+        terms_accepted = request.POST.get("terms", False)
+        
+        if not terms_accepted:
+            messages.error(request, "You must accept the terms and conditions to register.")
+            return redirect("register")
+            
         if CustomUser.objects.filter(email=email).exists():
             messages.error(request, "Email is already registered.")
             return redirect("register")
 
-        # ✅ Create user
+        # Create user
         user = CustomUser.objects.create_user(username=username, email=email, password=password, role=role)
 
-        # ✅ Manually create UserProfile (in case signals fail)
+
+        # THIS IS WHERE YOU ADD THE TERMS ACCEPTANCE CODE
+        if terms_accepted:
+            # Get client IP address
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                ip = x_forwarded_for.split(',')[0]
+            else:
+                ip = request.META.get('REMOTE_ADDR')
+                
+            TermsAcceptance.objects.create(
+                user=user,
+                ip_address=ip
+            )
+
+        # Manually create UserProfile (in case signals fail)
         UserProfile.objects.get_or_create(user=user)
         
-        # ✅ Auto-login user after registration
+        # Auto-login user after registration
         login(request, user)
         messages.success(request, "Registration successful!")
-        # ✅ Redirect based on role
+        # Redirect based on role
         if role == "doctor":
             return redirect("doctor_dashboard")
         elif role == "admin":
@@ -154,81 +177,82 @@ def health_risk_assessment(request):
     previous_results = None
     report = None
     recommendations = None
-    # personalized_advice = None
 
     if request.user.is_authenticated:
-        # Fetch previous results for the logged-in user
         previous_results = RiskAssessmentResult.objects.filter(user=request.user).order_by("-created_at")
 
     if request.method == "POST":
         form = HealthRiskForm(request.POST)
         if form.is_valid():
-            # Get user input from the form
             user_data = form.cleaned_data
             
-            # Convert gender to numeric format if needed
-            user_data["gender"] = 1 if user_data["gender"].lower() == "male" else 0
-
-            # ✅ Ensure both height and weight are valid before calculating BMI
-            if user_data.get("height") and user_data.get("weight"):
+            try:
+                # Convert form data to model format
+                model_data = convert_form_data_to_model_format(user_data)
+                
+                # Make prediction
+                risk_result = predict_health_risk(model_data)
+                
+                # Generate explanation (with error handling)
                 try:
-                    height_m = float(user_data["height"]) / 100  # Convert cm to meters
-                    weight_kg = float(user_data["weight"])
-                    user_data["bmi"] = round(weight_kg / (height_m ** 2), 2)
-                except (ValueError, TypeError, ZeroDivisionError) as e:
-                    print(f"Error calculating BMI: {e}")  # Debugging statement
-                    user_data["bmi"] = None  # Avoid crashes by setting BMI to None
-            else:
-                print("Missing height or weight, cannot calculate BMI.")  # Debugging statement
-                user_data["bmi"] = None
+                    explanation = generate_explanation(
+                        risk_result["risk_level"],
+                        risk_result["risk_probability"],
+                        user_data
+                    )
+                except Exception as e:
+                    logger.error(f"Error generating explanation: {str(e)}")
+                    explanation = (
+                        f"Your risk level is {risk_result['risk_level']} with a probability of "
+                        f"{risk_result['risk_probability']:.2f}. This indicates a potential "
+                        "cardiovascular risk. Consult a healthcare professional for more details."
+                    )
+                
+                # Generate recommendations
+                recommendations = generate_recommendations(user_data, risk_result["risk_level"])
+                
+                # Save to database
+                try:
+                    RiskAssessmentResult.objects.create(
+                        user=request.user,
+                        age=user_data["age"],
+                        gender=user_data["gender"],
+                        height=user_data.get("height"),  # New field
+                        weight=user_data.get("weight"),  # New field
+                        blood_pressure=user_data["BP"],
+                        cholesterol_level=int(user_data["cholesterol_level"]),
+                        glucose_level=int(user_data["glucose_level"]),
+                        smoke=int(user_data["smoke"]),  # New field
+                        smoke_frequency=user_data.get("smoke_frequency", ""),
+                        alco=int(user_data["alco"]),  # New field
+                        alco_frequency=user_data.get("alco_frequency", ""),
+                        active=int(user_data["active"]),  # New field
+                        workout_frequency=user_data.get("workout_frequency", 0),
+                        chestpain=int(user_data["chestpain"]),  # New field
+                        restingrelectro=int(user_data["restingrelectro"]),  # New field
+                        maxheartrate=int(user_data.get("maxheartrate", 0)),  # New field
+                        exerciseangia=int(user_data["exerciseangia"]),  # New field
+                        bmi=model_data.get("BMI"),
+                        risk_level=risk_result["risk_level"],
+                        risk_probability=risk_result["risk_probability"],
+                        explanation=explanation,
+                        recommendations=", ".join(recommendations) if isinstance(recommendations, list) else recommendations
+                    )
 
-            # Predict health risk using AI model
-            risk_result = predict_health_risk(user_data)
-
-            # Generate explanation using DeepSeek
-            # if explination is undefined it should output something
-            try:
-                explanation = generate_explanation(
-                    risk_result["risk_level"],
-                    risk_result["risk_probability"],
-                    user_data
-                )
+                    
+                except Exception as e:
+                    logger.error(f"Error saving assessment result: {str(e)}")
+                    messages.error(request, "There was an error saving your assessment results.")
+                
             except Exception as e:
-                print(f"Error generating explanation: {e}")                
-                explanation = "Unable to generate explanation due to an error."
-            
-             # Generate personalized recommendations
-            recommendations = generate_recommendations(user_data, risk_result["risk_level"])
-
-            # Generate personalized health report
-            report = generate_health_report(user_data, risk_result)
-
-            explanation = generate_explanation(risk_result["risk_level"], risk_result["risk_probability"], user_data)
-            sanitized_explanation = sanitize_text(explanation)
-
-            try:
-                # Save the results to the database
-                RiskAssessmentResult.objects.create(
-                    user=request.user if request.user.is_authenticated else None,  # Link to the logged-in user (optional)
-                    age=user_data["age"],
-                    gender="Male" if user_data["gender"] == 1 else "Female",
-                    blood_pressure=user_data["BP"],
-                    cholesterol_level=user_data["cholesterol_level"],
-                    glucose_level=user_data["glucose_level"],
-                    risk_level=risk_result["risk_level"],       
-                    risk_probability=risk_result["risk_probability"],
-                    explanation=explanation,
-                    recommendations=", ".join(recommendations),
-                    bmi=user_data["bmi"],
-                    smoke_frequency=user_data.get("smoke_frequency", ""),
-                    alco_frequency=user_data.get("alco_frequency", ""),
-                    workout_frequency=user_data.get("workout_frequency", 0)
-                )
-            except UnicodeEncodeError as e:
-                logger.error(f"UnicodeEncodeError: {e}")
-                logger.error(f"Problematic data: {explanation}")
-                raise
-
+                logger.error(f"Error in health risk assessment: {str(e)}")
+                messages.error(request, "There was an error processing your assessment. Please try again.")
+                risk_result = {
+                    "risk_level": "Error",
+                    "risk_probability": 0.5,
+                    "risk_score": 50,
+                    "error": str(e)
+                }
     else:
         form = HealthRiskForm()
 
@@ -565,16 +589,62 @@ def generate_reports(request):
 @login_required
 @user_passes_test(admin_required)
 def export_users_csv(request):
-    """Export User Statistics as CSV"""
+    """Export complete user data as CSV"""
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="anonymized_users.csv"'
+    response["Content-Disposition"] = f'attachment; filename="users_export_{timezone.now().date()}.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(["Username", "Email", "Role", "Date Joined"])  # ✅ Correct headers
+    
+    # Define all possible fields (including methods)
+    field_names = [
+        'id', 'username', 'email', 'first_name', 'last_name',
+        'get_full_name', 'role', 'get_role_display',
+        'date_joined', 'last_login', 'is_active',
+        'is_staff', 'is_superuser'
+    ]
+    
+    # Add any additional fields your CustomUser might have
+    additional_fields = [
+        'date_of_birth', 'gender', 'phone_number', 
+        'address', 'city', 'country'
+    ]
+    
+    # Create complete header row
+    headers = []
+    for field in field_names + additional_fields:
+        if hasattr(CustomUser, field):
+            # Format header names nicely
+            header_name = field.replace('_', ' ').title()
+            if field.startswith('get_'):
+                header_name = header_name.replace('Get ', '').replace(' Display', '')
+            headers.append(header_name)
 
-    users = CustomUser.objects.all()
+    writer.writerow(headers)
+
+    # Get all users
+    users = CustomUser.objects.all().order_by('date_joined')
+    
     for user in users:
-        writer.writerow([user.username, user.email, user.role, user.date_joined])  # ✅ Write actual data
+        row = []
+        for field in field_names + additional_fields:
+            if hasattr(user, field):
+                value = getattr(user, field)
+                
+                # Handle callable methods
+                if callable(value):
+                    value = value()
+                
+                # Format special field types
+                if field == 'date_joined' or field == 'last_login':
+                    value = value.strftime('%Y-%m-%d %H:%M') if value else ''
+                elif field == 'date_of_birth' and value:
+                    value = value.strftime('%Y-%m-%d')
+                elif field == 'is_active' or field == 'is_staff' or field == 'is_superuser':
+                    value = 'Yes' if value else 'No'
+                
+                row.append(str(value) if value is not None else '')
+        
+        writer.writerow(row)
 
     return response
 
@@ -622,50 +692,98 @@ def export_risk_assessments_csv(request):
 @login_required
 @user_passes_test(admin_required)
 def export_users_pdf(request):
-    """Export User Statistics as a PDF with better formatting"""
-    buffer = io.BytesIO()
-    pdf = SimpleDocTemplate(buffer, pagesize=letter)
+    """Export complete user data as a well-formatted PDF"""
+    # Create PDF buffer
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                          rightMargin=inch/2, leftMargin=inch/2,
+                          topMargin=inch/2, bottomMargin=inch/2)
+    
+    styles = getSampleStyleSheet()
     elements = []
 
     # Title
-    title = [["User Statistics Report"]]
-    title_table = Table(title)
-    title_table.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (-1, -1), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 14),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
-    ]))
-    elements.append(title_table)
+    elements.append(Paragraph("COMPREHENSIVE USER REPORT", styles['Title']))
+    elements.append(Paragraph(f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M')}", styles['Normal']))
+    elements.append(Spacer(1, 24))
 
-    # Column Headers
-    data = [["Username", "Email", "Role", "Date Joined"]]
+    # Get all users
+    users = CustomUser.objects.all().order_by('date_joined')
 
-    users = CustomUser.objects.all()
+    # Define which fields to include (standard + any custom fields)
+    field_config = [
+        {'name': 'id', 'label': 'ID', 'width': 0.5*inch},
+        {'name': 'username', 'label': 'Username', 'width': 1*inch},
+        {'name': 'email', 'label': 'Email', 'width': 1.5*inch},
+        {'name': 'get_full_name', 'label': 'Full Name', 'width': 1.2*inch},
+        {'name': 'get_role_display', 'label': 'Role', 'width': 0.8*inch},
+        {'name': 'date_joined', 'label': 'Date Joined', 'width': 1*inch, 'format': '%Y-%m-%d %H:%M'},
+        {'name': 'last_login', 'label': 'Last Login', 'width': 1*inch, 'format': '%Y-%m-%d %H:%M'},
+        {'name': 'is_active', 'label': 'Active', 'width': 0.5*inch, 'format': lambda x: 'Yes' if x else 'No'},
+        {'name': 'is_staff', 'label': 'Staff', 'width': 0.5*inch, 'format': lambda x: 'Yes' if x else 'No'},
+        # Add any additional custom fields here
+        {'name': 'date_of_birth', 'label': 'Birth Date', 'width': 0.8*inch, 'format': '%Y-%m-%d'},
+        {'name': 'get_gender_display', 'label': 'Gender', 'width': 0.6*inch},
+    ]
+
+    # Filter to only include fields that exist on the model
+    available_fields = [f for f in field_config if hasattr(CustomUser, f['name'])]
+    
+    # Prepare table data
+    col_widths = [f['width'] for f in available_fields]
+    headers = [f['label'] for f in available_fields]
+    data = [headers]
+
     for user in users:
-        date_joined = user.date_joined.strftime("%Y-%m-%d %H:%M") if user.date_joined else "N/A"
-        data.append([user.username, user.email, user.role, date_joined])
+        row = []
+        for field in available_fields:
+            # Get the value
+            value = getattr(user, field['name'])
+            
+            # Handle callable methods
+            if callable(value):
+                value = value()
+            
+            # Apply formatting if specified
+            if 'format' in field:
+                if callable(field['format']):
+                    value = field['format'](value)
+                elif value:
+                    try:
+                        value = value.strftime(field['format'])
+                    except AttributeError:
+                        pass
+            
+            row.append(str(value) if value is not None else 'N/A')
+        data.append(row)
 
-    # Create Table
-    table = Table(data, colWidths=[100, 150, 80, 100])
+    # Create the table
+    table = Table(data, colWidths=col_widths, repeatRows=1)
     table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#4472C4')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 10),
+        ('BOTTOMPADDING', (0,0), (-1,0), 8),
+        ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#D9E1F2')),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
     ]))
+
     elements.append(table)
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph(f"Total Users: {users.count()}", styles['Normal']))
 
-    # Build PDF
-    pdf.build(elements)
-    buffer.seek(0)
+    # Build the PDF
+    doc.build(elements)
+    pdf_data = buffer.getvalue()
+    buffer.close()
 
-    # Create HTTP Response
-    response = HttpResponse(buffer, content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="users_report.pdf"'
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="users_report_{timezone.now().date()}.pdf"'
+    response.write(pdf_data)
     return response
 
 @login_required
@@ -884,90 +1002,189 @@ def export_patient_csv(request, patient_id):
         return render(request, "error.html", {"message": "Access Denied: You are not assigned to this patient."})
 
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = f'attachment; filename="{patient.username}_report.csv"'
+    response["Content-Disposition"] = f'attachment; filename="{patient.username}_health_report_{timezone.now().date()}.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(["Patient Name", "Email"])
-    writer.writerow([patient.username, patient.email])
-
+    
+    # Patient Information Section
+    writer.writerow(["PATIENT INFORMATION"])
+    writer.writerow(["Name", patient.get_full_name() or patient.username])
+    writer.writerow(["Email", patient.email])
+    writer.writerow(["Gender", patient.get_gender_display() if hasattr(patient, 'get_gender_display') else "N/A"])
     writer.writerow([])  # Empty row
-    writer.writerow(["Date", "Risk Level", "Explanation"])
 
+    # Risk Assessment Data Header
+    headers = [
+        "Assessment Date",
+        "Risk Level", 
+        "Risk Probability (%)",
+        "Age",
+        "Gender",
+        "Blood Pressure (mmHg)",
+        "Cholesterol Level",
+        "Glucose Level",
+        "BMI",
+        "Smoker",
+        "Smoking Frequency",
+        "Alcohol Consumer",
+        "Alcohol Frequency",
+        "Physically Active",
+        "Workout Frequency (times/week)",
+        "Chest Pain",
+        "Resting ECG Results",
+        "Exercise-induced Angina",
+        "Max Heart Rate",
+        "Explanation",
+        "Recommendations"
+    ]
+    writer.writerow(headers)
+
+    # Risk Assessment Data Rows
     risk_assessments = RiskAssessmentResult.objects.filter(user=patient).order_by("-created_at")
+    
     for assessment in risk_assessments:
-        writer.writerow([assessment.created_at.strftime("%Y-%m-%d"), assessment.risk_level, assessment.explanation])
+        writer.writerow([
+            assessment.created_at.strftime("%Y-%m-%d %H:%M"),
+            assessment.risk_level,
+            f"{assessment.risk_probability:.2%}",
+            assessment.age,
+            assessment.gender,
+            assessment.blood_pressure,
+            assessment.get_cholesterol_level_display() if hasattr(assessment, 'get_cholesterol_level_display') else assessment.cholesterol_level,
+            assessment.get_glucose_level_display() if hasattr(assessment, 'get_glucose_level_display') else assessment.glucose_level,
+            f"{assessment.bmi:.1f}" if assessment.bmi else "N/A",
+            "Yes" if assessment.smoke else "No",
+            assessment.get_smoke_frequency_display() if hasattr(assessment, 'get_smoke_frequency_display') else assessment.smoke_frequency,
+            "Yes" if assessment.alco else "No",
+            assessment.get_alco_frequency_display() if hasattr(assessment, 'get_alco_frequency_display') else assessment.alco_frequency,
+            "Yes" if assessment.active else "No",
+            assessment.workout_frequency,
+            "Yes" if assessment.chestpain else "No",
+            assessment.get_restingrelectro_display() if hasattr(assessment, 'get_restingrelectro_display') else assessment.restingrelectro,
+            "Yes" if assessment.exerciseangia else "No",
+            assessment.maxheartrate,
+            assessment.explanation.replace('\n', ' ') if assessment.explanation else "N/A",
+            assessment.recommendations.replace('\n', ' ') if assessment.recommendations else "N/A"
+        ])
 
     return response
 
 @login_required
 def export_patient_pdf(request, patient_id):
-    """Doctor - Export Patient Report as PDF"""
+    """Doctor - Export comprehensive patient report as PDF"""
     patient = get_object_or_404(CustomUser, id=patient_id, role="patient")
 
-    # Ensure the doctor is assigned to this patient
+    # Verify doctor-patient assignment
     if not DoctorPatientAssignment.objects.filter(doctor=request.user, patient=patient).exists():
         return render(request, "error.html", {"message": "Access Denied: You are not assigned to this patient."})
 
-    # Create a BytesIO buffer for the PDF
+    # Create PDF buffer
     buffer = BytesIO()
-
-    # Create the PDF object
-    pdf = SimpleDocTemplate(
-        buffer,
-        pagesize=letter,
-        rightMargin=inch,
-        leftMargin=inch,
-        topMargin=inch,
-        bottomMargin=inch,
-    )
-
-    # Container for the PDF content
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                          rightMargin=inch/2, leftMargin=inch/2,
+                          topMargin=inch/2, bottomMargin=inch/2)
+    
+    styles = getSampleStyleSheet()
     elements = []
 
-    # Styles
-    styles = getSampleStyleSheet()
-    title_style = styles["Title"]
-    heading_style = styles["Heading2"]
-    body_style = styles["BodyText"]
+    # Title
+    elements.append(Paragraph(f"COMPREHENSIVE PATIENT REPORT", styles['Title']))
+    elements.append(Spacer(1, 24))
 
-    # Add title
-    elements.append(Paragraph(f"Patient Report: {patient.username}", title_style))
-    elements.append(Spacer(1, 12))  # Add space after title
+    # Patient Information Section
+    patient_data = [
+        ["<b>Patient Name</b>", patient.get_full_name() or patient.username],
+        ["<b>Email</b>", patient.email],
+        ["<b>Date Joined</b>", patient.date_joined.strftime("%Y-%m-%d")],
+        ["<b>Role</b>", patient.get_role_display()],
+    ]
+    
+    if hasattr(patient, 'date_of_birth') and patient.date_of_birth:
+        patient_data.append(["<b>Date of Birth</b>", patient.date_of_birth.strftime("%Y-%m-%d")])
+    if hasattr(patient, 'gender') and patient.gender:
+        patient_data.append(["<b>Gender</b>", patient.get_gender_display()])
 
-    # Add patient details
-    elements.append(Paragraph(f"<b>Email:</b> {patient.email}", body_style))
-    elements.append(Spacer(1, 12))  # Add space after email
+    patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
+    patient_table.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.black),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('BOX', (0,0), (-1,-1), 1, colors.black),
+        ('GRID', (0,0), (-1,-1), 1, colors.black),
+    ]))
+    
+    elements.append(Paragraph("<b>PATIENT INFORMATION</b>", styles['Heading2']))
+    elements.append(Spacer(1, 12))
+    elements.append(patient_table)
+    elements.append(Spacer(1, 24))
 
-    # Add risk assessments section
-    elements.append(Paragraph("Risk Assessments:", heading_style))
-    elements.append(Spacer(1, 12))  # Add space after heading
+    # Risk Assessments Section
+    elements.append(Paragraph("<b>RISK ASSESSMENT HISTORY</b>", styles['Heading2']))
+    elements.append(Spacer(1, 12))
 
-    # Fetch risk assessments
     risk_assessments = RiskAssessmentResult.objects.filter(user=patient).order_by("-created_at")
-
-    # Add risk assessments to the PDF
+    
     for assessment in risk_assessments:
-        # Format the assessment details
-        assessment_text = (
-            f"<b>Date:</b> {assessment.created_at.strftime('%Y-%m-%d')}<br/>"
-            f"<b>Risk Level:</b> {assessment.risk_level}<br/>"
-            f"<b>Explanation:</b> {assessment.explanation}"
+        # Assessment header
+        elements.append(Paragraph(
+            f"Assessment on {assessment.created_at.strftime('%Y-%m-%d %H:%M')}",
+            styles['Heading3']
+        ))
+        
+        # Risk summary
+        risk_color = colors.red if assessment.risk_level == "High" else (
+            colors.orange if assessment.risk_level == "Medium" else colors.green
         )
-        elements.append(Paragraph(assessment_text, body_style))
-        elements.append(Spacer(1, 12))  # Add space between assessments
+        
+        risk_summary = [
+            ["<b>Risk Level</b>", f"<font color='{risk_color}'>{assessment.risk_level}</font>"],
+            ["<b>Risk Probability</b>", f"{assessment.risk_probability:.2%}"],
+            ["<b>Age at Assessment</b>", assessment.age],
+            ["<b>Blood Pressure</b>", f"{assessment.blood_pressure} mmHg"],
+            ["<b>Cholesterol</b>", assessment.get_cholesterol_level_display() if hasattr(assessment, 'get_cholesterol_level_display') else assessment.cholesterol_level],
+            ["<b>Glucose</b>", assessment.get_glucose_level_display() if hasattr(assessment, 'get_glucose_level_display') else assessment.glucose_level],
+            ["<b>BMI</b>", f"{assessment.bmi:.1f}" if assessment.bmi else "N/A"],
+            ["<b>Smoker</b>", "Yes" if assessment.smoke else "No"],
+            ["<b>Exercise Frequency</b>", f"{assessment.workout_frequency} times/week" if assessment.workout_frequency else "None"],
+            ["<b>Chest Pain</b>", "Yes" if assessment.chestpain else "No"],
+        ]
+        
+        # Create assessment table
+        assessment_table = Table(risk_summary, colWidths=[2*inch, 4*inch])
+        assessment_table.setStyle(TableStyle([
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('TEXTCOLOR', (0,0), (-1,-1), colors.black),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
+            ('BOX', (0,0), (-1,-1), 1, colors.black),
+            ('GRID', (0,0), (-1,-1), 1, colors.lightgrey),
+            ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
+        ]))
+        
+        elements.append(assessment_table)
+        elements.append(Spacer(1, 12))
+        
+        # Explanation and recommendations
+        elements.append(Paragraph("<b>Explanation:</b>", styles['Heading4']))
+        elements.append(Paragraph(assessment.explanation or "No explanation provided", styles['BodyText']))
+        elements.append(Spacer(1, 12))
+        
+        if assessment.recommendations:
+            elements.append(Paragraph("<b>Recommendations:</b>", styles['Heading4']))
+            elements.append(Paragraph(assessment.recommendations, styles['BodyText']))
+        
+        elements.append(Spacer(1, 24))  # Extra space between assessments
 
     # Build the PDF
-    pdf.build(elements)
-
-    # Get the value of the BytesIO buffer and write it to the response
+    doc.build(elements)
     pdf_data = buffer.getvalue()
     buffer.close()
 
-    # Create the HttpResponse object with the PDF data
-    response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{patient.username}_report.pdf"'
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{patient.username}_full_report.pdf"'
     response.write(pdf_data)
-
     return response
 
 
@@ -1405,3 +1622,8 @@ def patient_detail_assessment(request, assessment_id):
     }
     
     return render(request, 'doctor/patient_assessment_detail.html', context)
+
+
+    # In your views.py
+def terms_view(request):
+    return render(request, 'terms.html')

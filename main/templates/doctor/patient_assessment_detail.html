@@ -41,12 +41,45 @@
                         <p class="text-sm font-medium text-gray-500">Gender</p>
                         <p class="text-gray-900">{{ assessment.gender }}</p>
                     </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Height</p>
+                        <p class="text-gray-900">{{ assessment.height }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Weight</p>
+                        <p class="text-gray-900">{{ assessment.weight }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">BMI</p>
+                        <p class="text-gray-900">{{ assessment.bmi }}</p>
+                    </div>
                 </div>
                 <div class="space-y-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Chestpain</p>
+                        <p class="text-gray-900">
+                            {{ assessment.chestpain }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">restingrelectro</p>
+                        <p class="text-gray-900">
+                            {% if assessment.restingrelectro == 0 %}Normal
+                            {% elif assessment.restingrelectro == 1 %}ST-T wave abnormality
+                            {% elif assessment.restingrelectro == 2 %}Left ventricular hypertrophy
+                            {% else %}Unknown{% endif %}                        
+                        </p>
+                    </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">Blood Pressure</p>
                         <p class="text-gray-900">
                             {{ assessment.blood_pressure }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Max Heart rate</p>
+                        <p class="text-gray-900">
+                            {{ assessment.maxheartrate }}
                         </p>
                     </div>
                     <div>
@@ -56,6 +89,12 @@
                             {% elif assessment.cholesterol_level == 1 %}Above Normal
                             {% elif assessment.cholesterol_level == 2 %}Well Above Normal
                             {% else %}Unknown{% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Exerciseangia</p>
+                        <p class="text-gray-900">
+                            {{ assessment.exerciseangia }}
                         </p>
                     </div>
                     <div>
@@ -77,7 +116,15 @@
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">workout frequency</p>
-                        <p class="text-gray-900">{{ assessment.workout_frequency }}</p>
+                        <p class="text-gray-900">
+                            {% if assessment.workout_frequency == 0 %}
+                                Never
+                            {% elif assessment.workout_frequency == 1 %}
+                                1 time per week
+                            {% else %}
+                                {{ assessment.workout_frequency }} times per week
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
             </div>

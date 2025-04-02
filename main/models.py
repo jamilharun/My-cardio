@@ -142,6 +142,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
+    def get_full_name(self):
+        """Return the first_name plus the last_name, with a space in between."""
+        full_name = f"{self.first_name} {self.last_name}".strip()
+        return full_name if full_name else self.username
+
+    def get_short_name(self):
+        """Return the short name for the user (first name only)."""
+        return self.first_name if self.first_name else self.username
+
 def user_profile_path(instance, filename):
     """Upload profile pictures to a specific user folder"""
     return f'profile_pics/{instance.user.id}/{filename}'
@@ -192,24 +201,42 @@ class HealthHistory(models.Model):
         return f"{self.user.username} - {self.assessment_date} - {self.diagnosis}"
 
 class RiskAssessmentResult(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)  # Link to the user (optional)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     age = models.IntegerField()
     gender = models.CharField(max_length=10)
-    blood_pressure = models.IntegerField()
+    height = models.FloatField(null=True, blank=True)  # in cm
+    weight = models.FloatField(null=True, blank=True)  # in kg
+    blood_pressure = models.IntegerField()  # systolic
     cholesterol_level = models.IntegerField()
     glucose_level = models.IntegerField()
+    smoke = models.IntegerField(choices=[(0, 'No'), (1, 'Yes')], null=True, blank=True)
+    smoke_frequency = models.CharField(max_length=20, null=True, blank=True)
+    alco = models.IntegerField(choices=[(0, 'No'), (1, 'Yes')], null=True, blank=True)
+    alco_frequency = models.CharField(max_length=20, null=True, blank=True)
+    active = models.IntegerField(choices=[(0, 'No'), (1, 'Yes')], null=True, blank=True)
+    workout_frequency = models.IntegerField(null=True, blank=True)
+    chestpain = models.IntegerField(choices=[(0, 'No'), (1, 'Yes')], null=True, blank=True)
+    restingrelectro = models.IntegerField(
+        choices=[(0, 'Normal'), (1, 'ST-T wave abnormality'), (2, 'Left ventricular hypertrophy')],
+        null=True,
+        blank=True
+    )
+    maxheartrate = models.IntegerField(null=True, blank=True)
+    exerciseangia = models.IntegerField(choices=[(0, 'No'), (1, 'Yes')], null=True, blank=True)
     bmi = models.FloatField(null=True, blank=True)
     risk_level = models.CharField(max_length=10)
     risk_probability = models.FloatField()
     explanation = models.TextField(blank=True, null=True)
     recommendations = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    smoke_frequency = models.CharField(max_length=20, null=True, blank=True)  
-    alco_frequency = models.CharField(max_length=20, null=True, blank=True)  
-    workout_frequency = models.IntegerField(null=True, blank=True)  
 
     def __str__(self):
-        return f"Risk Assessment for {self.user} on {self.created_at}"
+        if self.user:
+            return f"Risk Assessment for {self.user.username} on {self.created_at}"
+        return f"Risk Assessment on {self.created_at}"
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 class DoctorPatientAssignment(models.Model):
@@ -319,3 +346,11 @@ class Notification(models.Model):
     def __str__(self):
         return f"Notification for {self.user.username}: {self.message}"
 
+# In your models.py
+class TermsAcceptance(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    accepted_at = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.accepted_at}"

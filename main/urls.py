@@ -10,7 +10,7 @@ from .views import (
     book_appointment,doctor_appointments, update_appointment_status, risk_alerts, mark_alert_as_read, patient_risk_chart, 
     assessment_detail, notifications_panel , mark_notification_as_read, patient_dashboard, doctor_consultation,
     patient_health_statistics,admin_create_appointment, patient_appointments, patient_appointment_detail, mark_notification_as_read_patient,
-    quick_password_reset, custom_password_reset_done, SimplePasswordResetView, patient_detail_assessment
+    quick_password_reset, custom_password_reset_done, SimplePasswordResetView, patient_detail_assessment, terms_view
 )
 from django.contrib.auth import views as auth_views
 
@@ -23,6 +23,7 @@ urlpatterns = [
     path("profile/", profile_view, name="profile"),
     path("health-risk/", health_risk_assessment, name="health_risk"),
     path("health-risk-history/", health_risk_history, name="health_risk_history"),
+    path('terms/', terms_view, name='terms'),
 
     # im not sure if im gonna ass this
     # path("health-reports/", health_reports_view, name="health_reports"),
@@ -48,8 +49,8 @@ urlpatterns = [
     path("admin-dashboard/update-user-role/<int:user_id>/", update_user_role, name="update_user_role"),
     path("admin-dashboard/generate-reports/", generate_reports, name="generate_reports"),
     path("admin-dashboard/export-users-csv/", export_users_csv, name="export_users_csv"),
-    path("admin-dashboard/export-risk-assessments-csv/", export_risk_assessments_csv, name="export_risk_assessments_csv"),
     path("admin-dashboard/export-users-pdf/", export_users_pdf, name="export_users_pdf"),
+    path("admin-dashboard/export-risk-assessments-csv/", export_risk_assessments_csv, name="export_risk_assessments_csv"),
     path("admin-dashboard/export-risk-assessments-pdf/", export_risk_assessments_pdf, name="export_risk_assessments_pdf"),
     path("admin-dashboard/risk-trends/", risk_trends, name="risk_trends"),
     path("admin-dashboard/system-alerts/", system_alerts, name="system_alerts"),

@@ -60,7 +60,10 @@
         <h2>User Information</h2>
         <p><strong>Age:</strong> {{ report.age }}</p>
         <p><strong>Gender:</strong> {{ report.gender }}</p>
+        <p><strong>Height:</strong> {{ report.height }}</p>
+        <p><strong>Weight:</strong> {{ report.weight }}</p>
         <p><strong>BMI:</strong> {{ report.bmi }}</p>
+        <p><strong>Chestpain:</strong> {{ report.chestpain }}</p>
         <p><strong>smoke frequency:</strong> {{ report.smoke_frequency }}</p>
         <p><strong>alcohol frequency:</strong> {{ report.alco_frequency }}</p>
         <p><strong>workout frequency:</strong> {{ report.workout_frequency }}</p>
@@ -72,6 +75,16 @@
         <p><strong>Blood Pressure:</strong>
             {{ report.blood_pressure }}
         </p>
+        <p><strong>Max Heart rate:</strong>
+            {{ report.maxheartrate }}
+        </p>
+        <p><strong>Restingrelectro:</strong>
+            {% if report.cholesterol_level == 0 %}Normal
+            {% elif report.cholesterol_level == 1 %}ST-T wave abnormality
+            {% elif report.cholesterol_level == 2 %}Left ventricular hypertrophy
+            {% else %}Unknown{% endif %}
+        </p>
+
         <p><strong>Cholesterol Level:</strong> 
             {% if report.cholesterol_level == 0 %}Normal
             {% elif report.cholesterol_level == 1 %}Above Normal

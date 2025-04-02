@@ -24,12 +24,12 @@
 <table class="min-w-full bg-white shadow-md rounded-lg mt-4">
     <tr><td class="py-2 px-4 border font-semibold">Age</td><td class="py-2 px-4 border">{{ assessment.age }}</td></tr>
     <tr><td class="py-2 px-4 border font-semibold">Gender</td><td class="py-2 px-4 border">{{ assessment.gender }}</td></tr>
+    <tr><td class="py-2 px-4 border font-semibold">Height</td><td class="py-2 px-4 border">{{ assessment.height }}</td></tr>
+    <tr><td class="py-2 px-4 border font-semibold">Weight</td><td class="py-2 px-4 border">{{ assessment.weight }}</td></tr>
     <tr><td class="py-2 px-4 border font-semibold">BMI</td><td class="py-2 px-4 border">{{ assessment.bmi }}</td></tr>
     <tr>
         <td class="py-2 px-4 border font-semibold">Blood Pressure</td>
-        <td class="py-2 px-4 border">
-            {{ assessment.blood_pressure }}
-        </td>
+        <td class="py-2 px-4 border">{{ assessment.blood_pressure }}</td>
     </tr>
     <tr>
         <td class="py-2 px-4 border font-semibold">Cholesterol Level</td>
@@ -49,9 +49,55 @@
             {% else %}Unknown{% endif %}
         </td>
     </tr>    
+    <tr>
+        <td class="py-2 px-4 border font-semibold">Chestpain</td>
+        <td class="py-2 px-4 border">
+        {{ assessment.chestpain }} = 
+        {% if assessment.chestpain == 0 %}
+            No
+        {% elif assessment.chestpain == 1 %}
+            Yes
+        {% else %}
+            Unknown
+        {% endif %}</td>
+    </tr>   
+    <tr>
+        <td class="py-2 px-4 border font-semibold">Maxheartrate</td>
+        <td class="py-2 px-4 border">{{ assessment.maxheartrate }}</td>
+    </tr>
+    <tr>
+        <td class="py-2 px-4 border font-semibold">Exerciseangia</td>
+        <td class="py-2 px-4 border">
+            {{ assessment.exerciseangia }} = 
+            {% if assessment.exerciseangia == 0 %}
+                No
+            {% elif assessment.exerciseangia == 1 %}
+                Yes
+            {% else %}
+                Unknown
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td class="py-2 px-4 border font-semibold">restingrelectro</td>
+        <td class="py-2 px-4 border">
+            {% if assessment.restingrelectro == 0 %}Normal
+            {% elif assessment.restingrelectro == 1 %}ST-T wave abnormality
+            {% elif assessment.restingrelectro == 2 %}Left ventricular hypertrophy
+            {% else %}Unknown{% endif %}
+        </td>
+    </tr>   
     <tr><td class="py-2 px-4 border font-semibold">Smoke Frequency</td><td class="py-2 px-4 border">{{ assessment.smoke_frequency }}</td></tr>
     <tr><td class="py-2 px-4 border font-semibold">Alcohol Frequency</td><td class="py-2 px-4 border">{{ assessment.alco_frequency }}</td></tr>
-    <tr><td class="py-2 px-4 border font-semibold">Workout Frequency</td><td class="py-2 px-4 border">{{ assessment.workout_frequency }}</td></tr>
+    <tr><td class="py-2 px-4 border font-semibold">Workout Frequency</td><td class="py-2 px-4 border">
+        {% if assessment.workout_frequency == 0 %}
+            Never
+        {% elif assessment.workout_frequency == 1 %}
+            1 time per week
+        {% else %}
+            {{ assessment.workout_frequency }} times per week
+        {% endif %}
+    </td></tr>
 </table>
 
 <!-- 📌 AI Explanation -->
