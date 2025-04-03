@@ -14,7 +14,7 @@
     </header>
 
     <!-- Sidebar Navigation -->
-    <aside id="sidebar" class="w-full md:w-64 bg-blue-900 text-white flex-col h-screen hidden md:flex transform -translate-x-full md:transform-none transition-transform duration-300 fixed md:relative z-10">
+    <aside id="sidebar" class="w-64 bg-blue-900 text-white flex-col h-screen md:flex fixed md:static z-10 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
         <h1 class="text-xl font-bold text-center py-4 border-b border-blue-800 hidden md:block">Admin Dashboard</h1>
         <nav class="flex-1 overflow-y-auto">
             {% with request.resolver_match.url_name as url_name %}
@@ -258,11 +258,37 @@
 </div>
 
 <script>
-    // Mobile menu toggle
-    document.getElementById('menu-toggle').addEventListener('click', function() {
+    // Mobile menu toggle with overlay
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menu-toggle');
         const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('translate-x-0');
-        sidebar.classList.toggle('-translate-x-full');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+            document.body.classList.toggle('overflow-hidden');
+        });
+        
+        // Close sidebar when clicking the overlay
+        overlay.addEventListener('click', function() {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            } else {
+                if (!sidebar.classList.contains('-translate-x-full')) {
+                    overlay.classList.remove('hidden');
+                }
+            }
+        });
     });
 </script>
 

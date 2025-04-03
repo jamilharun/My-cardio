@@ -169,7 +169,7 @@ class UserProfile(models.Model):
     )
     profile_picture = models.ImageField(
         upload_to=user_profile_path, 
-        default="profile_pics/default.jpg", 
+        default=None, 
         blank=True,
         null=True)
 
@@ -182,12 +182,6 @@ class UserProfile(models.Model):
     
     def __str__(self):
         return f"{self.user.username}'s Profile"
-
-    # def get_profile_picture_url(self):
-    #     """Return profile picture URL or default static image."""
-    #     if self.profile_picture:
-    #         return self.profile_picture.url
-    #     return static("assets/default.jpg")
 
 class HealthHistory(models.Model):
     """Stores user’s past health assessments"""

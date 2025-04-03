@@ -10,7 +10,7 @@ from .views import (
     book_appointment,doctor_appointments, update_appointment_status, risk_alerts, mark_alert_as_read, patient_risk_chart, 
     assessment_detail, notifications_panel , mark_notification_as_read, patient_dashboard, doctor_consultation,
     patient_health_statistics,admin_create_appointment, patient_appointments, patient_appointment_detail, mark_notification_as_read_patient,
-    quick_password_reset, custom_password_reset_done, SimplePasswordResetView, patient_detail_assessment, terms_view
+    quick_password_reset, custom_password_reset_done, SimplePasswordResetView, patient_detail_assessment, terms_view, mark_alert_as_read_admin
 )
 from django.contrib.auth import views as auth_views
 
@@ -54,7 +54,7 @@ urlpatterns = [
     path("admin-dashboard/export-risk-assessments-pdf/", export_risk_assessments_pdf, name="export_risk_assessments_pdf"),
     path("admin-dashboard/risk-trends/", risk_trends, name="risk_trends"),
     path("admin-dashboard/system-alerts/", system_alerts, name="system_alerts"),
-    path("admin-dashboard/mark-alert-as-read/<int:alert_id>/", mark_alert_as_read, name="mark_alert_as_read"),
+    path("admin-dashboard/mark-alert-as-read/<int:alert_id>/", mark_alert_as_read_admin, name="mark_alert_as_read"),
     path("admin-dashboard/delete-alert/<int:alert_id>/", delete_alert, name="delete_alert"),
     path("admin-dashboard/create_appointment/", admin_create_appointment, name="create_appointment"),
 

@@ -122,7 +122,6 @@ def user_login(request):
                 return redirect("admin_dashboard")
             else:
                 return redirect("patient_dashboard")  # Default fallback patient
-                return redirect("patient_dashboard")  # Default fallback patient
 
         else:
             messages.error(request, "Invalid email or password.")
@@ -137,33 +136,19 @@ def user_logout(request):
 @login_required
 def profile_view(request):
     """Display and edit user profile"""
-    """Display and edit user profile"""
     if request.method == "POST":
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
-            return redirect("profile")  # Redirect to profile page after saving
-
-        user_form = UserUpdateForm(request.POST, instance=request.user)
-        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            return redirect("profile")  # Redirect to profile page after saving
+            return redirect("profile")
 
     else:
-        user_form = UserUpdateForm(instance=request.user)
-        profile_form = ProfileUpdateForm(instance=request.user.profile)
+        
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=request.user.profile)
 
-    context = {
-        "user_form": user_form,
-        "profile_form": profile_form,
-    }
-    return render(request, "users/profile.html", context)
     context = {
         "user_form": user_form,
         "profile_form": profile_form,
@@ -891,7 +876,7 @@ def system_alerts(request):
 
 @login_required
 @user_passes_test(admin_required)
-def mark_alert_as_read(request, alert_id):
+def mark_alert_as_read_admin(request, alert_id):
     """Admin - Mark an Alert as Read"""
     alert = get_object_or_404(SystemAlert, id=alert_id)
     alert.is_read = True

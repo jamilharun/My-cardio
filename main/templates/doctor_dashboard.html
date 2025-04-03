@@ -14,8 +14,8 @@
     </header>
 
     <!-- Sidebar Navigation -->
-    <aside id="sidebar" class="w-full md:w-64 bg-blue-900 text-white flex-col h-screen hidden md:flex transform -translate-x-full md:transform-none transition-transform duration-300 fixed md:relative z-10">
-        <h1 class="text-xl font-bold text-center py-4 border-b border-blue-800 hidden md:block">Doctor Dashboard</h1>
+    <aside id="sidebar" class="w-64 bg-blue-900 text-white h-screen flex-shrink-0 md:flex flex-col fixed md:sticky top-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-30 overflow-y-auto">
+        <h1 class="text-xl font-bold text-center py-4 border-b border-blue-800">Doctor Dashboard</h1>
         <nav class="flex-1 overflow-y-auto">
             {% with request.resolver_match.url_name as url_name %}
             <ul class="space-y-2 p-4">
@@ -259,8 +259,58 @@
     // Mobile menu toggle
     document.getElementById('menu-toggle').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('translate-x-0');
+        const overlay = document.getElementById('sidebar-overlay');
+        
         sidebar.classList.toggle('-translate-x-full');
+        
+        // Toggle overlay
+        if (sidebar.classList.contains('-translate-x-full')) {
+            overlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        } else {
+            overlay.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+    });
+    
+    // Close sidebar when clicking overlay
+    document.getElementById('sidebar-overlay').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    });
+    
+    // Close sidebar when clicking menu items on mobile
+    const menuItems = document.querySelectorAll('#sidebar a');
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            if (window.innerWidth < 768) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+                
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+        });
+    });
+    
+    // Handle resize events to ensure proper sidebar state
+    window.addEventListener('resize', function() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        if (window.innerWidth >= 768) {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        } else if (!sidebar.classList.contains('-translate-x-full')) {
+            // Keep sidebar open on mobile if it was already open
+            overlay.classList.remove('hidden');
+        }
     });
 </script>
 
