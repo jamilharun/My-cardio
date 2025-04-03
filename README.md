@@ -113,3 +113,7 @@ docker compose ps
 docker exec -it django_app /bin/bash
 
 cat my_cardio/settings.py | grep INSTALLED_APPS
+
+docker volume rm my-cardio_postgres_data
+
+docker compose up --build -d
