@@ -36,11 +36,7 @@ import csv
 import io
 
 # debugging tool
-
-
 logger = logging.getLogger(__name__)
-
-
 
 def home(request):
     return render(request, "home.html")
@@ -219,7 +215,7 @@ def health_risk_assessment(request):
                         exerciseangia=int(user_data["exerciseangia"]),  # New field
                         bmi=model_data.get("BMI"),
                         risk_level=risk_result["risk_level"],
-                        risk_probability=risk_result["risk_probability"],
+                        risk_probability=round(risk_result["risk_probability"], 2),                        
                         explanation=explanation,
                         recommendations=", ".join(recommendations) if isinstance(recommendations, list) else recommendations
                     )
@@ -474,18 +470,6 @@ def unassign_patient(request, assignment_id):
 
     return render(request, "admin/unassign_patient.html", {"assignment": assignment})
 
-
-# @login_required
-# def doctor_assignments(request):
-#     """Doctor - View Assigned Patients"""
-#     if request.user.role != "doctor":
-#         return render(request, "error.html", {"message": "Access Denied: Only doctors can view assigned patients."})
-    
-#     # Get all assignments for the logged-in doctor
-#     assignments = DoctorPatientAssignment.objects.filter(doctor=request.user)
-    
-#     return render(request, "doctor/doctor_assignments.html", {"assignments": assignments})
-
 @login_required
 @user_passes_test(admin_required)
 def system_analytics(request):
@@ -501,7 +485,12 @@ def system_analytics(request):
 
     # 📊 Data for Chart.js
     risk_trends = RiskAssessmentResult.objects.values("risk_level").order_by("created_at")  # Assuming created_at exists
-    risk_counts = {"High": 0, "Medium": 0, "Low": 0}
+
+    # Get all unique risk levels from database
+    unique_risk_levels = RiskAssessmentResult.objects.values_list('risk_level', flat=True).distinct()
+
+    # Initialize counts for all unique risk levels
+    risk_counts = {level: 0 for level in unique_risk_levels}
     
     for assessment in risk_trends:
         risk_counts[assessment["risk_level"]] += 1

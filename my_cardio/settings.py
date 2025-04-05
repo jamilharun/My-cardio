@@ -18,7 +18,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 
-# To serve CSS and JavaScript,
 import os
 from dotenv import load_dotenv
 

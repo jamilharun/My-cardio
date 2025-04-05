@@ -51,13 +51,13 @@ class HealthRiskForm(forms.Form):
     )
     smoke = forms.ChoiceField(choices=[(0, "No"), (1, "Yes")], label="Do you smoke?")
     smoke_frequency = forms.ChoiceField(
-        choices=[("often", "Often"), ("seldom", "Seldom"), ("occasional", "Occasional"), ("None", "Never")],
+        choices=[("often", "Often"), ("seldom", "Seldom"), ("occasional", "Occasional")],
         label="How often do you smoke?",
         required=False
     )
     alco = forms.ChoiceField(choices=[(0, "No"), (1, "Yes")], label="Do you consume alcohol?")
     alco_frequency = forms.ChoiceField(
-        choices=[("often", "Often"), ("seldom", "Seldom"), ("occasional", "Occasional"), ("None", "Never")],
+        choices=[("often", "Often"), ("seldom", "Seldom"), ("occasional", "Occasional")],
         label="How often do you consume alcohol?",
         required=False
     )

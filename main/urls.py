@@ -24,10 +24,6 @@ urlpatterns = [
     path("health-risk/", health_risk_assessment, name="health_risk"),
     path("health-risk-history/", health_risk_history, name="health_risk_history"),
     path('terms/', terms_view, name='terms'),
-
-    # im not sure if im gonna ass this
-    # path("health-reports/", health_reports_view, name="health_reports"),
-
     path("export-report-pdf/<int:report_id>/", export_report_pdf, name="export_report_pdf"),
     path("assessment/<int:assessment_id>/", assessment_detail, name="assessment_detail"),
     path("consultation/<int:appointment_id>/", doctor_consultation, name="doctor_consultation"),
@@ -71,9 +67,7 @@ urlpatterns = [
     path("doctor-dashboard/mark-alert-as-read/<int:alert_id>/", mark_alert_as_read, name="mark_alert_as_read"),
     path("doctor-dashboard/notifications/", notifications_panel, name="notifications_panel"),
     path("doctor-dashboard/mark-notification/<int:alert_id>/", mark_notification_as_read, name="mark_notification_as_read"),
-    # path('doctor-dashboard/assignments/', doctor_assignments, name='doctor_assignments'),
     
-
     # patient
     path("patient-dashboard/", patient_dashboard, name="patient_dashboard"),
     path("patient/appointments/", patient_appointments, name="patient_appointments"),

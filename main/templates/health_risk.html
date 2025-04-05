@@ -171,7 +171,7 @@
                         {% if risk_result.risk_level == 'High' %}bg-red-100 text-red-800
                         {% elif risk_result.risk_level == 'Medium' %}bg-yellow-100 text-yellow-800
                         {% else %}bg-green-100 text-green-800{% endif %}">
-                        Risk Level: {{ risk_result.risk_level }} ({{ risk_result.risk_probability|floatformat:2 }}%)
+                        Risk Level: {{ risk_result.risk_level }} ({{ risk_result.risk_probability|percentage }}%)
                     </span>
                 </div>
 

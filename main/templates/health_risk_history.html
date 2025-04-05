@@ -1,5 +1,7 @@
 {% extends 'patient_dashboard.html' %}
 
+{% load custom_filters %}
+
 {% block patient_content %}
 <div class="max-w-6xl mx-auto p-4 md:p-6">
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -31,6 +33,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cholesterol</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Glucose</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Level</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Probability</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -50,7 +53,7 @@
                                 {{ result.blood_pressure}}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ result.bmi }}
+                                {{ result.bmi|floatformat:2 }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {% if result.cholesterol_level == 0 %}Normal
@@ -71,6 +74,9 @@
                                     {% else %}bg-green-100 text-green-800{% endif %}">
                                     {{ result.risk_level }}
                                 </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ result.risk_probability|percentage }}%                         
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">

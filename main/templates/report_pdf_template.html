@@ -62,7 +62,7 @@
         <p><strong>Gender:</strong> {{ report.gender }}</p>
         <p><strong>Height:</strong> {{ report.height }}</p>
         <p><strong>Weight:</strong> {{ report.weight }}</p>
-        <p><strong>BMI:</strong> {{ report.bmi }}</p>
+        <p><strong>BMI:</strong> {{ report.bmi|floatformat:2 }}</p>
         <p><strong>Chestpain:</strong> {{ report.chestpain }}</p>
         <p><strong>smoke frequency:</strong> {{ report.smoke_frequency }}</p>
         <p><strong>alcohol frequency:</strong> {{ report.alco_frequency }}</p>

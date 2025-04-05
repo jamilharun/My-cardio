@@ -1,5 +1,7 @@
 {% extends 'doctor_dashboard.html' %}
 
+{% load custom_filters %}
+
 {% block doctor_content %}
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
@@ -31,7 +33,7 @@
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">Risk Probability</p>
-                        <p class="text-gray-900">{{ assessment.risk_probability }}%</p>
+                        <p class="text-gray-900">{{ assessment.risk_probability|percentage }}%</p>
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">Age</p>
@@ -51,7 +53,7 @@
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">BMI</p>
-                        <p class="text-gray-900">{{ assessment.bmi }}</p>
+                        <p class="text-gray-900">{{ assessment.bmi|floatformat:2 }}</p>
                     </div>
                 </div>
                 <div class="space-y-4">
@@ -176,7 +178,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ a.risk_probability }}%
+                                {{ a.risk_probability|percentage }}%
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <a href="{% url 'patient_detail_assessment' a.id %}" class="text-blue-600 hover:text-blue-900">View Details</a>

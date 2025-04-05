@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Health Report{% endblock %}
 
+{% load custom_filters %}
+
 {% block content %}
 <a href="{% url 'health_risk_history' %}" class="text-blue-500 hover:underline flex items-center mb-4">
     🔙 Back to Patient Record
@@ -16,6 +18,11 @@
             {{ assessment.risk_level }}
         </span>
     </p>
+    <p class="text-gray-700"><strong>Risk Probability:</strong> 
+        <span >
+            {{ assessment.risk_probability|percentage }}% 
+        </span>
+    </p>
 </div>
 
 <!-- 📊 Health Metrics -->
@@ -26,7 +33,7 @@
     <tr><td class="py-2 px-4 border font-semibold">Gender</td><td class="py-2 px-4 border">{{ assessment.gender }}</td></tr>
     <tr><td class="py-2 px-4 border font-semibold">Height</td><td class="py-2 px-4 border">{{ assessment.height }}</td></tr>
     <tr><td class="py-2 px-4 border font-semibold">Weight</td><td class="py-2 px-4 border">{{ assessment.weight }}</td></tr>
-    <tr><td class="py-2 px-4 border font-semibold">BMI</td><td class="py-2 px-4 border">{{ assessment.bmi }}</td></tr>
+    <tr><td class="py-2 px-4 border font-semibold">BMI</td><td class="py-2 px-4 border">{{ assessment.bmi|floatformat:2 }}</td></tr>
     <tr>
         <td class="py-2 px-4 border font-semibold">Blood Pressure</td>
         <td class="py-2 px-4 border">{{ assessment.blood_pressure }}</td>

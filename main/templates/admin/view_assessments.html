@@ -1,4 +1,7 @@
 {% extends 'admin_dashboard.html' %}
+
+{% load custom_filters %}
+
 {% block admin_content %}
 <div class="container mx-auto px-4 py-6">
     <h1 class="text-3xl font-bold text-blue-600 text-center mb-8 flex items-center justify-center">
@@ -94,7 +97,7 @@
                             </span>
                         </td>
                         <td class="py-4 px-4 text-gray-500">
-                            {{ assessment.risk_probability|floatformat:2 }}%
+                            {{ assessment.risk_probability|percentage }}%
                         </td>
                         <td class="py-4 px-4 text-gray-500 hidden md:table-cell">
                             {{ assessment.created_at|date:"M d, Y" }}
