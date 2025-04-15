@@ -170,6 +170,45 @@ class AppointmentForm(forms.ModelForm):
             "consultation_notes": forms.Textarea(attrs={"class": "border p-2 w-full rounded-lg", "rows": 4}),
         }
 
+class DoctorAppointmentForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.doctor = kwargs.pop('doctor')  # Required - pass the current doctor
+        super().__init__(*args, **kwargs)
+        
+        # Filter patients based on the relationship model
+        # This assumes there's a related_name in your doctor-patient assignment model
+        # Let's try using the patient_appointments related name from your model
+        assigned_patient_ids = Appointment.objects.filter(
+            doctor=self.doctor
+        ).values_list('patient_id', flat=True).distinct()
+        
+        self.fields['patient'].queryset = CustomUser.objects.filter(
+            id__in=assigned_patient_ids,
+            role='patient'
+        )
+        
+        # Add Tailwind classes to all fields
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({
+                'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+            })
+            
+        # Special handling for textarea
+        if 'consultation_notes' in self.fields:
+            self.fields['consultation_notes'].widget.attrs.update({
+                'rows': 4,
+                'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
+            })
+
+    class Meta:
+        model = Appointment
+        fields = ['patient', 'date', 'time', 'consultation_notes']
+        widgets = {
+            "date": forms.DateInput(attrs={"type": "date"}),
+            "time": forms.TimeInput(attrs={"type": "time"}),
+            "consultation_notes": forms.Textarea(attrs={"rows": 4}),
+        }
+
 class ConsultationForm(forms.ModelForm):
     """Form for doctors to update consultation notes and appointment status."""
     class Meta:

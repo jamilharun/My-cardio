@@ -24,7 +24,7 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from weasyprint import HTML
 from .forms import (HealthRiskForm, ProfileUpdateForm, UserForm, AssignPatientForm, RoleUpdateForm, AppointmentForm, UserUpdateForm,
-                    ConsultationForm, RecommendationForm)
+                    ConsultationForm, RecommendationForm, DoctorAppointmentForm)
 from .ai_model import predict_health_risk, generate_explanation, generate_recommendations, generate_health_report, convert_form_data_to_model_format    
 from .models import (RiskAssessmentResult, CustomUser, UserProfile, DoctorPatientAssignment, SystemAlert, Recommendation, Appointment,
                     RiskAlert, DataAccessLog, EncryptedFieldMixin, Notification, TermsAcceptance)
@@ -1260,6 +1260,28 @@ def doctor_appointments(request):
     appointments = Appointment.objects.filter(doctor=request.user).order_by("-date", "-time")
 
     return render(request, "doctor/appointments.html", {"appointments": appointments})
+
+@login_required
+def doctor_create_appointment(request):
+    if request.user.role != "doctor":
+        return render(request, "error.html", {"message": "Access Denied: Only doctors can manage appointments."})
+    
+    if request.method == 'POST':
+        form = DoctorAppointmentForm(request.POST, doctor=request.user)
+        if form.is_valid():
+            appointment = form.save(commit=False)
+            appointment.doctor = request.user
+            appointment.status = 'Pending'
+            appointment.save()
+            messages.success(request, "Appointment created successfully!")
+            return redirect('doctor_appointments')
+    else:
+        form = DoctorAppointmentForm(doctor=request.user)
+    
+    return render(request, 'doctor/create_appointment.html', {
+        'form': form,
+        'title': 'Create New Appointment'
+    })
 
 @login_required
 def patient_appointments(request):
