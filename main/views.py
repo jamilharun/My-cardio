@@ -185,10 +185,10 @@ def health_risk_assessment(request):
                     logger.error(f"Error generating explanation: {str(e)}")
                     explanation = (
                         f"Your risk level is {risk_result['risk_level']} with a probability of "
-                        f"{risk_result['risk_probability']:.2f}. This indicates a potential "
+                        f"{risk_result['risk_probability']}. This indicates a potential "
                         "cardiovascular risk. Consult a healthcare professional for more details."
                     )
-                
+
                 # Generate recommendations
                 recommendations = generate_recommendations(user_data, risk_result["risk_level"])
                 
@@ -215,7 +215,7 @@ def health_risk_assessment(request):
                         exerciseangia=int(user_data["exerciseangia"]),  # New field
                         bmi=model_data.get("BMI"),
                         risk_level=risk_result["risk_level"],
-                        risk_probability=round(risk_result["risk_probability"], 2),                        
+                        risk_probability=risk_result["risk_probability"],                        
                         explanation=explanation,
                         recommendations=", ".join(recommendations) if isinstance(recommendations, list) else recommendations
                     )

@@ -510,7 +510,7 @@ def generate_explanation(risk_level, risk_probability, user_data):
 
         # Fallback explanation
         fallback_explanation = (
-            f"Your risk level is {risk_level} with a probability of {risk_probability:.2f}. "
+            f"Your risk level is {risk_level} with a probability of {risk_probability*100:.2f}. "
             "This indicates a potential cardiovascular risk. To reduce your risk, consider adopting a healthy lifestyle, "
             "including a balanced diet, regular exercise, and regular health checkups. "
             "For personalized advice, consult a healthcare professional."
