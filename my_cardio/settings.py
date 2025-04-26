@@ -25,7 +25,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Trust requests from this domain
-CSRF_TRUSTED_ORIGINS = ['https://skibidi.jhomelabs.co', 'https://mycardio.jhomelabs.co']
+CSRF_TRUSTED_ORIGINS = ['https://skibidi.jhomelabs.co', 'https://mycardio.jhomelabs.co', 'https://medirisk.jhomelabs.co']
 
 # Ensure CSRF cookie is only sent over HTTPS
 CSRF_COOKIE_SECURE = True
