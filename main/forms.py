@@ -178,7 +178,7 @@ class DoctorAppointmentForm(forms.ModelForm):
         # Filter patients based on the relationship model
         # This assumes there's a related_name in your doctor-patient assignment model
         # Let's try using the patient_appointments related name from your model
-        assigned_patient_ids = Appointment.objects.filter(
+        assigned_patient_ids = DoctorPatientAssignment.objects.filter(
             doctor=self.doctor
         ).values_list('patient_id', flat=True).distinct()
         

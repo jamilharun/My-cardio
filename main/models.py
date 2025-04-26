@@ -117,9 +117,9 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = [
-        ("Patient", "Patient"),
-        ("Doctor", "Doctor"),
-        ("Admin", "Admin"),
+        ("patient", "Patient"),
+        ("doctor", "Doctor"),
+        ("admin", "Admin"),
     ]
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
