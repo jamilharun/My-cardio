@@ -60,7 +60,9 @@
                     <div>
                         <p class="text-sm font-medium text-gray-500">Chestpain</p>
                         <p class="text-gray-900">
-                            {{ assessment.chestpain }}
+                            {% if assessment.chestpain == 0 %}No
+                            {% elif assessment.chestpain == 1 %}Yes
+                            {% else %}Unknown{% endif %}
                         </p>
                     </div>
                     <div>
@@ -96,7 +98,9 @@
                     <div>
                         <p class="text-sm font-medium text-gray-500">Exerciseangia</p>
                         <p class="text-gray-900">
-                            {{ assessment.exerciseangia }}
+                            {% if assessment.exerciseangia == 0 %}No
+                            {% elif assessment.exerciseangia == 1 %}Yes
+                            {% else %}Unknown{% endif %}
                         </p>
                     </div>
                     <div>

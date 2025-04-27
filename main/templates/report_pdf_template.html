@@ -65,7 +65,11 @@
         <p><strong>Height:</strong> {{ report.height }}</p>
         <p><strong>Weight:</strong> {{ report.weight }}</p>
         <p><strong>BMI:</strong> {{ report.bmi|floatformat:2 }}</p>
-        <p><strong>Chestpain:</strong> {{ report.chestpain }}</p>
+        <p><strong>Chestpain:</strong>
+            {% if report.chestpain == 0 %}No
+            {% elif report.chestpain == 1 %}Yes
+            {% else %}Unknown{% endif %}
+        </p>
         <p><strong>smoke frequency:</strong> {{ report.smoke_frequency }}</p>
         <p><strong>alcohol frequency:</strong> {{ report.alco_frequency }}</p>
         <p><strong>workout frequency:</strong> {{ report.workout_frequency }}</p>

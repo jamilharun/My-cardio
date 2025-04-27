@@ -1112,12 +1112,12 @@ def export_patient_pdf(request, patient_id):
         )
         
         risk_summary = [
-            ["Risk Level", f"<font color='{risk_color}'>{assessment.risk_level}</font>"],
+            ["Risk Level", f"{assessment.risk_level}"],
             ["Risk Probability", f"{assessment.risk_probability:.2%}"],
             ["Age at Assessment", assessment.age],
             ["Blood Pressure", f"{assessment.blood_pressure} mmHg"],
-            ["Cholesterol", assessment.get_cholesterol_level_display() if hasattr(assessment, 'get_cholesterol_level_display') else assessment.cholesterol_level],
-            ["Glucose", assessment.get_glucose_level_display() if hasattr(assessment, 'get_glucose_level_display') else assessment.glucose_level],
+            ["Cholesterol", "normal" if assessment.cholesterol_level == 0 else "above normal" if assessment.cholesterol_level == 1 else "well above normal"],
+            ["Glucose", "normal" if assessment.glucose_level == 0 else "above normal" if assessment.glucose_level == 1 else "well above normal"],
             ["BMI", f"{assessment.bmi:.1f}" if assessment.bmi else "N/A"],
             ["Smoker", "Yes" if assessment.smoke else "No"],
             ["Exercise Frequency", f"{assessment.workout_frequency} times/week" if assessment.workout_frequency else "None"],
