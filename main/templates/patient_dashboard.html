@@ -116,16 +116,58 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-white p-4 rounded-xl shadow-md border-l-4 border-red-500">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
-                            <i class="fas fa-bell"></i>
+                <div class="bg-white p-4 rounded-xl shadow-md border-l-4 border-red-500 relative">
+                    <!-- Summary/toggle element -->
+                    <details class="group">
+                        <summary class="flex items-center cursor-pointer list-none">
+                            <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-sm">Notifications</p>
+                                <p class="text-xl font-bold">{{ notifications.count }}</p>
+                            </div>
+                            <!-- Chevron icon that rotates when open -->
+                            <svg class="ml-auto w-5 h-5 text-gray-400 transform group-open:rotate-180 transition-transform" 
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </summary>
+                        
+                        <!-- Dropdown content -->
+                        <div class="absolute z-10 mt-2 w-72 right-0 bg-white rounded-md shadow-lg overflow-hidden border border-gray-200">
+                            <div class="py-1 max-h-96 overflow-y-auto">
+                                {% if notifications %}
+                                    {% for notification in notifications %}
+                                    <div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
+                                        <a href="{% url 'mark_notification_as_read_patient' notification.id %}" class="flex items-start">
+                                            <div class="flex-shrink-0">
+                                                <i class="fas 
+                                                    {% if notification.notification_type == 'appointment' %}fa-calendar-alt text-blue-500
+                                                    {% elif notification.notification_type == 'assessment' %}fa-heartbeat text-red-500
+                                                    {% else %}fa-bell text-yellow-500{% endif %}"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">{{ notification.title }}</p>
+                                                <p class="text-sm text-gray-500 mt-1">{{ notification.message }}</p>
+                                                <p class="text-xs text-gray-400 mt-1">{{ notification.created_at|timesince }} ago</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="px-4 py-3 text-center text-gray-500">
+                                        No new notifications
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% if notifications %}
+                            <div class="bg-gray-50 px-4 py-2 text-right">
+                                <a href="#" class="text-xs font-medium text-blue-600 hover:text-blue-800">Mark all as read</a>
+                            </div>
+                            {% endif %}
                         </div>
-                        <div>
-                            <p class="text-gray-500 text-sm">Notifications</p>
-                            <p class="text-xl font-bold">{{ notifications.count }}</p>
-                        </div>
-                    </div>
+                    </details>
                 </div>
             </div>
 
@@ -273,3 +315,4 @@
     </main>
 </div>
 {% endblock %}
+

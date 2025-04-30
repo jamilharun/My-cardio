@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save, post_migrate
+from django.db.models.signals import post_save, post_migrate, pre_save
 from django.dispatch import receiver
 from .models import UserProfile, CustomUser, HealthHistory, RiskAssessmentResult, SystemAlert, Appointment, DoctorPatientAssignment, Notification
 from django.contrib.auth.models import Permission
@@ -99,9 +99,50 @@ def create_risk_alert(sender, instance, created, **kwargs):
             print("No doctor assigned to this patient.")
 
 
+_status_cache = {}
+
+@receiver(pre_save, sender=Appointment)
+def cache_original_status(sender, instance, **kwargs):
+    """Cache the original status before saving"""
+    if instance.pk:  # Only for existing instances
+        try:
+            original = Appointment.objects.get(pk=instance.pk)
+            _status_cache[instance.pk] = original.status
+        except Appointment.DoesNotExist:
+            pass
+
 @receiver(post_save, sender=Appointment)
 def notify_patient(sender, instance, created, **kwargs):
-    """Send a notification when a doctor schedules an appointment for a patient."""
-    if created:  # Only notify when the appointment is newly created
+    """Send notifications for appointment creation and status updates"""
+    if created:
+        # New appointment created
         message = f"You have a new appointment with Dr. {instance.doctor.username} on {instance.date} at {instance.time}."
-        Notification.objects.create(user=instance.patient, message=message)
+        Notification.objects.create(
+            user=instance.patient,
+            message=message,
+        )
+    else:
+        # Existing appointment updated - check if status changed
+        original_status = _status_cache.get(instance.pk)
+        
+        if original_status is not None and original_status != instance.status:
+            status_messages = {
+                'Pending': f"Your appointment with Dr. {instance.doctor.username} is now pending confirmation.",
+                'Confirmed': f"Your appointment with Dr. {instance.doctor.username} on {instance.date} has been confirmed!",
+                'Cancelled': f"Your appointment with Dr. {instance.doctor.username} on {instance.date} has been cancelled.",
+                # 'Rescheduled': f"Your appointment with Dr. {instance.doctor.username} has been rescheduled to {instance.date} at {instance.time}.",
+                'Complete': f"Your appointment with Dr. {instance.doctor.username} has been marked as completed.",
+                'Late': f"Your appointment with Dr. {instance.doctor.username} has been marked as Late."
+            }
+            
+            message = status_messages.get(instance.status, 
+                f"Your appointment status with Dr. {instance.doctor.username} has changed from {original_status} to {instance.status}.")
+            
+            Notification.objects.create(
+                user=instance.patient,
+                message=message,
+            )
+        
+        # Clean up cache
+        if instance.pk in _status_cache:
+            del _status_cache[instance.pk]

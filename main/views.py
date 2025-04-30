@@ -1433,7 +1433,7 @@ def patient_dashboard(request):
         return render(request, "error.html", {"message": "Access Denied: Only patients can access this page."})
 
     # Fetch upcoming appointments
-    appointments = Appointment.objects.filter(patient=request.user, status="Confirmed").order_by("date", "time")
+    appointments = Appointment.objects.filter(patient=request.user).order_by("-date", "-time")
 
     # Fetch unread notifications
     notifications = Notification.objects.filter(user=request.user, is_read=False).order_by("-created_at")
@@ -1623,3 +1623,6 @@ def patient_detail_assessment(request, assessment_id):
     # In your views.py
 def terms_view(request):
     return render(request, 'terms.html')
+
+def policy_view(request):
+    return render(request, 'policy.html')
