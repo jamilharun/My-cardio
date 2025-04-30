@@ -114,11 +114,17 @@
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">smoke frequency</p>
-                        <p class="text-gray-900">{{ assessment.smoke_frequency }}</p>
+                        <p class="text-gray-900">
+                            {% if assessment.smoke_frequency %} {{ assessment.smoke_frequency }}
+                            {% else %}Never{% endif %}
+                        </p>
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">alcohol frequency</p>
-                        <p class="text-gray-900">{{ assessment.alco_frequency }}</p>
+                        <p class="text-gray-900">
+                            {% if assessment.alco_frequency %} {{ assessment.alco_frequency }}
+                            {% else %}Never{% endif %}
+                        </p>
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">workout frequency</p>

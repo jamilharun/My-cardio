@@ -1,6 +1,8 @@
 from django.db.models.signals import post_save, post_migrate, pre_save
 from django.dispatch import receiver
-from .models import UserProfile, CustomUser, HealthHistory, RiskAssessmentResult, SystemAlert, Appointment, DoctorPatientAssignment, Notification
+from .models import (
+                UserProfile, CustomUser, HealthHistory, RiskAssessmentResult, SystemAlert, 
+                Appointment, DoctorPatientAssignment, Notification, RiskAlert)
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
