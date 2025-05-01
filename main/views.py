@@ -253,6 +253,7 @@ def health_risk_assessment(request):
         "previous_results": previous_results,
         "report": report,
         "recommendations": recommendations,
+        "newRiskLevel": newRiskLevel
     })
 
 @login_required
