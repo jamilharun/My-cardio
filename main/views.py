@@ -158,6 +158,7 @@ def health_risk_assessment(request):
     previous_results = None
     report = None
     recommendations = None
+    newRiskLevel = None
 
     if request.user.is_authenticated:
         previous_results = RiskAssessmentResult.objects.filter(user=request.user).order_by("-created_at")
@@ -174,23 +175,31 @@ def health_risk_assessment(request):
                 # Make prediction
                 risk_result = predict_health_risk(model_data)
                 
+                # Calculate risk level based on probability
+                if risk_result["risk_probability"] <= 0.45:
+                    newRiskLevel = "Low"
+                elif risk_result["risk_probability"] <= 0.70:
+                    newRiskLevel = "Medium"
+                else:
+                    newRiskLevel = "High"
+
                 # Generate explanation (with error handling)
                 try:
                     explanation = generate_explanation(
-                        risk_result["risk_level"],
+                        newRiskLevel,
                         risk_result["risk_probability"],
                         user_data
                     )
                 except Exception as e:
                     logger.error(f"Error generating explanation: {str(e)}")
                     explanation = (
-                        f"Your risk level is {risk_result['risk_level']} with a probability of "
+                        f"Your risk level is {newRiskLevel} with a probability of "
                         f"{risk_result['risk_probability']}. This indicates a potential "
                         "cardiovascular risk. Consult a healthcare professional for more details."
                     )
 
                 # Generate recommendations
-                recommendations = generate_recommendations(user_data, risk_result["risk_level"])
+                recommendations = generate_recommendations(user_data, newRiskLevel)
                 
                 # Save to database
                 try:
@@ -214,7 +223,7 @@ def health_risk_assessment(request):
                         maxheartrate=int(user_data.get("maxheartrate", 0)),  # New field
                         exerciseangia=int(user_data["exerciseangia"]),  # New field
                         bmi=model_data.get("BMI"),
-                        risk_level=risk_result["risk_level"],
+                        risk_level=newRiskLevel,
                         risk_probability=risk_result["risk_probability"],                        
                         explanation=explanation,
                         recommendations=", ".join(recommendations) if isinstance(recommendations, list) else recommendations
@@ -388,6 +397,7 @@ def admin_dashboard(request):
     total_doctors = CustomUser.objects.filter(role="doctor").count()
     total_assessments = RiskAssessmentResult.objects.count()
     high_risk_cases = RiskAssessmentResult.objects.filter(risk_level="High").count()
+    medium_risk_cases = RiskAssessmentResult.objects.filter(risk_level="Medium").count()
     low_risk_cases = RiskAssessmentResult.objects.filter(risk_level="Low").count()
     latest_assessments = RiskAssessmentResult.objects.order_by("-created_at")[:5]
 
@@ -397,6 +407,7 @@ def admin_dashboard(request):
         "total_doctors": total_doctors,
         "total_assessments": total_assessments,
         "high_risk_cases": high_risk_cases,
+        "medium_risk_cases": medium_risk_cases,
         "low_risk_cases": low_risk_cases,
         "latest_assessments": latest_assessments,
     })
@@ -482,6 +493,7 @@ def system_analytics(request):
     total_assessments = RiskAssessmentResult.objects.count()
     high_risk_cases = RiskAssessmentResult.objects.filter(risk_level="High").count()
     low_risk_cases = RiskAssessmentResult.objects.filter(risk_level="Low").count()
+    Medium_risk_cases = RiskAssessmentResult.objects.filter(risk_level="Medium").count()
 
     # 📊 Data for Chart.js
     risk_trends = RiskAssessmentResult.objects.values("risk_level").order_by("created_at")  # Assuming created_at exists
@@ -503,6 +515,7 @@ def system_analytics(request):
         "total_patients": total_patients,
         "total_assessments": total_assessments,
         "high_risk_cases": high_risk_cases,
+        "Medium_risk_cases": Medium_risk_cases,
         "low_risk_cases": low_risk_cases,
         "risk_data_json": risk_data_json,  # ✅ Send Chart.js data
     })
