@@ -271,51 +271,61 @@ def health_risk_history(request):
         "risk_history": risk_history
     })
 
-
 def export_report_pdf(request, report_id):
-    # Fetch the report from the database
-    report = RiskAssessmentResult.objects.get(id=report_id)
-
-    print(report.age)
-
-    recommendations = report.recommendations.split(", ")
-
-    # Generate a static chart using Plotly
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=['January', 'February', 'March', 'April', 'May', 'June', 'July'],  # Example data
-        y=[120, 125, 130, 128, 132, 135, 140],  # Example data
-        name='Blood Pressure'
-    ))
-    fig.add_trace(go.Scatter(
-        x=['January', 'February', 'March', 'April', 'May', 'June', 'July'],  # Example data
-        y=[180, 190, 200, 195, 205, 210, 215],  # Example data
-        name='Cholesterol Level'
-    ))
-    fig.add_trace(go.Scatter(
-        x=['January', 'February', 'March', 'April', 'May', 'June', 'July'],  # Example data
-        y=[90, 95, 100, 105, 110, 115, 120],  # Example data
-        name='Glucose Level'
-    ))
-    fig.update_layout(title="Health Metrics Over Time", xaxis_title="Date", yaxis_title="Value")
+    # Get the current report and all previous reports for this user
+    current_report = RiskAssessmentResult.objects.get(id=report_id)
+    user_reports = RiskAssessmentResult.objects.filter(
+        user=current_report.user
+    ).order_by('-created_at')[:5]
     
+    # Prepare data for the chart
+    dates = [report.created_at.strftime("%b %d, %Y %H:%M") for report in user_reports]
+    bp_values = [report.blood_pressure for report in user_reports]
+    maxhr_values = [report.maxheartrate for report in user_reports]
+    
+
+    print("dates:",dates)
+    print("bp_values:",bp_values)
+    print("cholesterol_values:",maxhr_values)
+
+    # Create the figure with actual historical data
+    fig = go.Figure()
+    
+    # Blood Pressure trace
+    fig.add_trace(go.Scatter(
+        x=dates,
+        y=bp_values,
+        name='Blood Pressure (mmHg)',
+        line=dict(color='#FF0000', width=2),
+    ))
+    
+    # Cholesterol trace
+    fig.add_trace(go.Scatter(
+        x=dates,
+        y=maxhr_values,
+        name='Max blood rate',
+        line=dict(color='#0000FF', width=2),
+    ))
+
     # Save the chart as a static image
     buf = BytesIO()
-    fig.write_image(buf, format="png")
+    fig.write_image(buf, format="png", width=1000, height=600)
     chart_image = base64.b64encode(buf.getvalue()).decode("utf-8")
     
+    # Prepare recommendations
+    recommendations = current_report.recommendations.split(", ") if current_report.recommendations else []
     
-    # Render the report as HTML
-    html_string = render_to_string("report_pdf_template.html", {
-        "report": report, 
+    # Context data for template
+    context = {
+        "report": current_report,
         "chart_image": chart_image,
-        "recommendations": recommendations
-    })
+        "recommendations": recommendations,
+    }
     
-    # Convert HTML to PDF
+    # Render and return PDF
+    html_string = render_to_string("report_pdf_template.html", context)
     pdf = HTML(string=html_string).write_pdf()
     
-    # Return the PDF as a response
     response = HttpResponse(pdf, content_type="application/pdf")
     response["Content-Disposition"] = f"attachment; filename=health_report_{report_id}.pdf"
     return response

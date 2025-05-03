@@ -70,8 +70,14 @@
             {% elif report.chestpain == 1 %}Yes
             {% else %}Unknown{% endif %}
         </p>
-        <p><strong>smoke frequency:</strong> {{ report.smoke_frequency }}</p>
-        <p><strong>alcohol frequency:</strong> {{ report.alco_frequency }}</p>
+        <p><strong>smoke frequency:</strong> 
+            {% if report.smoke_frequency %} {{ report.smoke_frequency }}
+            {% else %}Never{% endif %}
+        </p>
+        <p><strong>alcohol frequency:</strong> {{ report.alco_frequency }}
+            {% if report.alco_frequency %} {{ report.alco_frequency }}
+            {% else %}Never{% endif %}
+        </p>
         <p><strong>workout frequency:</strong> {{ report.workout_frequency }}</p>
     </div>
 
