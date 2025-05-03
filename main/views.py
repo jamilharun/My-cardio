@@ -605,10 +605,9 @@ def export_users_csv(request):
     
     # Define all possible fields (including methods)
     field_names = [
-        'id', 'username', 'email', 'first_name', 'last_name',
-        'get_full_name', 'role', 'get_role_display',
-        'date_joined', 'last_login', 'is_active',
-        'is_staff', 'is_superuser'
+        'id', 'username', 'email', 'role', 'get_role_display',
+        'date_joined', 'last_login', 'is_active', 'is_staff', 
+        'is_superuser'
     ]
     
     # Add any additional fields your CustomUser might have
