@@ -133,9 +133,11 @@
             {% for rec in recommendations %}
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                 <div class="flex justify-between items-start">
-                    <div>
+                    <div class="min-w-0"> <!-- Constrain text container -->
                         <span class="text-sm font-medium text-gray-900">{{ rec.created_at|date:"M j, Y" }}</span>
-                        <p class="mt-1 text-sm text-gray-600">{{ rec.recommendation_text }}</p>
+                        <div class="mt-1 text-sm text-gray-600 break-words whitespace-pre-line">
+                            {{ rec.recommendation_text }}
+                        </div>
                     </div>
                 </div>
             </div>

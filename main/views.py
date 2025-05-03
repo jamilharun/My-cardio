@@ -453,6 +453,9 @@ def doctor_dashboard(request):
     low_risk_patients = RiskAssessmentResult.objects.filter(
         user__in=assigned_patients, risk_level="Low"
     ).count()
+    medium_risk_patients = RiskAssessmentResult.objects.filter(
+        user__in=assigned_patients, risk_level="Medium"
+    ).count()
 
     risk_alerts = RiskAlert.objects.filter(doctor=request.user, is_read=False).order_by("-created_at")
 
@@ -462,6 +465,7 @@ def doctor_dashboard(request):
         "low_risk_patients": low_risk_patients,
         "risk_alerts": risk_alerts,
         "appointments": appointments,
+        "medium_risk_patients": medium_risk_patients
     })
 
 @login_required

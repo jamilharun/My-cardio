@@ -282,24 +282,36 @@
                         {% if recommendations %}
                             <div class="space-y-4">
                                 {% for rec in recommendations|slice:":3" %}
-                                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 overflow-hidden">
                                     <div class="flex justify-between items-start">
-                                        <div>
+                                        <div class="w-full"> <!-- Constrain width -->
                                             <h3 class="font-medium">{{ rec.created_at|date:"M j, Y" }}</h3>
-                                            <p class="text-sm mt-1 text-gray-700">
-                                                <span class="recommendation-text {% if rec.recommendation_text|length > 150 %}line-clamp-5{% endif %}">
+                                            <div class="text-sm mt-1 text-gray-700">
+                                                <div class="recommendation-text {% if rec.recommendation_text|length > 150 %}line-clamp-3{% endif %} break-words whitespace-pre-line">
                                                     {{ rec.recommendation_text }}
-                                                </span>
+                                                </div>
                                                 {% if rec.recommendation_text|length > 150 %}
-                                                    <button class="read-more-btn text-blue-600 text-xs font-medium ml-1" 
-                                                            onclick="toggleReadMore(this)">
-                                                        Read more
-                                                    </button>
+                                                <button class="read-more-btn text-blue-600 text-xs font-medium mt-1 hover:text-blue-800 transition-colors"
+                                                        onclick="toggleReadMore(this)">
+                                                    Read more
+                                                </button>
                                                 {% endif %}
-                                            </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                                
+                                <script>
+                                function toggleReadMore(button) {
+                                    const container = button.closest('.text-sm');
+                                    const textDiv = container.querySelector('.recommendation-text');
+                                    
+                                    textDiv.classList.toggle('line-clamp-none');
+                                    button.textContent = textDiv.classList.contains('line-clamp-none') 
+                                        ? 'Read more' 
+                                        : 'Show less';
+                                }
+                                </script>
                                 {% endfor %}
                             </div>
                         {% else %}
@@ -320,18 +332,3 @@
     </main>
 </div>
 {% endblock %}
-
-<script>
-    function toggleReadMore(button) {
-        const container = button.closest('p');
-        const textSpan = container.querySelector('.recommendation-text');
-        
-        if (textSpan.classList.contains('line-clamp-5')) {
-            textSpan.classList.remove('line-clamp-5');
-            button.textContent = 'Show less';
-        } else {
-            textSpan.classList.add('line-clamp-5');
-            button.textContent = 'Read more';
-        }
-    }
-    </script>
