@@ -31,7 +31,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 {% for appointment in appointments %}
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-gray-50 {% if appointment.status == 'Cancelled' %}hidden{% endif %}">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="text-sm font-medium text-gray-900">{{ appointment.patient.username }}</div>
