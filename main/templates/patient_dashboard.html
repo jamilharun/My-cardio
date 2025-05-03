@@ -280,20 +280,30 @@
                     </div>
                     <div class="p-4">
                         {% if recommendations %}
-                        <div class="space-y-4">
-                            {% for rec in recommendations|slice:":3" %}
-                            <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <h3 class="font-medium">{{ rec.created_at|date:"M j, Y" }}</h3>
-                                        <p class="text-sm mt-1 text-gray-700 line-clamp-2">{{ rec.recommendation_text }}</p>
+                            <div class="space-y-4">
+                                {% for rec in recommendations|slice:":3" %}
+                                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="font-medium">{{ rec.created_at|date:"M j, Y" }}</h3>
+                                            <p class="text-sm mt-1 text-gray-700">
+                                                <span class="recommendation-text {% if rec.recommendation_text|length > 150 %}line-clamp-5{% endif %}">
+                                                    {{ rec.recommendation_text }}
+                                                </span>
+                                                {% if rec.recommendation_text|length > 150 %}
+                                                    <button class="read-more-btn text-blue-600 text-xs font-medium ml-1" 
+                                                            onclick="toggleReadMore(this)">
+                                                        Read more
+                                                    </button>
+                                                {% endif %}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
-                        </div>
                         {% else %}
-                        <p class="text-gray-500 text-center py-4">No recommendations yet</p>
+                            <p class="text-gray-500 text-center py-4">No recommendations yet</p>
                         {% endif %}
                     </div>
                     {% if recommendations.count > 3 %}
@@ -311,3 +321,17 @@
 </div>
 {% endblock %}
 
+<script>
+    function toggleReadMore(button) {
+        const container = button.closest('p');
+        const textSpan = container.querySelector('.recommendation-text');
+        
+        if (textSpan.classList.contains('line-clamp-5')) {
+            textSpan.classList.remove('line-clamp-5');
+            button.textContent = 'Show less';
+        } else {
+            textSpan.classList.add('line-clamp-5');
+            button.textContent = 'Read more';
+        }
+    }
+    </script>
