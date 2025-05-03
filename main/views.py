@@ -103,8 +103,13 @@ def user_login(request):
 
         user = authenticate(request, email=email, password=password)
 
+        storage = messages.get_messages(request)
+        for _ in storage:
+            pass
+
         if user is not None:
             login(request, user)
+            list(messages.get_messages(request))
             messages.success(request, "Login successful!")
 
             # ✅ Get role from authenticated user
@@ -120,6 +125,7 @@ def user_login(request):
                 return redirect("patient_dashboard")  # Default fallback patient
 
         else:
+            list(messages.get_messages(request))
             messages.error(request, "Invalid email or password.")
 
     return render(request, "login.html")
@@ -703,7 +709,6 @@ def export_users_pdf(request):
         {'name': 'id', 'label': 'ID', 'width': 0.5*inch},
         {'name': 'username', 'label': 'Username', 'width': 1*inch},
         {'name': 'email', 'label': 'Email', 'width': 1.5*inch},
-        {'name': 'get_full_name', 'label': 'Full Name', 'width': 1.2*inch},
         {'name': 'get_role_display', 'label': 'Role', 'width': 0.8*inch},
         {'name': 'date_joined', 'label': 'Date Joined', 'width': 1*inch, 'format': '%Y-%m-%d %H:%M'},
         {'name': 'last_login', 'label': 'Last Login', 'width': 1*inch, 'format': '%Y-%m-%d %H:%M'},
